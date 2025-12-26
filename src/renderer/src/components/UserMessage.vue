@@ -4,7 +4,7 @@
     <div v-if="message.image" class="mb-2 flex items-center gap-2 media-container">
       <MediaActionButtons media-type="image" @reuse="handleReuse('image', message.image)" @download="handleDownload(message.image, 'image')" />
       <div class="relative media-hover-container">
-        <img :src="message.image" alt="用户上传的图片" class="max-w-300px max-h-200px rounded-lg shadow-md border border-neutral-700 cursor-pointer transition-all duration-200" @click="handlePreview('image', message.image)" />
+        <img :src="message.image" :alt="t('userMessage.uploadedImage')" class="max-w-300px max-h-200px rounded-lg shadow-md border border-neutral-700 cursor-pointer transition-all duration-200" @click="handlePreview('image', message.image)" />
         <div class="media-hover-overlay">
           <n-icon size="24" class="eye-icon">
             <View />
@@ -34,8 +34,8 @@
           <img src="@renderer/assets/icons/pdf3.svg" alt="PDF" class="w-full h-full" />
         </div>
         <div class="text-neutral-300 flex-1 min-w-0">
-          <div class="text-sm font-medium truncate">{{ message.pdfName || 'PDF文档' }}</div>
-          <div class="text-xs text-neutral-400">{{ message.pdfImages.length }}页</div>
+          <div class="text-sm font-medium truncate">{{ message.pdfName || t('floating.pdfDocument') }}</div>
+          <div class="text-xs text-neutral-400">{{ t('floating.pages', { count: message.pdfImages.length }) }}</div>
         </div>
       </div>
     </div>
@@ -48,8 +48,8 @@
           <img src="@renderer/assets/icons/ppt3.svg" alt="PPT" class="w-full h-full" />
         </div>
         <div class="text-neutral-300 flex-1 min-w-0">
-          <div class="text-sm font-medium truncate">{{ message.pptName || 'PPT文档' }}</div>
-          <div class="text-xs text-neutral-400">{{ message.pptTotalPages || message.pptImages.length }}页</div>
+          <div class="text-sm font-medium truncate">{{ message.pptName || t('floating.pptDocument') }}</div>
+          <div class="text-xs text-neutral-400">{{ t('floating.pages', { count: message.pptTotalPages || message.pptImages.length }) }}</div>
         </div>
       </div>
     </div>
@@ -69,9 +69,12 @@
 <script setup lang="ts">
 import { NIcon } from 'naive-ui'
 import { View } from '@vicons/carbon'
+import { useI18n } from 'vue-i18n'
 import VideoPlayer from './VideoPlayer.vue'
 import MediaActionButtons from './MediaActionButtons.vue'
 import { formatMessageTime, formatDetailedTime } from '../utils/timeFormat'
+
+const { t } = useI18n()
 
 interface Message {
   id: string

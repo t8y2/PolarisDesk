@@ -11,6 +11,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeMount, nextTick, defineAsyncComponent } from 'vue'
+import { useI18n } from 'vue-i18n'
 import ThemeProvider from './components/ThemeProvider.vue'
 import { useSettingsInit } from './composables/useSettingsInit'
 import { useLanguage } from './composables/useLanguage'
@@ -20,6 +21,7 @@ const AppLayout = defineAsyncComponent(() => import('./layouts/AppLayout.vue'))
 const ChatView = defineAsyncComponent(() => import('./views/ChatView.vue'))
 const FloatingChat = defineAsyncComponent(() => import('./components/FloatingChat.vue'))
 
+const { t } = useI18n()
 const isFloatingMode = ref(false)
 
 // 初始化设置
@@ -28,6 +30,14 @@ useSettingsInit()
 // 初始化语言
 const { initLanguage } = useLanguage()
 initLanguage()
+
+// 更新加载文本为当前语言
+const updateLoadingText = (): void => {
+  const loadingText = document.querySelector('.start-loading-text')
+  if (loadingText) {
+    loadingText.textContent = t('app.loading')
+  }
+}
 
 // 检查是否为悬浮窗模式
 const checkMode = (): void => {
@@ -56,6 +66,8 @@ const hideGlobalLoading = (): void => {
 onBeforeMount(() => {
   // 确保模式检查在所有初始化之前完成
   checkMode()
+  // 更新加载文本
+  updateLoadingText()
 })
 
 onMounted(async () => {

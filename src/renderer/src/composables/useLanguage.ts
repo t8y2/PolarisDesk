@@ -1,10 +1,12 @@
 import { watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useSettingsStore } from '../stores/settingsStore'
+import { useChatStore } from '../stores/chatStore'
 
 export function useLanguage() {
   const { locale } = useI18n()
   const settingsStore = useSettingsStore()
+  const chatStore = useChatStore()
 
   // 初始化语言
   const initLanguage = () => {
@@ -16,6 +18,8 @@ export function useLanguage() {
     () => settingsStore.settings.language,
     (newLang) => {
       locale.value = newLang
+      // 语言切换时更新欢迎消息
+      chatStore.updateWelcomeMessage()
     }
   )
 

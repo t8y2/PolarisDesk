@@ -72,7 +72,7 @@
       <div class="modal-backdrop"></div>
       <div class="modal-content html-preview-content" @click.stop>
         <div class="html-preview-header">
-          <h3>HTML 预览</h3>
+          <h3>{{ t('chatView.htmlPreview') }}</h3>
           <button class="modal-close-btn" @click.stop="closeHtmlPreview">
             <n-icon size="18">
               <Close />
@@ -93,6 +93,7 @@ import '../assets/themes/one-dark-pro.css'
 import { ref, computed, nextTick, onMounted, onUnmounted, watch, defineAsyncComponent } from 'vue'
 import { useMessage, NIcon } from 'naive-ui'
 import { Close } from '@vicons/carbon'
+import { useI18n } from 'vue-i18n'
 import { useChatFunctions } from '../composables/useChatFunctions'
 import { getModelVisionCapability, useSettingsStore } from '../stores/settingsStore'
 
@@ -109,6 +110,7 @@ const UserMessage = defineAsyncComponent(() => import('../components/UserMessage
 const AssistantMessage = defineAsyncComponent(() => import('../components/AssistantMessage.vue'))
 const MediaPreviewModal = defineAsyncComponent(() => import('../components/MediaPreviewModal.vue'))
 
+const { t } = useI18n()
 const message = useMessage()
 const settingsStore = useSettingsStore()
 
@@ -216,8 +218,8 @@ onMounted(() => {
     if (codeElement) {
       navigator.clipboard
         .writeText(codeElement.textContent || '')
-        .then((): void => message.success('代码已复制到剪贴板', { duration: 1500 }))
-        .catch((): void => message.error('复制失败'))
+        .then((): void => message.success(t('chatView.codeCopied'), { duration: 1500 }))
+        .catch((): void => message.error(t('chatView.copyFailed')))
     }
   }
   ;(window as Record<string, unknown>).openHtmlPreview = (codeId: string): void => openHtmlPreview(codeId)
@@ -321,7 +323,7 @@ async function handleFileSelect(event: Event): Promise<void> {
   if (!file) return
   const maxSize = 50 * 1024 * 1024
   if (file.size > maxSize) {
-    message.error('文件大小超过限制（50MB），请选择更小的文件')
+    message.error(t('chatView.fileSizeExceeded50MB'))
     ;(event.target as HTMLInputElement).value = ''
     return
   }
@@ -330,7 +332,7 @@ async function handleFileSelect(event: Event): Promise<void> {
     if (file.type.startsWith('image/')) {
       const imageMaxSize = 10 * 1024 * 1024
       if (file.size > imageMaxSize) {
-        message.error('图片文件大小超过限制（10MB），请选择更小的图片')
+        message.error(t('chatView.imageSizeExceeded10MB'))
         ;(event.target as HTMLInputElement).value = ''
         return
       }
@@ -345,13 +347,13 @@ async function handleFileSelect(event: Event): Promise<void> {
           pptImages: undefined,
           pptName: undefined
         })
-        message.success('图片上传成功')
+        message.success(t('chatView.imageUploadSuccess'))
       }
       reader.readAsDataURL(file)
     } else if (file.type.startsWith('video/')) {
       const videoMaxSize = 20 * 1024 * 1024
       if (file.size > videoMaxSize) {
-        message.error('视频文件大小超过限制（20MB），请选择更小的视频或进行压缩')
+        message.error(t('chatView.videoSizeExceeded20MB'))
         ;(event.target as HTMLInputElement).value = ''
         return
       }
@@ -367,7 +369,7 @@ async function handleFileSelect(event: Event): Promise<void> {
           pptImages: undefined,
           pptName: undefined
         })
-        message.success('视频上传成功')
+        message.success(t('chatView.videoUploadSuccess'))
       }
       reader.readAsDataURL(file)
     } else if (file.type === 'application/pdf' || file.type === 'application/vnd.ms-powerpoint' || file.type === 'application/vnd.openxmlformats-officedocument.presentationml.presentation') {
@@ -383,12 +385,12 @@ async function handleFileSelect(event: Event): Promise<void> {
         (totalPages: number | null) => chatStore.setPendingMedia({ pptTotalPages: totalPages || undefined })
       )
     } else {
-      message.error('不支持的文件类型，请选择图片、视频、PDF或PPT文件')
+      message.error(t('chatView.unsupportedFileType'))
       ;(event.target as HTMLInputElement).value = ''
     }
   } catch (error) {
     console.error('文件上传处理失败:', error)
-    message.error('文件处理失败，请重试')
+    message.error(t('chatView.fileProcessFailed'))
     ;(event.target as HTMLInputElement).value = ''
   } finally {
     isFileUploading.value = false
@@ -422,38 +424,38 @@ function reuseMedia(mediaType: 'image' | 'video' | 'pdf' | 'ppt', mediaData: str
       case 'image':
         if (typeof mediaData === 'string') {
           chatStore.setPendingMedia({ image: mediaData })
-          message.success('图片已添加到输入框')
+          message.success(t('floating.imageAdded'))
         }
         break
       case 'video':
         if (typeof mediaData === 'string') {
           chatStore.setPendingMedia({ video: mediaData, videoBase64: videoBase64 || undefined })
-          message.success('视频已添加到输入框')
+          message.success(t('floating.videoAdded'))
         }
         break
       case 'pdf':
         if (Array.isArray(mediaData)) {
-          chatStore.setPendingMedia({ pdfImages: mediaData, pdfName: fileName || 'PDF文档' })
-          message.success('PDF已添加到输入框')
+          chatStore.setPendingMedia({ pdfImages: mediaData, pdfName: fileName || t('floating.pdfDocument') })
+          message.success(t('floating.pdfAdded'))
         }
         break
       case 'ppt':
         if (Array.isArray(mediaData)) {
-          chatStore.setPendingMedia({ pptImages: mediaData, pptName: fileName || 'PPT文档', pptTotalPages: totalPages })
-          message.success('PPT已添加到输入框')
+          chatStore.setPendingMedia({ pptImages: mediaData, pptName: fileName || t('floating.pptDocument'), pptTotalPages: totalPages })
+          message.success(t('floating.pptAdded'))
         }
         break
     }
   } catch (error) {
     console.error('复用媒体失败:', error)
-    message.error('复用媒体失败，请重试')
+    message.error(t('floating.reuseMediaFailed'))
   }
 }
 
 function downloadMedia(mediaData: string, mediaType: 'image' | 'video'): void {
   try {
     if (!mediaData) {
-      message.error('无效的媒体数据')
+      message.error(t('floating.invalidMediaData'))
       return
     }
     const link = document.createElement('a')
@@ -463,7 +465,7 @@ function downloadMedia(mediaData: string, mediaType: 'image' | 'video'): void {
     } else if (mediaData.startsWith('blob:')) {
       link.href = mediaData
     } else {
-      message.error('不支持的媒体格式')
+      message.error(t('floating.unsupportedMediaFormat'))
       return
     }
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
@@ -474,7 +476,7 @@ function downloadMedia(mediaData: string, mediaType: 'image' | 'video'): void {
     document.body.removeChild(link)
   } catch (error) {
     console.error('下载失败:', error)
-    message.error('下载失败，请重试')
+    message.error(t('floating.downloadFailed'))
   }
 }
 

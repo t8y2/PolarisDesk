@@ -1,7 +1,8 @@
 export default {
   app: {
     name: 'PolarisDesk',
-    slogan: '如北极星般，为您指引方向'
+    slogan: '如北极星般，为您指引方向',
+    loading: '正在启动应用...'
   },
   common: {
     confirm: '确认',
@@ -262,5 +263,23 @@ export default {
     reuseMediaFailed: '复用媒体失败，请重试',
     downloadFailed: '下载失败，请重试',
     generationStopped: '已停止生成'
+  },
+  chatView: {
+    htmlPreview: 'HTML 预览',
+    codeCopied: '代码已复制到剪贴板',
+    copyFailed: '复制失败',
+    fileSizeExceeded50MB: '文件大小超过限制（50MB），请选择更小的文件',
+    imageSizeExceeded10MB: '图片文件大小超过限制（10MB），请选择更小的图片',
+    videoSizeExceeded20MB: '视频文件大小超过限制（20MB），请选择更小的视频或进行压缩',
+    unsupportedFileType: '不支持的文件类型，请选择图片、视频、PDF或PPT文件',
+    fileProcessFailed: '文件处理失败，请重试',
+    imageUploadSuccess: '图片上传成功',
+    videoUploadSuccess: '视频上传成功'
+  },
+  userMessage: {
+    uploadedImage: '用户上传的图片'
+  },
+  welcome: {
+    message: '你好！我是PolarisDesk，可以帮你分析图片、视频和回答问题。你可以截图、上传图片/视频或直接输入文字与我对话。'
   }
 }

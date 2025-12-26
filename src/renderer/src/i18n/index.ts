@@ -14,4 +14,5 @@ const i18n = createI18n<[MessageSchema], 'zh' | 'en'>({
   }
 })
 
+export { i18n }
 export default i18n

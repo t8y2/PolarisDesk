@@ -1,7 +1,8 @@
 export default {
   app: {
     name: 'PolarisDesk',
-    slogan: 'Like the North Star, guiding your way'
+    slogan: 'Like the North Star, guiding your way',
+    loading: 'Starting application...'
   },
   common: {
     confirm: 'Confirm',
@@ -262,5 +263,23 @@ export default {
     reuseMediaFailed: 'Failed to reuse media, please try again',
     downloadFailed: 'Download failed, please try again',
     generationStopped: 'Generation stopped'
+  },
+  chatView: {
+    htmlPreview: 'HTML Preview',
+    codeCopied: 'Code copied to clipboard',
+    copyFailed: 'Copy failed',
+    fileSizeExceeded50MB: 'File size exceeds limit (50MB), please select a smaller file',
+    imageSizeExceeded10MB: 'Image file size exceeds limit (10MB), please select a smaller image',
+    videoSizeExceeded20MB: 'Video file size exceeds limit (20MB), please select a smaller video or compress it',
+    unsupportedFileType: 'Unsupported file type, please select image, video, PDF or PPT file',
+    fileProcessFailed: 'File processing failed, please try again',
+    imageUploadSuccess: 'Image uploaded successfully',
+    videoUploadSuccess: 'Video uploaded successfully'
+  },
+  userMessage: {
+    uploadedImage: 'User uploaded image'
+  },
+  welcome: {
+    message: 'Hello! I am PolarisDesk, I can help you analyze images, videos and answer questions. You can take screenshots, upload images/videos or chat with me directly.'
   }
 }

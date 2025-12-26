@@ -1,4 +1,5 @@
 // AI 服务商配置工具
+import i18n from '../i18n'
 
 export type ProviderType = 'openai' | 'anthropic' | 'google' | 'deepseek' | 'moonshot' | 'openrouter' | 'siliconcloud' | 'ollama' | 'zhipu' | 'custom'
 
@@ -13,9 +14,14 @@ export interface ProviderConfig {
   requiresApiKey: boolean
 }
 
+// 获取服务商名称（支持 i18n）
+function getProviderName(key: ProviderType): string {
+  return i18n.global.t(`settings.providers.${key}`)
+}
+
 export const PROVIDERS: Record<ProviderType, ProviderConfig> = {
   openai: {
-    name: 'OpenAI',
+    get name() { return getProviderName('openai') },
     apiUrl: 'https://api.openai.com/v1/chat/completions',
     defaultModel: 'gpt-4o',
     maxTokens: 4096,
@@ -25,7 +31,7 @@ export const PROVIDERS: Record<ProviderType, ProviderConfig> = {
     requiresApiKey: true
   },
   anthropic: {
-    name: 'Anthropic (Claude)',
+    get name() { return getProviderName('anthropic') },
     apiUrl: 'https://api.anthropic.com/v1/messages',
     defaultModel: 'claude-3-5-sonnet-20241022',
     maxTokens: 8192,
@@ -35,7 +41,7 @@ export const PROVIDERS: Record<ProviderType, ProviderConfig> = {
     requiresApiKey: true
   },
   google: {
-    name: 'Google (Gemini)',
+    get name() { return getProviderName('google') },
     apiUrl: 'https://generativelanguage.googleapis.com/v1beta/models/{model}:streamGenerateContent',
     defaultModel: 'gemini-2.0-flash-exp',
     maxTokens: 8192,
@@ -45,7 +51,7 @@ export const PROVIDERS: Record<ProviderType, ProviderConfig> = {
     requiresApiKey: true
   },
   deepseek: {
-    name: 'DeepSeek',
+    get name() { return getProviderName('deepseek') },
     apiUrl: 'https://api.deepseek.com/v1/chat/completions',
     defaultModel: 'deepseek-chat',
     maxTokens: 8192,
@@ -55,7 +61,7 @@ export const PROVIDERS: Record<ProviderType, ProviderConfig> = {
     requiresApiKey: true
   },
   moonshot: {
-    name: 'Moonshot (Kimi)',
+    get name() { return getProviderName('moonshot') },
     apiUrl: 'https://api.moonshot.cn/v1/chat/completions',
     defaultModel: 'moonshot-v1-8k',
     maxTokens: 8192,
@@ -65,7 +71,7 @@ export const PROVIDERS: Record<ProviderType, ProviderConfig> = {
     requiresApiKey: true
   },
   openrouter: {
-    name: 'OpenRouter',
+    get name() { return getProviderName('openrouter') },
     apiUrl: 'https://openrouter.ai/api/v1/chat/completions',
     defaultModel: 'anthropic/claude-3.5-sonnet',
     maxTokens: 4096,
@@ -75,7 +81,7 @@ export const PROVIDERS: Record<ProviderType, ProviderConfig> = {
     requiresApiKey: true
   },
   siliconcloud: {
-    name: 'SiliconCloud',
+    get name() { return getProviderName('siliconcloud') },
     apiUrl: 'https://api.siliconflow.cn/v1/chat/completions',
     defaultModel: 'deepseek-ai/DeepSeek-V3',
     maxTokens: 8192,
@@ -85,7 +91,7 @@ export const PROVIDERS: Record<ProviderType, ProviderConfig> = {
     requiresApiKey: true
   },
   ollama: {
-    name: 'Ollama',
+    get name() { return getProviderName('ollama') },
     apiUrl: 'http://localhost:11434/api/chat',
     defaultModel: 'llama3.2-vision',
     maxTokens: 4096,
@@ -95,7 +101,7 @@ export const PROVIDERS: Record<ProviderType, ProviderConfig> = {
     requiresApiKey: false
   },
   zhipu: {
-    name: '智谱 AI (GLM)',
+    get name() { return getProviderName('zhipu') },
     apiUrl: 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
     defaultModel: 'glm-4.6v',
     maxTokens: 16384,
@@ -105,7 +111,7 @@ export const PROVIDERS: Record<ProviderType, ProviderConfig> = {
     requiresApiKey: true
   },
   custom: {
-    name: '自定义端点',
+    get name() { return getProviderName('custom') },
     apiUrl: '',
     defaultModel: '',
     maxTokens: 4096,

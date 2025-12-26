@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import i18n from '../i18n'
 
 // 生成唯一ID的函数
 function generateMessageId(): string {
@@ -54,8 +55,13 @@ const KEYS = {
   PENDING_MEDIA: 'polaris-chat-pending-media'
 }
 
-// 欢迎消息标识
-const WELCOME_MESSAGE_INDICATOR = '你好！我是PolarisDesk'
+// 欢迎消息标识（用于识别欢迎消息，不依赖具体语言）
+const WELCOME_MESSAGE_ID_PREFIX = 'welcome_msg'
+
+// 获取当前语言的欢迎消息
+function getWelcomeMessage(): string {
+  return i18n.global.t('welcome.message')
+}
 
 export const useChatStore = defineStore(STORE_ID, () => {
   // ========== 状态定义 ==========
@@ -72,7 +78,8 @@ export const useChatStore = defineStore(STORE_ID, () => {
   // 过滤后的真实消息（排除欢迎消息）
   const realMessages = computed(() => {
     return messages.value.filter(msg => {
-      if (msg.role === 'assistant' && msg.content.includes(WELCOME_MESSAGE_INDICATOR)) {
+      // 通过 ID 前缀识别欢迎消息
+      if (msg.id.startsWith(WELCOME_MESSAGE_ID_PREFIX)) {
         return false
       }
       return true
@@ -208,12 +215,21 @@ export const useChatStore = defineStore(STORE_ID, () => {
   const addWelcomeMessageIfNeeded = (): void => {
     if (!welcomeAdded.value && messages.value.length === 0) {
       messages.value.push({
-        id: generateMessageId(),
+        id: `${WELCOME_MESSAGE_ID_PREFIX}_${Date.now()}`,
         role: 'assistant',
-        content: '你好！我是PolarisDesk，可以帮你分析图片、视频和回答问题。你可以截图、上传图片/视频或直接输入文字与我对话。',
+        content: getWelcomeMessage(),
         timestamp: Date.now()
       })
       welcomeAdded.value = true
+      saveToStorage()
+    }
+  }
+
+  // 更新欢迎消息（当语言切换时调用）
+  const updateWelcomeMessage = (): void => {
+    const welcomeMsg = messages.value.find(msg => msg.id.startsWith(WELCOME_MESSAGE_ID_PREFIX))
+    if (welcomeMsg) {
+      welcomeMsg.content = getWelcomeMessage()
       saveToStorage()
     }
   }
@@ -726,6 +742,7 @@ export const useChatStore = defineStore(STORE_ID, () => {
     updateAssistantMessageContent,
     removeMessage,
     addWelcomeMessageIfNeeded,
+    updateWelcomeMessage,
 
     // 状态管理
     setLoading,
