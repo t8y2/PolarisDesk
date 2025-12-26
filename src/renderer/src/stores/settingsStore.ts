@@ -8,6 +8,7 @@ export interface AppSettings {
   defaultExpandThink: boolean
   saveRecordingLocally: boolean
   language: 'zh' | 'en'
+  theme: 'dark' | 'light'
 
   // API配置
   provider: 'openai' | 'anthropic' | 'google' | 'deepseek' | 'moonshot' | 'openrouter' | 'siliconcloud' | 'ollama' | 'zhipu' | 'custom'
@@ -31,6 +32,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   defaultExpandThink: true,
   saveRecordingLocally: false,
   language: 'zh',
+  theme: 'dark',
 
   // API配置
   provider: 'zhipu',

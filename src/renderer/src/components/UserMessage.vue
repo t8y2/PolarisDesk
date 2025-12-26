@@ -29,13 +29,13 @@
     <!-- PDF预览 -->
     <div v-if="message.pdfImages && message.pdfImages.length > 0" class="mb-2 flex items-center gap-2 media-container">
       <MediaActionButtons media-type="pdf" :show-download="false" @reuse="handleReuse('pdf', message.pdfImages, undefined, message.pdfName)" />
-      <div class="bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 flex items-center space-x-2 max-w-200px">
+      <div class="user-file-card bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 flex items-center space-x-2 max-w-200px">
         <div class="text-lg w-8 h-8">
           <img src="@renderer/assets/icons/pdf3.svg" alt="PDF" class="w-full h-full" />
         </div>
-        <div class="text-neutral-300 flex-1 min-w-0">
+        <div class="user-file-text text-neutral-300 flex-1 min-w-0">
           <div class="text-sm font-medium truncate">{{ message.pdfName || t('floating.pdfDocument') }}</div>
-          <div class="text-xs text-neutral-400">{{ t('floating.pages', { count: message.pdfImages.length }) }}</div>
+          <div class="user-file-meta text-xs text-neutral-400">{{ t('floating.pages', { count: message.pdfImages.length }) }}</div>
         </div>
       </div>
     </div>
@@ -43,19 +43,19 @@
     <!-- PPT预览 -->
     <div v-if="message.pptImages && message.pptImages.length > 0" class="mb-2 flex items-center gap-2 media-container">
       <MediaActionButtons media-type="ppt" :show-download="false" @reuse="handleReuse('ppt', message.pptImages, undefined, message.pptName, message.pptTotalPages)" />
-      <div class="bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 flex items-center space-x-2 max-w-200px">
+      <div class="user-file-card bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 flex items-center space-x-2 max-w-200px">
         <div class="text-lg w-8 h-8">
           <img src="@renderer/assets/icons/ppt3.svg" alt="PPT" class="w-full h-full" />
         </div>
-        <div class="text-neutral-300 flex-1 min-w-0">
+        <div class="user-file-text text-neutral-300 flex-1 min-w-0">
           <div class="text-sm font-medium truncate">{{ message.pptName || t('floating.pptDocument') }}</div>
-          <div class="text-xs text-neutral-400">{{ t('floating.pages', { count: message.pptTotalPages || message.pptImages.length }) }}</div>
+          <div class="user-file-meta text-xs text-neutral-400">{{ t('floating.pages', { count: message.pptTotalPages || message.pptImages.length }) }}</div>
         </div>
       </div>
     </div>
 
     <!-- 文本内容 -->
-    <div v-if="message.content" class="bg-blue-900/80 backdrop-blur-sm text-white px-3 py-2 rounded-xl break-words border border-blue-800/50">
+    <div v-if="message.content" class="user-message-content bg-blue-900/80 backdrop-blur-sm text-white px-3 py-2 rounded-xl break-words border border-blue-800/50">
       {{ message.content }}
     </div>
 
@@ -151,5 +151,27 @@ function handleDownload(data: string, type: 'image' | 'video'): void {
 .media-container:hover :deep(.media-action-buttons-external) {
   opacity: 1;
   pointer-events: auto;
+}
+
+/* 浅色主题样式 */
+body[data-theme='light'] .user-file-card {
+  background-color: #95ec69 !important;
+  border-color: transparent !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+body[data-theme='light'] .user-file-text {
+  color: #1a1a1a !important;
+}
+
+body[data-theme='light'] .user-file-meta {
+  color: #2d2d2d !important;
+}
+
+body[data-theme='light'] .user-message-content {
+  background-color: #95ec69 !important;
+  color: #1a1a1a !important;
+  border-color: transparent !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
 }
 </style>

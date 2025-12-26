@@ -5,7 +5,7 @@
 
     <!-- AI回复内容 -->
     <div v-if="mainContent.trim()" class="flex items-start w-full mb-2">
-      <div class="bg-neutral-900/80 backdrop-blur-sm px-3 w-full py-1 rounded-xl shadow-sm border border-neutral-800/60">
+      <div class="ai-message-container bg-neutral-900/80 backdrop-blur-sm px-3 w-full py-1 rounded-xl shadow-sm border border-neutral-800/60">
         <MarkdownRenderer
           :content="mainContent"
           class="prose prose-sm max-w-none prose-headings:text-white prose-p:text-neutral-200 prose-code:bg-neutral-700/60 prose-code:text-neutral-100 prose-code:px-1 prose-code:rounded prose-code:break-words prose-strong:text-white prose-em:text-neutral-200 prose-p:my-2 prose-headings:my-2 prose-ul:my-1 prose-ol:my-1 prose-li:my-0 prose-a:text-blue-400 prose-a:no-underline hover:prose-a:underline prose-blockquote:text-neutral-300 prose-blockquote:border-neutral-600 prose-hr:border-neutral-600 prose-th:text-white prose-td:text-neutral-200 prose-pre:bg-transparent prose-pre:p-0 prose-pre:m-0 ai-response" />
@@ -360,5 +360,183 @@ const answerBoxes = computed(() => {
   color: #e5e7eb !important;
   border: 1px solid #6b7280 !important;
   padding: 8px 12px !important;
+}
+
+/* 浅色主题样式 */
+body[data-theme='light'] .ai-message-container {
+  background-color: #ffffff !important;
+  border-color: transparent !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+body[data-theme='light'] :deep(.ai-response) {
+  color: #1a1a1a !important;
+}
+
+body[data-theme='light'] :deep(.ai-response *) {
+  color: #1a1a1a !important;
+}
+
+body[data-theme='light'] :deep(.ai-response p),
+body[data-theme='light'] :deep(.ai-response span:not(.hljs *)),
+body[data-theme='light'] :deep(.ai-response div:not(.code-block-wrapper):not(.code-header):not(.hljs)) {
+  color: #1a1a1a !important;
+}
+
+body[data-theme='light'] :deep(.ai-response h1),
+body[data-theme='light'] :deep(.ai-response h2),
+body[data-theme='light'] :deep(.ai-response h3),
+body[data-theme='light'] :deep(.ai-response h4),
+body[data-theme='light'] :deep(.ai-response h5),
+body[data-theme='light'] :deep(.ai-response h6) {
+  color: #1a1a1a !important;
+  font-weight: 600 !important;
+}
+
+body[data-theme='light'] :deep(.ai-response p) {
+  color: #1a1a1a !important;
+}
+
+body[data-theme='light'] :deep(.ai-response code:not(.hljs)) {
+  color: #1a1a1a !important;
+  background-color: rgba(229, 231, 235, 0.8) !important;
+}
+
+body[data-theme='light'] :deep(.ai-response strong) {
+  color: #1a1a1a !important;
+  font-weight: 600 !important;
+}
+
+body[data-theme='light'] :deep(.ai-response em) {
+  color: #1a1a1a !important;
+}
+
+body[data-theme='light'] :deep(.ai-response a) {
+  color: #2563eb !important;
+}
+
+body[data-theme='light'] :deep(.ai-response blockquote) {
+  color: #4b5563 !important;
+  border-left-color: #d1d5db !important;
+}
+
+body[data-theme='light'] :deep(.ai-response hr) {
+  border-color: #d1d5db !important;
+}
+
+body[data-theme='light'] :deep(.ai-response ul),
+body[data-theme='light'] :deep(.ai-response ol),
+body[data-theme='light'] :deep(.ai-response li) {
+  color: #1a1a1a !important;
+}
+
+body[data-theme='light'] :deep(.ai-response table) {
+  color: #1a1a1a !important;
+}
+
+body[data-theme='light'] :deep(.ai-response table th) {
+  color: #1a1a1a !important;
+  background-color: rgba(243, 244, 246, 0.8) !important;
+  border-color: #d1d5db !important;
+  font-weight: 600 !important;
+}
+
+body[data-theme='light'] :deep(.ai-response table td) {
+  color: #1a1a1a !important;
+  border-color: #d1d5db !important;
+}
+
+/* 浅色主题 - 代码块 */
+body[data-theme='light'] :deep(.ai-response pre) {
+  background-color: #1f2937 !important;
+}
+
+body[data-theme='light'] :deep(.ai-response .hljs) {
+  background-color: #1f2937 !important;
+  color: #e5e7eb !important;
+}
+
+body[data-theme='light'] :deep(.ai-response .code-block-wrapper) {
+  background-color: #1f2937 !important;
+}
+
+body[data-theme='light'] :deep(.ai-response .code-header) {
+  background-color: #374151 !important;
+  color: #e5e7eb !important;
+}
+
+/* 浅色主题 - Prose 类覆盖 */
+body[data-theme='light'] :deep(.prose) {
+  color: #1a1a1a !important;
+}
+
+body[data-theme='light'] :deep(.prose-headings\:text-white h1),
+body[data-theme='light'] :deep(.prose-headings\:text-white h2),
+body[data-theme='light'] :deep(.prose-headings\:text-white h3),
+body[data-theme='light'] :deep(.prose-headings\:text-white h4),
+body[data-theme='light'] :deep(.prose-headings\:text-white h5),
+body[data-theme='light'] :deep(.prose-headings\:text-white h6) {
+  color: #1a1a1a !important;
+}
+
+body[data-theme='light'] :deep(.prose-p\:text-neutral-200 p) {
+  color: #1a1a1a !important;
+}
+
+body[data-theme='light'] :deep(.prose-strong\:text-white strong) {
+  color: #1a1a1a !important;
+}
+
+body[data-theme='light'] :deep(.prose-em\:text-neutral-200 em) {
+  color: #1a1a1a !important;
+}
+
+body[data-theme='light'] :deep(.prose-a\:text-blue-400 a) {
+  color: #2563eb !important;
+}
+
+body[data-theme='light'] :deep(.prose-blockquote\:text-neutral-300 blockquote) {
+  color: #4b5563 !important;
+}
+
+body[data-theme='light'] :deep(.prose-th\:text-white th) {
+  color: #1a1a1a !important;
+}
+
+body[data-theme='light'] :deep(.prose-td\:text-neutral-200 td) {
+  color: #1a1a1a !important;
+}
+
+/* 浅色主题 - 最高优先级覆盖所有 prose 类 */
+body[data-theme='light'] .ai-response,
+body[data-theme='light'] .ai-response *,
+body[data-theme='light'] .ai-response p,
+body[data-theme='light'] .ai-response span,
+body[data-theme='light'] .ai-response div,
+body[data-theme='light'] .ai-response h1,
+body[data-theme='light'] .ai-response h2,
+body[data-theme='light'] .ai-response h3,
+body[data-theme='light'] .ai-response h4,
+body[data-theme='light'] .ai-response h5,
+body[data-theme='light'] .ai-response h6,
+body[data-theme='light'] .ai-response li,
+body[data-theme='light'] .ai-response td,
+body[data-theme='light'] .ai-response th,
+body[data-theme='light'] .ai-response strong,
+body[data-theme='light'] .ai-response em {
+  color: #1a1a1a !important;
+}
+
+body[data-theme='light'] .ai-response a {
+  color: #2563eb !important;
+}
+
+body[data-theme='light'] .ai-response blockquote {
+  color: #4b5563 !important;
+}
+
+body[data-theme='light'] .ai-response code:not(.hljs) {
+  color: #1a1a1a !important;
+  background-color: rgba(229, 231, 235, 0.8) !important;
 }
 </style>

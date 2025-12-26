@@ -158,4 +158,40 @@ defineExpose({
     content: '...';
   }
 }
+
+/* 浅色主题样式 */
+body[data-theme='light'] .think-block {
+  background-color: rgba(149, 236, 105, 0.15) !important;
+  border-color: rgba(149, 236, 105, 0.3) !important;
+}
+
+body[data-theme='light'] .think-label {
+  color: #15803d !important;
+  font-weight: 600 !important;
+}
+
+body[data-theme='light'] .think-toggle {
+  color: #15803d !important;
+  font-weight: 600 !important;
+}
+
+body[data-theme='light'] .think-toggle:hover {
+  background: rgba(149, 236, 105, 0.2) !important;
+  color: #166534 !important;
+}
+
+body[data-theme='light'] .think-toggle span {
+  color: #15803d !important;
+}
+
+body[data-theme='light'] .think-content,
+body[data-theme='light'] .think-content .prose,
+body[data-theme='light'] .think-content *,
+body[data-theme='light'] .think-content div {
+  color: #1a1a1a !important;
+}
+
+body[data-theme='light'] .think-content-wrapper.is-expanded .think-content {
+  border-top-color: rgba(149, 236, 105, 0.3) !important;
+}
 </style>

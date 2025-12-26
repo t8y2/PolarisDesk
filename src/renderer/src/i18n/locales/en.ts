@@ -91,6 +91,7 @@ export default {
     // Basic settings
     generalSettings: 'General Settings',
     language: 'Language',
+    theme: 'Theme',
     starryBackground: 'Starry Background',
     defaultExpandThink: 'Expand Thinking Process by Default',
     saveRecordingLocally: 'Save Recording Locally',
@@ -162,6 +163,12 @@ export default {
       ollama: 'Ollama',
       zhipu: 'Zhipu AI (GLM)',
       custom: 'Custom Endpoint'
+    },
+
+    // Theme options
+    themes: {
+      dark: 'Dark',
+      light: 'Light'
     }
   },
   history: {

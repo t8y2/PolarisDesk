@@ -1,9 +1,9 @@
 <template>
-  <header class="bg-black/95 backdrop-blur-md p-3 shadow-sm border-b border-neutral-800">
+  <header class="app-header bg-black/95 backdrop-blur-md p-3 shadow-sm border-b border-neutral-800">
     <div class="drag-region h-10 w-100% absolute top-0 lef-0 right-0"></div>
     <div class="flex justify-between items-center">
       <div class="flex-1"></div>
-      <h1 class="text-xl font-bold text-white z-1000">PolarisDesk</h1>
+      <h1 class="app-title text-xl font-bold text-white z-1000">PolarisDesk</h1>
       <div class="flex-1 flex justify-end items-center space-x-2">
         <n-tooltip trigger="hover" placement="bottom" :show-arrow="false" :delay="500">
           <template #trigger>
@@ -96,7 +96,7 @@
           <n-form :model="localSettings" label-placement="left" label-width="200px" size="small">
             <!-- 连接设置 -->
             <div>
-              <h4 class="text-sm font-semibold text-white mb-3">{{ t('settings.connectionSettings') }}</h4>
+              <h4 class="settings-section-title text-sm font-semibold text-white mb-3">{{ t('settings.connectionSettings') }}</h4>
 
               <!-- 服务商选择 -->
               <n-form-item :label="t('settings.provider')">
@@ -137,7 +137,7 @@
 
             <!-- 生成参数 -->
             <div>
-              <h4 class="text-sm font-semibold text-white mb-3">{{ t('settings.generationParams') }}</h4>
+              <h4 class="settings-section-title text-sm font-semibold text-white mb-3">{{ t('settings.generationParams') }}</h4>
               <div class="grid grid-cols-2 gap-y-0">
                 <n-form-item label="max_tokens">
                   <n-input-number v-model:value="localSettings.maxTokens" round :min="1" :max="81920" class="w-full" :placeholder="t('settings.maxTokens')" />
@@ -166,10 +166,13 @@
           <n-form :model="localSettings" label-placement="left" size="small">
             <!-- 界面设置 -->
             <div>
-              <h4 class="text-sm font-semibold text-white mb-3">{{ t('settings.generalSettings') }}</h4>
+              <h4 class="settings-section-title text-sm font-semibold text-white mb-3">{{ t('settings.generalSettings') }}</h4>
               <div class="flex flex-wrap justify-between gap-y-2 ml-8">
                 <n-form-item :label="t('settings.language')">
                   <n-select v-model:value="localSettings.language" :options="languageOptions" style="width: 140px" />
+                </n-form-item>
+                <n-form-item :label="t('settings.theme')">
+                  <n-select v-model:value="localSettings.theme" :options="themeOptions" style="width: 140px" />
                 </n-form-item>
                 <n-form-item :label="t('settings.defaultExpandThink')">
                   <n-switch v-model:value="localSettings.defaultExpandThink" :rail-style="switchRailStyle" />
@@ -190,7 +193,7 @@
 
             <!-- 快捷键设置 -->
             <div>
-              <h4 class="text-sm font-semibold text-white mb-3">{{ t('settings.shortcuts') }}</h4>
+              <h4 class="settings-section-title text-sm font-semibold text-white mb-3">{{ t('settings.shortcuts') }}</h4>
               <div class="grid grid-cols-2 gap-x-4 gap-y-2">
                 <div class="flex justify-between items-center text-sm">
                   <span>{{ t('settings.quickScreenshot') }}</span>
@@ -235,7 +238,7 @@
             <n-form-item>
               <template #label>
                 <div class="flex items-center mt-2">
-                  <span class="text-sm font-semibold text-white">{{ t('settings.systemPromptLabel') }}</span>
+                  <span class="settings-section-title text-sm font-semibold text-white">{{ t('settings.systemPromptLabel') }}</span>
                 </div>
               </template>
               <n-input v-model:value="localSettings.systemPrompt" type="textarea" :rows="8" :placeholder="t('settings.systemPromptPlaceholder')" class="w-full" clearable />
@@ -381,6 +384,12 @@ const languageOptions = [
   { label: '简体中文', value: 'zh' },
   { label: 'English', value: 'en' }
 ]
+
+// 主题选项
+const themeOptions = computed(() => [
+  { label: t('settings.themes.dark'), value: 'dark' },
+  { label: t('settings.themes.light'), value: 'light' }
+])
 
 // 当前服务商配置
 const currentProviderConfig = computed(() => {
@@ -772,5 +781,106 @@ onUnmounted(() => {
 
 .privacy-mode-button.privacy-active :deep(.n-button__icon) {
   color: white !important;
+}
+
+/* 浅色主题样式 */
+body[data-theme='light'] .app-header {
+  background-color: #f7f7f7 !important;
+  border-bottom-color: #d6d6d6 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+
+body[data-theme='light'] .app-title {
+  color: #1a1a1a !important;
+}
+
+/* 浅色主题 - 设置面板标题 */
+body[data-theme='light'] .settings-section-title {
+  color: #1a1a1a !important;
+}
+
+/* 浅色主题 - 表单项文字 */
+body[data-theme='light'] :deep(.n-form-item-label) {
+  color: #1a1a1a !important;
+}
+
+/* 浅色主题 - 快捷键列表文字 */
+body[data-theme='light'] .flex.justify-between.items-center span {
+  color: #1a1a1a !important;
+}
+
+/* 浅色主题 - 提示文字 */
+body[data-theme='light'] .text-gray-400 {
+  color: #666666 !important;
+}
+
+/* 浅色主题 - 系统提示词说明框 */
+body[data-theme='light'] .bg-blue-500\/20 {
+  background-color: rgba(37, 99, 235, 0.1) !important;
+  border-color: rgba(37, 99, 235, 0.3) !important;
+}
+
+body[data-theme='light'] .text-blue-300 {
+  color: #2563eb !important;
+}
+
+/* 浅色主题 - 按钮图标颜色 */
+body[data-theme='light'] :deep(.n-button) {
+  color: #1a1a1a !important;
+}
+
+body[data-theme='light'] :deep(.n-button .n-icon) {
+  color: #1a1a1a !important;
+}
+
+body[data-theme='light'] :deep(.n-button svg) {
+  color: #1a1a1a !important;
+  fill: currentColor !important;
+}
+
+body[data-theme='light'] :deep(.n-button--primary) {
+  background-color: #1a1a1a !important;
+  border-color: #1a1a1a !important;
+  color: #ffffff !important;
+}
+
+body[data-theme='light'] :deep(.n-button--primary:hover) {
+  background-color: #333333 !important;
+  border-color: #333333 !important;
+}
+
+body[data-theme='light'] :deep(.n-button--primary .n-icon),
+body[data-theme='light'] :deep(.n-button--primary svg) {
+  color: #ffffff !important;
+}
+
+body[data-theme='light'] :deep(.n-button .n-button__icon),
+body[data-theme='light'] :deep(.n-button .n-icon svg path) {
+  fill: currentColor !important;
+}
+
+/* 浅色主题 - 滑动条 */
+body[data-theme='light'] :deep(.n-slider .n-slider-rail) {
+  background-color: #e0e0e0 !important;
+}
+
+body[data-theme='light'] :deep(.n-slider .n-slider-rail__fill) {
+  background-color: #1a1a1a !important;
+}
+
+body[data-theme='light'] :deep(.n-slider .n-slider-handle) {
+  border-color: #1a1a1a !important;
+}
+
+body[data-theme='light'] :deep(.n-slider .n-slider-handle__fill) {
+  background-color: #1a1a1a !important;
+}
+
+body[data-theme='light'] :deep(.n-slider .n-slider-dot) {
+  border-color: #1a1a1a !important;
+}
+
+body[data-theme='light'] :deep(.n-slider .n-slider-dot--active) {
+  background-color: #1a1a1a !important;
 }
 </style>

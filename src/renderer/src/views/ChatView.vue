@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col h-full w-full overflow-hidden bg-black relative" @dragover="handleDragOver" @dragenter="handleDragEnter" @dragleave="handleDragLeave" @drop="handleDrop">
+  <div class="chat-view flex flex-col h-full w-full overflow-hidden relative" :class="{ 'bg-black': settingsStore.settings.theme === 'dark' }" @dragover="handleDragOver" @dragenter="handleDragEnter" @dragleave="handleDragLeave" @drop="handleDrop">
     <!-- 全局星空背景层 -->
     <StarryBackground :enabled="settingsStore.settings.starryBackground" />
 
@@ -7,7 +7,7 @@
     <DragOverlay :is-drag-over="isDragOver" />
 
     <!-- 聊天消息区域 - 使用虚拟滚动优化 -->
-    <DynamicScroller v-if="chatStore.messages.length > 20" ref="messagesContainer" :items="chatStore.messages" :min-item-size="80" class="flex-1 p-4 pb-0 bg-gradient-to-br from-neutral-950/30 to-black/20 relative z-10 virtual-scroller" :class="{ 'drag-over': isDragOver }" key-field="id">
+    <DynamicScroller v-if="chatStore.messages.length > 20" ref="messagesContainer" :items="chatStore.messages" :min-item-size="80" class="messages-container flex-1 p-4 pb-0 relative z-10 virtual-scroller" :class="{ 'drag-over': isDragOver, 'bg-gradient-to-br from-neutral-950/30 to-black/20': settingsStore.settings.theme === 'dark' }" key-field="id">
       <template #default="{ item: msg, index, active }">
         <DynamicScrollerItem :item="msg" :active="active" :size-dependencies="[msg.content, msg.image, msg.video, msg.pdfImages, msg.pptImages]" :data-index="index">
           <div :id="`message-${msg.id}`" class="mb-2 relative z-10 group" :class="msg.role">
@@ -29,7 +29,7 @@
     </DynamicScroller>
 
     <!-- 消息少于20条时使用普通滚动 -->
-    <div v-else ref="messagesContainer" class="flex-1 overflow-y-auto p-4 pb-0 bg-gradient-to-br from-neutral-950/30 to-black/20 relative z-10" :class="{ 'drag-over': isDragOver }">
+    <div v-else ref="messagesContainer" class="messages-container flex-1 overflow-y-auto p-4 pb-0 relative z-10" :class="{ 'drag-over': isDragOver, 'bg-gradient-to-br from-neutral-950/30 to-black/20': settingsStore.settings.theme === 'dark' }">
       <div v-for="msg in chatStore.messages" :id="`message-${msg.id}`" :key="msg.id" class="mb-2 relative z-10 group" :class="msg.role">
         <div class="flex items-start">
           <!-- 用户消息 -->
@@ -629,18 +629,7 @@ function handleStorageClearEvent(event: StorageEvent): void {
 </script>
 
 <style scoped>
-:global(html),
-:global(body) {
-  margin: 0 !important;
-  padding: 0 !important;
-  background-color: #000000 !important;
-  overflow: hidden;
-}
-:global(#app) {
-  margin: 0 !important;
-  padding: 0 !important;
-  background-color: #000000 !important;
-}
+
 .user {
   max-width: var(--user-message-width, 80%);
   margin-left: auto;
@@ -652,42 +641,31 @@ function handleStorageClearEvent(event: StorageEvent): void {
   margin-right: auto;
 }
 
-/* 普通滚动容器样式 */
-.flex-1.overflow-y-auto::-webkit-scrollbar {
-  width: 6px;
-}
-.flex-1.overflow-y-auto::-webkit-scrollbar-track {
-  background: transparent;
-}
-.flex-1.overflow-y-auto::-webkit-scrollbar-thumb {
-  background: transparent;
-  border-radius: 3px;
-  transition: background 0.5s ease-out;
-}
-.flex-1.overflow-y-auto.scrolling::-webkit-scrollbar-thumb {
-  background: rgba(64, 64, 64, 0.7);
-  transition: background 0.2s ease-in;
-}
-.flex-1.overflow-y-auto.scrolling::-webkit-scrollbar-thumb:hover {
-  background: rgba(82, 82, 82, 0.8);
-}
-
-/* 虚拟滚动容器样式 */
+/* 滚动容器样式 */
+.flex-1.overflow-y-auto::-webkit-scrollbar,
 .virtual-scroller::-webkit-scrollbar {
   width: 6px;
 }
+
+.flex-1.overflow-y-auto::-webkit-scrollbar-track,
 .virtual-scroller::-webkit-scrollbar-track {
   background: transparent;
 }
+
+.flex-1.overflow-y-auto::-webkit-scrollbar-thumb,
 .virtual-scroller::-webkit-scrollbar-thumb {
   background: transparent;
   border-radius: 3px;
   transition: background 0.5s ease-out;
 }
+
+.flex-1.overflow-y-auto.scrolling::-webkit-scrollbar-thumb,
 .virtual-scroller.scrolling::-webkit-scrollbar-thumb {
   background: rgba(64, 64, 64, 0.7);
   transition: background 0.2s ease-in;
 }
+
+.flex-1.overflow-y-auto.scrolling::-webkit-scrollbar-thumb:hover,
 .virtual-scroller.scrolling::-webkit-scrollbar-thumb:hover {
   background: rgba(82, 82, 82, 0.8);
 }
@@ -818,5 +796,26 @@ function handleStorageClearEvent(event: StorageEvent): void {
     opacity: 1;
     transform: scale(1);
   }
+}
+
+/* 浅色主题样式 */
+body[data-theme='light'] .chat-view,
+body[data-theme='light'] .messages-container {
+  background-color: rgb(237, 237, 237) !important;
+}
+
+/* 浅色主题滚动条 */
+body[data-theme='light'] .messages-container.scrolling::-webkit-scrollbar-thumb,
+body[data-theme='light'] .virtual-scroller.scrolling::-webkit-scrollbar-thumb {
+  background: rgba(160, 160, 160, 0.5) !important;
+}
+
+body[data-theme='light'] .messages-container.scrolling::-webkit-scrollbar-thumb:hover,
+body[data-theme='light'] .virtual-scroller.scrolling::-webkit-scrollbar-thumb:hover {
+  background: rgba(120, 120, 120, 0.6) !important;
+}
+
+body[data-theme='light'] .drag-over {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(37, 99, 235, 0.06)) !important;
 }
 </style>

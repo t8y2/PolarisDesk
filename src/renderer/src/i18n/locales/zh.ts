@@ -91,6 +91,7 @@ export default {
     // 基础设置
     generalSettings: '通用设置',
     language: '语言',
+    theme: '主题',
     starryBackground: '星空背景',
     defaultExpandThink: '默认展开思考过程',
     saveRecordingLocally: '本地保存录音',
@@ -162,6 +163,12 @@ export default {
       ollama: 'Ollama',
       zhipu: '智谱 AI (GLM)',
       custom: '自定义端点'
+    },
+
+    // 主题选项
+    themes: {
+      dark: '深色',
+      light: '浅色'
     }
   },
   history: {

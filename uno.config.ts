@@ -54,9 +54,18 @@ export default defineConfig({
     'control-btn': 'btn-base bg-white/10 rounded text-white px-1.5 py-1 min-w-5 h-5 hover:bg-white/20',
     // 操作按钮样式
     'action-btn': 'btn-base bg-white/10 rounded text-white px-1.5 py-1 min-w-6 h-6 hover:bg-white/20',
-    // 消息样式
+    // 消息样式 - 深色主题
     'message-base': 'mb-1.5 px-1.5 py-1 rounded text-2.75',
     'message-user': 'message-base bg-blue/30 text-white self-end border border-blue/40',
     'message-ai': 'message-base bg-white/8 text-white border border-white/15 cursor-pointer transition-all-200 hover:bg-white/12 hover:border-blue/40'
+  },
+  theme: {
+    colors: {
+      // 浅色主题颜色
+      'light-bg': '#ffffff',
+      'light-text': '#000000',
+      'light-border': '#e0e0e6',
+      'light-card': '#f5f5f5'
+    }
   }
 })

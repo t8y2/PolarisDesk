@@ -307,4 +307,33 @@ const renderedContent = computed(() => renderMarkdown(props.content))
   margin: 1rem 0;
   text-align: center;
 }
+
+/* 浅色主题样式 */
+body[data-theme='light'] .markdown-content :deep(.code-block-wrapper) {
+  border-color: #d1d5db;
+}
+
+body[data-theme='light'] .markdown-content :deep(.code-header) {
+  background-color: #374151;
+  border-bottom-color: #4b5563;
+}
+
+body[data-theme='light'] .markdown-content :deep(.language-label) {
+  color: #e5e7eb;
+}
+
+body[data-theme='light'] .markdown-content :deep(.copy-button),
+body[data-theme='light'] .markdown-content :deep(.preview-button) {
+  color: #d1d5db;
+}
+
+body[data-theme='light'] .markdown-content :deep(.copy-button):hover,
+body[data-theme='light'] .markdown-content :deep(.preview-button):hover {
+  color: #f3f4f6;
+  background-color: #4b5563;
+}
+
+body[data-theme='light'] .markdown-content :deep(pre) {
+  background-color: #1f2937;
+}
 </style>

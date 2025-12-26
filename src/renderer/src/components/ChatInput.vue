@@ -304,4 +304,149 @@ defineExpose({
     transform: rotate(360deg);
   }
 }
+
+/* 浅色主题样式 */
+body[data-theme='light'] .input-area-container {
+  background: #f7f7f7 !important;
+  backdrop-filter: none !important;
+  border-top-color: #d6d6d6 !important;
+  box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+
+body[data-theme='light'] :deep(.custom-input) {
+  background-color: #ffffff !important;
+  border-color: #d6d6d6 !important;
+  color: #1a1a1a !important;
+}
+
+body[data-theme='light'] :deep(.custom-input:hover) {
+  background-color: #ffffff !important;
+  border-color: #b8b8b8 !important;
+}
+
+body[data-theme='light'] :deep(.custom-input:focus-within) {
+  background-color: #ffffff !important;
+  border-color: #95ec69 !important;
+  box-shadow: 0 0 0 2px rgba(149, 236, 105, 0.2) !important;
+}
+
+body[data-theme='light'] :deep(.custom-input textarea) {
+  color: #1a1a1a !important;
+}
+
+body[data-theme='light'] :deep(.custom-input textarea::placeholder) {
+  color: #999999 !important;
+}
+
+body[data-theme='light'] :deep(.send-button) {
+  background-color: #95ec69 !important;
+  border-color: transparent !important;
+  color: #1a1a1a !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+body[data-theme='light'] :deep(.send-button:hover:not(:disabled)) {
+  background-color: #7ed957 !important;
+  border-color: transparent !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+}
+
+body[data-theme='light'] :deep(.send-button:disabled) {
+  background-color: #e0e0e0 !important;
+  border-color: transparent !important;
+  color: #999999 !important;
+  box-shadow: none !important;
+}
+
+/* 浅色主题 - 操作按钮 */
+body[data-theme='light'] .action-button,
+body[data-theme='light'] :deep(.action-button),
+body[data-theme='light'] :deep(button.action-button) {
+  background-color: #ffffff !important;
+  border-color: #d6d6d6 !important;
+  color: #1a1a1a !important;
+}
+
+body[data-theme='light'] .action-button:hover,
+body[data-theme='light'] :deep(.action-button:hover),
+body[data-theme='light'] :deep(button.action-button:hover) {
+  background-color: #f9fafb !important;
+  border-color: #b8b8b8 !important;
+  color: #1a1a1a !important;
+}
+
+body[data-theme='light'] .action-button *,
+body[data-theme='light'] :deep(.action-button *),
+body[data-theme='light'] :deep(.action-button .n-icon),
+body[data-theme='light'] :deep(.action-button .n-icon *),
+body[data-theme='light'] :deep(.action-button svg),
+body[data-theme='light'] :deep(.action-button svg *),
+body[data-theme='light'] :deep(.action-button path) {
+  color: #1a1a1a !important;
+  fill: #1a1a1a !important;
+  stroke: #1a1a1a !important;
+}
+
+body[data-theme='light'] .send-button,
+body[data-theme='light'] :deep(.send-button),
+body[data-theme='light'] :deep(button.send-button) {
+  background-color: #1a1a1a !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+body[data-theme='light'] .send-button:hover:not(:disabled),
+body[data-theme='light'] :deep(.send-button:hover:not(:disabled)) {
+  background-color: #333333 !important;
+  border-color: transparent !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+}
+
+body[data-theme='light'] .send-button *,
+body[data-theme='light'] :deep(.send-button *),
+body[data-theme='light'] :deep(.send-button .n-icon),
+body[data-theme='light'] :deep(.send-button .n-icon *),
+body[data-theme='light'] :deep(.send-button svg),
+body[data-theme='light'] :deep(.send-button svg *),
+body[data-theme='light'] :deep(.send-button path),
+body[data-theme='light'] :deep(.send-button span),
+body[data-theme='light'] :deep(.send-button .n-button__content) {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+body[data-theme='light'] :deep(.send-button:disabled) {
+  background-color: #e0e0e0 !important;
+  border-color: transparent !important;
+  color: #999999 !important;
+  box-shadow: none !important;
+}
+
+/* 浅色主题 - 停止按钮 */
+body[data-theme='light'] .send-button.stop-button,
+body[data-theme='light'] :deep(.send-button.stop-button) {
+  background-color: #fda4af !important;
+  border: none !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+body[data-theme='light'] .send-button.stop-button:hover,
+body[data-theme='light'] :deep(.send-button.stop-button:hover) {
+  background-color: #fb7185 !important;
+  border: none !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+}
+
+body[data-theme='light'] .send-button.stop-button *,
+body[data-theme='light'] :deep(.send-button.stop-button *),
+body[data-theme='light'] :deep(.send-button.stop-button .n-icon),
+body[data-theme='light'] :deep(.send-button.stop-button svg),
+body[data-theme='light'] :deep(.send-button.stop-button path) {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+  stroke: #ffffff !important;
+}
 </style>
