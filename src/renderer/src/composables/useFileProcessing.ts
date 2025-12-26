@@ -4,6 +4,7 @@
 import { useMessage } from 'naive-ui'
 import { processPdfToImages, validatePdfFile, type PdfProcessingResult } from '../utils/pdfProcessor'
 import { processPptToImages, validatePptFile, type PptProcessingResult } from '../utils/pptProcessor'
+import { processWordToImages, validateWordFile, type WordProcessingResult } from '../utils/wordProcessor'
 import { checkFileSize, clearOtherMedia, type MediaSetters } from '../utils/mediaUtils'
 
 export function useFileProcessing(): {
@@ -16,7 +17,10 @@ export function useFileProcessing(): {
     setPdfName: (name: string | null) => void,
     setPptImages: (data: string[] | null) => void,
     setPptName: (name: string | null) => void,
-    setPptTotalPages: (totalPages: number | null) => void
+    setPptTotalPages: (totalPages: number | null) => void,
+    setWordImages?: (data: string[] | null) => void,
+    setWordName?: (name: string | null) => void,
+    setWordTotalPages?: (totalPages: number | null) => void
   ) => Promise<void>
   handlePaste: (event: ClipboardEvent, processFileCallback: (file: File) => void | Promise<void>) => Promise<void>
 } {
@@ -31,8 +35,18 @@ export function useFileProcessing(): {
     setPdfName: (name: string | null) => void,
     setPptImages: (data: string[] | null) => void,
     setPptName: (name: string | null) => void,
-    setPptTotalPages: (totalPages: number | null) => void
+    setPptTotalPages: (totalPages: number | null) => void,
+    setWordImages?: (data: string[] | null) => void,
+    setWordName?: (name: string | null) => void,
+    setWordTotalPages?: (totalPages: number | null) => void
   ): Promise<void> => {
+    console.log('processFile 被调用，文件信息:', {
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      hasWordCallbacks: !!(setWordImages && setWordName && setWordTotalPages)
+    })
+
     // 创建setters对象
     const setters: MediaSetters = {
       setImage,
@@ -42,7 +56,10 @@ export function useFileProcessing(): {
       setPdfName,
       setPptImages,
       setPptName,
-      setPptTotalPages
+      setPptTotalPages,
+      setWordImages,
+      setWordName,
+      setWordTotalPages
     }
     // 检查文件大小
     const sizeCheck = checkFileSize(file)
@@ -123,8 +140,35 @@ export function useFileProcessing(): {
         console.error('PPT处理失败:', error)
         message.error(`PPT处理失败: ${error instanceof Error ? error.message : '未知错误'}`)
       }
+    } else if (
+      file.type === 'application/msword' ||
+      file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ) {
+      if (!validateWordFile(file)) {
+        message.error('无效的 Word 文件')
+        return
+      }
+
+      try {
+        const result: WordProcessingResult = await processWordToImages(file)
+
+        if (result.images.length === 0) {
+          message.error('Word 处理失败：无法提取内容')
+          return
+        }
+
+        clearOtherMedia('word', setters)
+        if (setWordImages) setWordImages(result.images)
+        if (setWordName) setWordName(result.fileName)
+        if (setWordTotalPages) setWordTotalPages(result.totalPages)
+
+        message.success(`Word 处理完成：共${result.totalPages}页`)
+      } catch (error) {
+        console.error('Word 处理失败:', error)
+        message.error(`Word 处理失败: ${error instanceof Error ? error.message : '未知错误'}`)
+      }
     } else {
-      message.error('不支持的文件类型，请选择图片、视频、PDF或PPT文件')
+      message.error('不支持的文件类型，请选择图片、视频、PDF、PPT 或 Word 文件')
     }
   }
 

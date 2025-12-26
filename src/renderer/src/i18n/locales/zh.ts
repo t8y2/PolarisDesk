@@ -54,6 +54,7 @@ export default {
     imageToSend: '待发送图片',
     pdfDocument: 'PDF文档',
     pptDocument: 'PPT文档',
+    wordDocument: 'Word文档',
     pages: '{count}页'
   },
   drag: {
@@ -245,8 +246,10 @@ export default {
     downloadVideo: '下载视频',
     reusePdf: '复用PDF',
     reusePpt: '复用PPT',
+    reuseWord: '复用Word',
     pdfDocument: 'PDF文档',
     pptDocument: 'PPT文档',
+    wordDocument: 'Word文档',
     pages: '{count}页',
     imageSelected: '已选择图片',
     videoSelected: '已选择视频',
@@ -265,6 +268,7 @@ export default {
     videoAdded: '视频已添加到输入框',
     pdfAdded: 'PDF已添加到输入框',
     pptAdded: 'PPT已添加到输入框',
+    wordAdded: 'Word已添加到输入框',
     invalidMediaData: '无效的媒体数据',
     unsupportedMediaFormat: '不支持的媒体格式',
     reuseMediaFailed: '复用媒体失败，请重试',
@@ -278,7 +282,7 @@ export default {
     fileSizeExceeded50MB: '文件大小超过限制（50MB），请选择更小的文件',
     imageSizeExceeded10MB: '图片文件大小超过限制（10MB），请选择更小的图片',
     videoSizeExceeded20MB: '视频文件大小超过限制（20MB），请选择更小的视频或进行压缩',
-    unsupportedFileType: '不支持的文件类型，请选择图片、视频、PDF或PPT文件',
+    unsupportedFileType: '不支持的文件类型，请选择图片、视频、PDF、PPT或Word文件',
     fileProcessFailed: '文件处理失败，请重试',
     imageUploadSuccess: '图片上传成功',
     videoUploadSuccess: '视频上传成功'

@@ -53,7 +53,7 @@ const handlePreview = (type: 'image' | 'video', src: string, videoBase64?: strin
   emit('preview', { type, src, videoBase64 })
 }
 
-const handleReuse = (mediaType: 'image' | 'video' | 'pdf' | 'ppt', mediaData: string | string[], videoBase64?: string, fileName?: string, totalPages?: number): void => {
+const handleReuse = (mediaType: 'image' | 'video' | 'pdf' | 'ppt' | 'word', mediaData: string | string[], videoBase64?: string, fileName?: string, totalPages?: number): void => {
   emit('reuse', { mediaType, mediaData, videoBase64, fileName, totalPages })
 }
 

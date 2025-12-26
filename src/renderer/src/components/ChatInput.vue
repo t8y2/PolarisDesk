@@ -77,7 +77,7 @@
     </div>
 
     <!-- 隐藏的文件输入 -->
-    <input ref="fileInputRef" type="file" accept="image/*,video/*,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation" style="display: none" @change="handleFileSelect" />
+    <input ref="fileInputRef" type="file" accept="image/*,video/*,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" style="display: none" @change="handleFileSelect" />
   </div>
 </template>
 
@@ -100,6 +100,9 @@ interface PendingMedia {
   pptImages?: string[]
   pptName?: string
   pptTotalPages?: number
+  wordImages?: string[]
+  wordName?: string
+  wordTotalPages?: number
 }
 
 interface Props {
@@ -122,7 +125,7 @@ const emit = defineEmits<{
   quickCapture: []
   areaCapture: []
   uploadFile: []
-  clearMedia: [type: 'image' | 'video' | 'pdf' | 'ppt']
+  clearMedia: [type: 'image' | 'video' | 'pdf' | 'ppt' | 'word']
   keydown: [event: KeyboardEvent]
   paste: [event: ClipboardEvent]
   fileSelect: [event: Event]
@@ -137,7 +140,7 @@ const inputText = computed({
 })
 
 const canSend = computed(() => {
-  return (inputText.value.trim() || props.pendingMedia.image || props.pendingMedia.video || (props.pendingMedia.pdfImages && props.pendingMedia.pdfImages.length > 0) || (props.pendingMedia.pptImages && props.pendingMedia.pptImages.length > 0)) && !props.isLoading && !props.isGenerating
+  return (inputText.value.trim() || props.pendingMedia.image || props.pendingMedia.video || (props.pendingMedia.pdfImages && props.pendingMedia.pdfImages.length > 0) || (props.pendingMedia.pptImages && props.pendingMedia.pptImages.length > 0) || (props.pendingMedia.wordImages && props.pendingMedia.wordImages.length > 0)) && !props.isLoading && !props.isGenerating
 })
 
 const isAnyOperationInProgress = computed(() => {
@@ -165,7 +168,7 @@ function handleUploadFile(): void {
   fileInputRef.value?.click()
 }
 
-function handleClearMedia(type: 'image' | 'video' | 'pdf' | 'ppt'): void {
+function handleClearMedia(type: 'image' | 'video' | 'pdf' | 'ppt' | 'word'): void {
   emit('clearMedia', type)
 }
 

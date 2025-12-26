@@ -11,6 +11,9 @@ export interface MediaData {
   pptImages?: string[]
   pptName?: string
   pptTotalPages?: number
+  wordImages?: string[]
+  wordName?: string
+  wordTotalPages?: number
 }
 
 export interface MediaSetters {
@@ -22,6 +25,9 @@ export interface MediaSetters {
   setPptImages: (data: string[] | null) => void
   setPptName: (name: string | null) => void
   setPptTotalPages: (totalPages: number | null) => void
+  setWordImages?: (data: string[] | null) => void
+  setWordName?: (name: string | null) => void
+  setWordTotalPages?: (totalPages: number | null) => void
 }
 
 /**
@@ -32,7 +38,8 @@ export const FILE_SIZE_LIMITS = {
   image: 10 * 1024 * 1024, // 10MB
   video: 20 * 1024 * 1024, // 20MB
   pdf: 30 * 1024 * 1024, // 30MB
-  ppt: 30 * 1024 * 1024 // 30MB
+  ppt: 30 * 1024 * 1024, // 30MB
+  word: 30 * 1024 * 1024 // 30MB
 } as const
 
 /**
@@ -74,13 +81,20 @@ export function checkFileSize(file: File): { valid: boolean; error?: string } {
     }
   }
 
+  if ((file.type === 'application/msword' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') && file.size > FILE_SIZE_LIMITS.word) {
+    return {
+      valid: false,
+      error: 'Word文件大小超过限制（30MB），请选择更小的文件'
+    }
+  }
+
   return { valid: true }
 }
 
 /**
  * 清除除指定类型外的所有媒体
  */
-export function clearOtherMedia(keepType: 'image' | 'video' | 'pdf' | 'ppt', setters: MediaSetters): void {
+export function clearOtherMedia(keepType: 'image' | 'video' | 'pdf' | 'ppt' | 'word', setters: MediaSetters): void {
   if (keepType !== 'image') {
     setters.setImage(null)
   }
@@ -96,6 +110,11 @@ export function clearOtherMedia(keepType: 'image' | 'video' | 'pdf' | 'ppt', set
     setters.setPptImages(null)
     setters.setPptName(null)
     setters.setPptTotalPages(null)
+  }
+  if (keepType !== 'word') {
+    if (setters.setWordImages) setters.setWordImages(null)
+    if (setters.setWordName) setters.setWordName(null)
+    if (setters.setWordTotalPages) setters.setWordTotalPages(null)
   }
 }
 
@@ -117,6 +136,11 @@ export function generateMessageDescription(messageContent: string, mediaData: Me
     const pptName = mediaData.pptName || 'presentation.ppt'
     const totalPages = mediaData.pptTotalPages || mediaData.pptImages.length
     return `发送了PPT: ${pptName} (${totalPages}页)`
+  }
+  if (mediaData.wordImages?.length) {
+    const wordName = mediaData.wordName || 'document.docx'
+    const totalPages = mediaData.wordTotalPages || mediaData.wordImages.length
+    return `发送了Word: ${wordName} (${totalPages}页)`
   }
 
   return ''

@@ -204,6 +204,31 @@ export class ModelAPI {
       const headers = this.buildHeaders(settings)
       const apiUrl = this.buildApiUrl(settings)
 
+      // 输出完整的 API 请求信息用于调试
+      console.log('========== API 请求详情 ==========')
+      console.log('Provider:', settings.provider)
+      console.log('Model:', settings.model)
+      console.log('API URL:', apiUrl)
+      console.log('请求体:', JSON.stringify(requestWithConfig, null, 2))
+      console.log('消息数量:', request.messages.length)
+      request.messages.forEach((msg, index) => {
+        console.log(`消息 ${index} (${msg.role}):`)
+        if (Array.isArray(msg.content)) {
+          msg.content.forEach((item, itemIndex) => {
+            if (item.type === 'text') {
+              console.log(`  - 文本内容 ${itemIndex}:`, item.text?.substring(0, 100))
+            } else if (item.type === 'image_url') {
+              console.log(`  - 图片 ${itemIndex}:`, item.image_url?.url?.substring(0, 50) + '...')
+            } else if (item.type === 'video_url') {
+              console.log(`  - 视频 ${itemIndex}:`, item.video_url?.url?.substring(0, 50) + '...')
+            }
+          })
+        } else {
+          console.log('  - 内容:', msg.content)
+        }
+      })
+      console.log('===================================')
+
       // 使用新的日志系统
       logger.apiRequest({
         provider: settings.provider,
@@ -529,11 +554,11 @@ export class ModelAPI {
       text?: string
       image_url?: { url: string }
     }> = [
-      {
-        type: 'text',
-        text: prompt
-      }
-    ]
+        {
+          type: 'text',
+          text: prompt
+        }
+      ]
 
     // 添加所有图片
     images.forEach(image => {
@@ -654,7 +679,20 @@ export class ModelAPI {
   }
 
   // 带历史上下文的对话完成
-  async chatCompletionWithHistory(messages: Array<{ role: 'user' | 'assistant'; content: string; image?: string; video?: string; pdfImages?: string[]; pptImages?: string[] }>, settings: APISettings, onChunk: (chunk: string, type?: 'reasoning' | 'content') => void, signal?: AbortSignal): Promise<string> {
+  async chatCompletionWithHistory(messages: Array<{ role: 'user' | 'assistant'; content: string; image?: string; video?: string; pdfImages?: string[]; pptImages?: string[]; wordImages?: string[] }>, settings: APISettings, onChunk: (chunk: string, type?: 'reasoning' | 'content') => void, signal?: AbortSignal): Promise<string> {
+    console.log('chatCompletionWithHistory 被调用，消息数量:', messages.length)
+    messages.forEach((msg, index) => {
+      console.log(`消息 ${index}:`, {
+        role: msg.role,
+        hasContent: !!msg.content,
+        hasImage: !!msg.image,
+        hasVideo: !!msg.video,
+        pdfImagesCount: msg.pdfImages?.length || 0,
+        pptImagesCount: msg.pptImages?.length || 0,
+        wordImagesCount: msg.wordImages?.length || 0
+      })
+    })
+
     // 构建符合API格式的消息数组
     const apiMessages: Array<{ role: 'user' | 'assistant' | 'system'; content: Array<{ type: 'text' | 'image_url' | 'video_url'; text?: string; image_url?: { url: string }; video_url?: { url: string } }> }> = []
 
@@ -692,6 +730,7 @@ export class ModelAPI {
         }
 
         if (msg.pdfImages && msg.pdfImages.length > 0) {
+          console.log('添加 PDF 图片:', msg.pdfImages.length, '张')
           msg.pdfImages.forEach(image => {
             content.push({
               type: 'image_url',
@@ -701,6 +740,7 @@ export class ModelAPI {
         }
 
         if (msg.pptImages && msg.pptImages.length > 0) {
+          console.log('添加 PPT 图片:', msg.pptImages.length, '张')
           msg.pptImages.forEach(image => {
             content.push({
               type: 'image_url',
@@ -709,12 +749,32 @@ export class ModelAPI {
           })
         }
 
+        if (msg.wordImages && msg.wordImages.length > 0) {
+          console.log('添加 Word 图片:', msg.wordImages.length, '张')
+          msg.wordImages.forEach(image => {
+            content.push({
+              type: 'image_url',
+              image_url: { url: image }
+            })
+          })
+        }
+
+        console.log('消息内容项数量:', content.length)
         return {
           role: msg.role,
           content
         }
       })
     )
+
+    console.log('最终 API 消息数量:', apiMessages.length)
+    apiMessages.forEach((msg, index) => {
+      console.log(`API 消息 ${index}:`, {
+        role: msg.role,
+        contentItems: msg.content.length,
+        types: msg.content.map(c => c.type)
+      })
+    })
 
     const request: ModelRequest = {
       messages: apiMessages

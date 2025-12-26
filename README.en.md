@@ -61,7 +61,7 @@ Supports custom endpoints compatible with OpenAI API format
 - 🎨 **Modern UI** - Beautiful interface based on Naive UI
 - 💬 **Float Window** - Convenient floating chat window
 - 📝 **Markdown Rendering** - Code highlighting, math formulas (KaTeX)
-- 📄 **Document Processing** - PDF, PPT parsing support
+- 📄 **Document Processing** - PDF, PPT, Word parsing support
 - 🎬 **Video Compression** - Built-in FFmpeg video processing
 - 💾 **Local Storage** - SQLite local database
 - ⚡ **Performance Optimized** - Code splitting, lazy loading, virtual scrolling
@@ -126,6 +126,8 @@ pnpm build:linux
 - **Highlight.js** - Code syntax highlighting
 - **KaTeX** - Math formula rendering
 - **PDF.js** - PDF document rendering
+- **Mammoth.js** - Word document processing
+- **pptxtojson** - PPT document parsing
 - **Better-SQLite3** - High-performance SQLite database
 - **FFmpeg** - Video processing
 

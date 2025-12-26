@@ -14,7 +14,7 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
   ReturnType<typeof useFileProcessing> &
   ReturnType<typeof useScreenshot> & {
     chatStore: ReturnType<typeof useChatStore>
-    sendMessage: (inputMessage: string, imageData: string | null, videoData: string | null, videoBase64: string | null, pdfImages: string[] | null, pdfName: string | null, pptImages: string[] | null, pptName: string | null, pptTotalPages: number | null, clearInputs: () => void, scrollToBottom: () => void) => Promise<void>
+    sendMessage: (inputMessage: string, imageData: string | null, videoData: string | null, videoBase64: string | null, pdfImages: string[] | null, pdfName: string | null, pptImages: string[] | null, pptName: string | null, pptTotalPages: number | null, wordImages: string[] | null, wordName: string | null, wordTotalPages: number | null, clearInputs: () => void, scrollToBottom: () => void) => Promise<void>
     handleKeyDown: (e: KeyboardEvent, sendMessageCallback: () => Promise<void>) => Promise<void>
     handleMessageClick: (message: ChatMessage) => void
     confirmClearMessages: (onClearCallback?: () => void) => void
@@ -73,7 +73,7 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
   }
 
   // 发送消息核心逻辑
-  const sendMessage = async (inputMessage: string, imageData: string | null, videoData: string | null, videoBase64: string | null, pdfImages: string[] | null, pdfName: string | null, pptImages: string[] | null, pptName: string | null, pptTotalPages: number | null, clearInputs: () => void, scrollToBottom: () => void): Promise<void> => {
+  const sendMessage = async (inputMessage: string, imageData: string | null, videoData: string | null, videoBase64: string | null, pdfImages: string[] | null, pdfName: string | null, pptImages: string[] | null, pptName: string | null, pptTotalPages: number | null, wordImages: string[] | null, wordName: string | null, wordTotalPages: number | null, clearInputs: () => void, scrollToBottom: () => void): Promise<void> => {
     // 安全地处理当前请求控制器
     if (currentRequestController) {
       currentRequestController.abort()
@@ -91,13 +91,16 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
       pdfName: pdfName || undefined,
       pptImages: pptImages || undefined,
       pptName: pptName || undefined,
-      pptTotalPages: pptTotalPages || undefined
+      pptTotalPages: pptTotalPages || undefined,
+      wordImages: wordImages || undefined,
+      wordName: wordName || undefined,
+      wordTotalPages: wordTotalPages || undefined
     }
 
     // 生成消息描述
     const messageDescription = generateMessageDescription(messageContent, mediaData)
 
-    chatStore.addUserMessage(messageDescription, mediaData.image, mediaData.video, mediaData.videoBase64, mediaData.pdfImages, mediaData.pdfName, mediaData.pptImages, mediaData.pptName, mediaData.pptTotalPages)
+    chatStore.addUserMessage(messageDescription, mediaData.image, mediaData.video, mediaData.videoBase64, mediaData.pdfImages, mediaData.pdfName, mediaData.pptImages, mediaData.pptName, mediaData.pptTotalPages, mediaData.wordImages, mediaData.wordName, mediaData.wordTotalPages)
 
     clearInputs()
     await nextTick()
@@ -113,9 +116,6 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
         return
       }
 
-      console.log('发送消息，使用流式输出模式，多媒体内容:', !!videoBase64, !!pdfImages, !!pptImages, !!imageData)
-      console.log('当前设置:', settingsStore.settings)
-
       if (!settingsStore.settings.apiKey) {
         message.warning('API Key 未设置，无法使用流式输出模式')
         throw new Error('API Key 未设置')
@@ -124,7 +124,7 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
       logger.stream('开始流式对话', {
         provider: settingsStore.settings.provider,
         model: settingsStore.settings.model,
-        hasMedia: !!(videoBase64 || pdfImages || pptImages || imageData)
+        hasMedia: !!(videoBase64 || pdfImages || pptImages || wordImages || imageData)
       })
 
       await handleStreamResponse(scrollToBottom)
@@ -340,7 +340,7 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
 
   // 构建流式请求
   const buildStreamRequest = (
-    historyMessages: Array<{ role: string; content: string; image?: string; video?: string; pdfImages?: string[]; pptImages?: string[] }>
+    historyMessages: Array<{ role: string; content: string; image?: string; video?: string; pdfImages?: string[]; pptImages?: string[]; wordImages?: string[] }>
   ): {
     messages: Array<{
       role: 'user' | 'assistant' | 'system'
@@ -376,7 +376,7 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
       messages.push(
         ...historyMessages.map(msg => ({
           role: msg.role as 'user' | 'assistant' | 'system',
-          content: buildMessageContent(msg.content, msg.image, msg.video, msg.pdfImages, msg.pptImages)
+          content: buildMessageContent(msg.content, msg.image, msg.video, msg.pdfImages, msg.pptImages, msg.wordImages)
         }))
       )
     }
@@ -389,7 +389,8 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
     image?: string,
     video?: string,
     pdfImages?: string[],
-    pptImages?: string[]
+    pptImages?: string[],
+    wordImages?: string[]
   ): Array<{
     type: 'text' | 'image_url' | 'video_url'
     text?: string
@@ -420,6 +421,10 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
     })
 
     pptImages?.forEach(img => {
+      content.push({ type: 'image_url', image_url: { url: img.split(',')[1] } })
+    })
+
+    wordImages?.forEach(img => {
       content.push({ type: 'image_url', image_url: { url: img.split(',')[1] } })
     })
 

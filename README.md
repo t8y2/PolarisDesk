@@ -61,7 +61,7 @@ PolarisDesk（北极星桌面）寓意如同北极星为航海者指引方向一
 - 🎨 **现代界面** - 基于 Naive UI 的精美用户界面
 - 💬 **悬浮窗口** - 便捷的悬浮聊天窗口
 - 📝 **Markdown 渲染** - 支持代码高亮、数学公式（KaTeX）
-- 📄 **文档处理** - 支持 PDF、PPT 等文档解析
+- 📄 **文档处理** - 支持 PDF、PPT、Word 等文档解析
 - 🎬 **视频压缩** - 内置 FFmpeg 视频处理功能
 - 💾 **本地存储** - 使用 SQLite 本地数据库
 - ⚡ **性能优化** - 代码分割、懒加载、虚拟滚动
@@ -126,6 +126,8 @@ pnpm build:linux
 - **Highlight.js** - 代码语法高亮
 - **KaTeX** - 数学公式渲染
 - **PDF.js** - PDF 文档渲染
+- **Mammoth.js** - Word 文档处理
+- **pptxtojson** - PPT 文档解析
 - **Better-SQLite3** - 高性能 SQLite 数据库
 - **FFmpeg** - 视频处理
 

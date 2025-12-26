@@ -219,3 +219,20 @@ body[data-theme='light'] .prose code:not(.hljs) {
   color: #1a1a1a !important;
   background-color: rgba(229, 231, 235, 0.8) !important;
 }
+
+/* 浅色主题 - 文件卡片样式 */
+body[data-theme='light'] .bg-neutral-800 {
+  background-color: rgb(238, 238, 238) !important;
+}
+
+body[data-theme='light'] .border-neutral-700 {
+  border-color: rgb(220, 220, 220) !important;
+}
+
+body[data-theme='light'] .text-neutral-300 {
+  color: #1a1a1a !important;
+}
+
+body[data-theme='light'] .text-neutral-400 {
+  color: #666666 !important;
+}

@@ -20,6 +20,9 @@ export interface ChatMessage {
   pptImages?: string[]
   pptName?: string
   pptTotalPages?: number
+  wordImages?: string[]
+  wordName?: string
+  wordTotalPages?: number
   timestamp?: number
 }
 
@@ -33,6 +36,9 @@ export interface PendingMedia {
   pptImages?: string[]
   pptName?: string
   pptTotalPages?: number
+  wordImages?: string[]
+  wordName?: string
+  wordTotalPages?: number
 }
 
 // 对话历史类型定义
@@ -155,11 +161,11 @@ export const useChatStore = defineStore(STORE_ID, () => {
 
   // ========== 消息管理 ==========
 
-  const addUserMessage = (content: string, image?: string, video?: string, videoBase64?: string, pdfImages?: string[], pdfName?: string, pptImages?: string[], pptName?: string, pptTotalPages?: number): void => {
+  const addUserMessage = (content: string, image?: string, video?: string, videoBase64?: string, pdfImages?: string[], pdfName?: string, pptImages?: string[], pptName?: string, pptTotalPages?: number, wordImages?: string[], wordName?: string, wordTotalPages?: number): void => {
     const message: ChatMessage = {
       id: generateMessageId(),
       role: 'user',
-      content: content || (video ? '发送了一个视频' : image ? '发送了一张图片' : pdfImages?.length ? `发送了PDF: ${pdfName || 'document.pdf'} (${pdfImages.length}页)` : pptImages?.length ? `发送了PPT: ${pptName || 'presentation.ppt'} (${pptTotalPages || pptImages.length}页)` : ''),
+      content: content || (video ? '发送了一个视频' : image ? '发送了一张图片' : pdfImages?.length ? `发送了PDF: ${pdfName || 'document.pdf'} (${pdfImages.length}页)` : pptImages?.length ? `发送了PPT: ${pptName || 'presentation.ppt'} (${pptTotalPages || pptImages.length}页)` : wordImages?.length ? `发送了Word: ${wordName || 'document.docx'} (${wordTotalPages || wordImages.length}页)` : ''),
       image,
       video,
       videoBase64,
@@ -168,6 +174,9 @@ export const useChatStore = defineStore(STORE_ID, () => {
       pptImages,
       pptName,
       pptTotalPages,
+      wordImages,
+      wordName,
+      wordTotalPages,
       timestamp: Date.now()
     }
 
@@ -464,7 +473,7 @@ export const useChatStore = defineStore(STORE_ID, () => {
   }
 
   const hasPendingMedia = (): boolean => {
-    return !!(pendingMedia.value.image || pendingMedia.value.video || (pendingMedia.value.pdfImages && pendingMedia.value.pdfImages.length > 0) || (pendingMedia.value.pptImages && pendingMedia.value.pptImages.length > 0))
+    return !!(pendingMedia.value.image || pendingMedia.value.video || (pendingMedia.value.pdfImages && pendingMedia.value.pdfImages.length > 0) || (pendingMedia.value.pptImages && pendingMedia.value.pptImages.length > 0) || (pendingMedia.value.wordImages && pendingMedia.value.wordImages.length > 0))
   }
 
   // ========== 对话管理 ==========
@@ -478,7 +487,7 @@ export const useChatStore = defineStore(STORE_ID, () => {
     return '新对话'
   }
 
-  const getHistoryForAPI = (maxTurns: number = 4): Array<{ role: 'user' | 'assistant'; content: string; image?: string; video?: string; pdfImages?: string[]; pptImages?: string[] }> => {
+  const getHistoryForAPI = (maxTurns: number = 4): Array<{ role: 'user' | 'assistant'; content: string; image?: string; video?: string; pdfImages?: string[]; pptImages?: string[]; wordImages?: string[] }> => {
     const maxMessages = maxTurns * 2 + 1
     const recentMessages = realMessages.value.slice(-maxMessages)
 
@@ -488,7 +497,8 @@ export const useChatStore = defineStore(STORE_ID, () => {
       image: msg.image,
       video: msg.videoBase64 || (msg.video && msg.video.startsWith('data:') ? msg.video : undefined),
       pdfImages: msg.pdfImages,
-      pptImages: msg.pptImages
+      pptImages: msg.pptImages,
+      wordImages: msg.wordImages
     }))
   }
 

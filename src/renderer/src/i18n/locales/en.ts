@@ -54,6 +54,7 @@ export default {
     imageToSend: 'Image to send',
     pdfDocument: 'PDF Document',
     pptDocument: 'PPT Document',
+    wordDocument: 'Word Document',
     pages: '{count} pages'
   },
   drag: {
@@ -245,8 +246,10 @@ export default {
     downloadVideo: 'Download Video',
     reusePdf: 'Reuse PDF',
     reusePpt: 'Reuse PPT',
+    reuseWord: 'Reuse Word',
     pdfDocument: 'PDF Document',
     pptDocument: 'PPT Document',
+    wordDocument: 'Word Document',
     pages: '{count} pages',
     imageSelected: 'Image selected',
     videoSelected: 'Video selected',
@@ -265,6 +268,7 @@ export default {
     videoAdded: 'Video added to input',
     pdfAdded: 'PDF added to input',
     pptAdded: 'PPT added to input',
+    wordAdded: 'Word added to input',
     invalidMediaData: 'Invalid media data',
     unsupportedMediaFormat: 'Unsupported media format',
     reuseMediaFailed: 'Failed to reuse media, please try again',
@@ -278,7 +282,7 @@ export default {
     fileSizeExceeded50MB: 'File size exceeds limit (50MB), please select a smaller file',
     imageSizeExceeded10MB: 'Image file size exceeds limit (10MB), please select a smaller image',
     videoSizeExceeded20MB: 'Video file size exceeds limit (20MB), please select a smaller video or compress it',
-    unsupportedFileType: 'Unsupported file type, please select image, video, PDF or PPT file',
+    unsupportedFileType: 'Unsupported file type, please select image, video, PDF, PPT or Word file',
     fileProcessFailed: 'File processing failed, please try again',
     imageUploadSuccess: 'Image uploaded successfully',
     videoUploadSuccess: 'Video uploaded successfully'

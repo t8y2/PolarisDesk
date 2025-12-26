@@ -299,6 +299,30 @@
             </div>
           </div>
 
+          <!-- Word 预览 -->
+          <div v-if="chatStore.pendingMedia.wordImages && chatStore.pendingMedia.wordImages.length > 0" class="mb-1.5">
+            <div class="bg-white/10 backdrop-blur-sm rounded px-2 py-1.5 flex items-center gap-2">
+              <div class="w-7 h-7">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" fill="#2B579A"/>
+                  <path d="M14 2V8H20" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M8 13H16M8 17H16M10 9H12" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="text-white/90 text-2.75 font-medium truncate">{{ chatStore.pendingMedia.wordName || t('floating.wordDocument') }} ({{ t('floating.pages', { count: chatStore.pendingMedia.wordTotalPages || chatStore.pendingMedia.wordImages.length }) }})</div>
+                <div class="text-white/60 text-2.25">{{ t('floating.clickSendToUpload') }}</div>
+              </div>
+              <button class="bg-red/20 border-none rounded-full w-4.5 h-4.5 flex items-center justify-center cursor-pointer text-white/80 transition-all-200 hover:bg-red/40 hover:text-white" @click="clearWordWrapper">
+                <n-icon size="10">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                  </svg>
+                </n-icon>
+              </button>
+            </div>
+          </div>
+
           <div class="flex gap-1 items-center">
             <input ref="inputRef" v-model="inputMessage" class="flex-1 bg-white/5 border border-white/10 rounded px-1.5 py-1 text-white text-2.75 outline-none h-6 leading-1.2 placeholder:text-white/50" :placeholder="t('floating.inputPlaceholder')" @keydown="handleKeyDown" @paste="handlePasteWrapper" @focus="handleInputFocus" @blur="handleInputBlur" />
 
@@ -515,6 +539,15 @@ const processFileWrapper = async (file: File): Promise<void> => {
     },
     (totalPages: number | null) => {
       chatStore.setPendingMedia({ pptTotalPages: totalPages || undefined })
+    },
+    (data: string[] | null) => {
+      chatStore.setPendingMedia({ wordImages: data || undefined })
+    },
+    (name: string | null) => {
+      chatStore.setPendingMedia({ wordName: name || undefined })
+    },
+    (totalPages: number | null) => {
+      chatStore.setPendingMedia({ wordTotalPages: totalPages || undefined })
     }
   )
 }
@@ -528,7 +561,10 @@ const clearImageWrapper = (): void => {
     pdfName: chatStore.pendingMedia.pdfName,
     pptImages: chatStore.pendingMedia.pptImages,
     pptName: chatStore.pendingMedia.pptName,
-    pptTotalPages: chatStore.pendingMedia.pptTotalPages
+    pptTotalPages: chatStore.pendingMedia.pptTotalPages,
+    wordImages: chatStore.pendingMedia.wordImages,
+    wordName: chatStore.pendingMedia.wordName,
+    wordTotalPages: chatStore.pendingMedia.wordTotalPages
   })
 }
 
@@ -541,7 +577,10 @@ const clearVideoWrapper = (): void => {
     pdfName: chatStore.pendingMedia.pdfName,
     pptImages: chatStore.pendingMedia.pptImages,
     pptName: chatStore.pendingMedia.pptName,
-    pptTotalPages: chatStore.pendingMedia.pptTotalPages
+    pptTotalPages: chatStore.pendingMedia.pptTotalPages,
+    wordImages: chatStore.pendingMedia.wordImages,
+    wordName: chatStore.pendingMedia.wordName,
+    wordTotalPages: chatStore.pendingMedia.wordTotalPages
   })
 }
 
@@ -554,20 +593,42 @@ const clearPdfWrapper = (): void => {
     pdfName: undefined,
     pptImages: chatStore.pendingMedia.pptImages,
     pptName: chatStore.pendingMedia.pptName,
-    pptTotalPages: chatStore.pendingMedia.pptTotalPages
+    pptTotalPages: chatStore.pendingMedia.pptTotalPages,
+    wordImages: chatStore.pendingMedia.wordImages,
+    wordName: chatStore.pendingMedia.wordName,
+    wordTotalPages: chatStore.pendingMedia.wordTotalPages
   })
 }
 
 const clearPptWrapper = (): void => {
   chatStore.setPendingMedia({
-    image: chatStore.pendingMedia.image, // 保留其他媒体
+    image: chatStore.pendingMedia.image,
     video: chatStore.pendingMedia.video,
     videoBase64: chatStore.pendingMedia.videoBase64,
     pdfImages: chatStore.pendingMedia.pdfImages,
     pdfName: chatStore.pendingMedia.pdfName,
     pptImages: undefined,
     pptName: undefined,
-    pptTotalPages: undefined
+    pptTotalPages: undefined,
+    wordImages: chatStore.pendingMedia.wordImages,
+    wordName: chatStore.pendingMedia.wordName,
+    wordTotalPages: chatStore.pendingMedia.wordTotalPages
+  })
+}
+
+const clearWordWrapper = (): void => {
+  chatStore.setPendingMedia({
+    image: chatStore.pendingMedia.image,
+    video: chatStore.pendingMedia.video,
+    videoBase64: chatStore.pendingMedia.videoBase64,
+    pdfImages: chatStore.pendingMedia.pdfImages,
+    pdfName: chatStore.pendingMedia.pdfName,
+    pptImages: chatStore.pendingMedia.pptImages,
+    pptName: chatStore.pendingMedia.pptName,
+    pptTotalPages: chatStore.pendingMedia.pptTotalPages,
+    wordImages: undefined,
+    wordName: undefined,
+    wordTotalPages: undefined
   })
 }
 
@@ -712,7 +773,7 @@ const sendMessage = async (): Promise<void> => {
     // 待发送媒体在store的addUserMessage中清空
   }
 
-  await sendMessageCore(inputMessage.value, chatStore.pendingMedia.image || '', chatStore.pendingMedia.video || '', chatStore.pendingMedia.videoBase64 || '', chatStore.pendingMedia.pdfImages || [], chatStore.pendingMedia.pdfName || '', chatStore.pendingMedia.pptImages || [], chatStore.pendingMedia.pptName || '', chatStore.pendingMedia.pptTotalPages || null, clearInputs, scrollToBottom)
+  await sendMessageCore(inputMessage.value, chatStore.pendingMedia.image || '', chatStore.pendingMedia.video || '', chatStore.pendingMedia.videoBase64 || '', chatStore.pendingMedia.pdfImages || [], chatStore.pendingMedia.pdfName || '', chatStore.pendingMedia.pptImages || [], chatStore.pendingMedia.pptName || '', chatStore.pendingMedia.pptTotalPages || null, chatStore.pendingMedia.wordImages || [], chatStore.pendingMedia.wordName || '', chatStore.pendingMedia.wordTotalPages || null, clearInputs, scrollToBottom)
 }
 
 // 停止生成
@@ -921,7 +982,7 @@ const handleDrop = async (event: DragEvent): Promise<void> => {
   const file = files[0]
 
   // 检查文件类型
-  const allowedTypes = ['image/', 'video/', 'application/pdf', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation']
+  const allowedTypes = ['image/', 'video/', 'application/pdf', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
 
   const isAllowedType = allowedTypes.some(type => file.type.startsWith(type) || file.type === type)
 

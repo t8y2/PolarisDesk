@@ -192,7 +192,10 @@ async function handleInputPaste(event: ClipboardEvent): Promise<void> {
       (name: string | null) => chatStore.setPendingMedia({ pdfName: name || undefined }),
       (data: string[] | null) => chatStore.setPendingMedia({ pptImages: data || undefined }),
       (name: string | null) => chatStore.setPendingMedia({ pptName: name || undefined }),
-      (totalPages: number | null) => chatStore.setPendingMedia({ pptTotalPages: totalPages || undefined })
+      (totalPages: number | null) => chatStore.setPendingMedia({ pptTotalPages: totalPages || undefined }),
+      (data: string[] | null) => chatStore.setPendingMedia({ wordImages: data || undefined }),
+      (name: string | null) => chatStore.setPendingMedia({ wordName: name || undefined }),
+      (totalPages: number | null) => chatStore.setPendingMedia({ wordTotalPages: totalPages || undefined })
     )
   })
 }
@@ -345,9 +348,13 @@ async function handleFileSelect(event: Event): Promise<void> {
           pdfImages: undefined,
           pdfName: undefined,
           pptImages: undefined,
-          pptName: undefined
+          pptName: undefined,
+          wordImages: undefined,
+          wordName: undefined
         })
         message.success(t('chatView.imageUploadSuccess'))
+        // 重置 file input
+        ;(event.target as HTMLInputElement).value = ''
       }
       reader.readAsDataURL(file)
     } else if (file.type.startsWith('video/')) {
@@ -367,12 +374,16 @@ async function handleFileSelect(event: Event): Promise<void> {
           pdfImages: undefined,
           pdfName: undefined,
           pptImages: undefined,
-          pptName: undefined
+          pptName: undefined,
+          wordImages: undefined,
+          wordName: undefined
         })
         message.success(t('chatView.videoUploadSuccess'))
+        // 重置 file input
+        ;(event.target as HTMLInputElement).value = ''
       }
       reader.readAsDataURL(file)
-    } else if (file.type === 'application/pdf' || file.type === 'application/vnd.ms-powerpoint' || file.type === 'application/vnd.openxmlformats-officedocument.presentationml.presentation') {
+    } else if (file.type === 'application/pdf' || file.type === 'application/vnd.ms-powerpoint' || file.type === 'application/vnd.openxmlformats-officedocument.presentationml.presentation' || file.type === 'application/msword' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
       await processFile(
         file,
         (data: string | null) => chatStore.setPendingMedia({ image: data || undefined }),
@@ -382,8 +393,13 @@ async function handleFileSelect(event: Event): Promise<void> {
         (name: string | null) => chatStore.setPendingMedia({ pdfName: name || undefined }),
         (data: string[] | null) => chatStore.setPendingMedia({ pptImages: data || undefined }),
         (name: string | null) => chatStore.setPendingMedia({ pptName: name || undefined }),
-        (totalPages: number | null) => chatStore.setPendingMedia({ pptTotalPages: totalPages || undefined })
+        (totalPages: number | null) => chatStore.setPendingMedia({ pptTotalPages: totalPages || undefined }),
+        (data: string[] | null) => chatStore.setPendingMedia({ wordImages: data || undefined }),
+        (name: string | null) => chatStore.setPendingMedia({ wordName: name || undefined }),
+        (totalPages: number | null) => chatStore.setPendingMedia({ wordTotalPages: totalPages || undefined })
       )
+      // 重置 file input
+      ;(event.target as HTMLInputElement).value = ''
     } else {
       message.error(t('chatView.unsupportedFileType'))
       ;(event.target as HTMLInputElement).value = ''
@@ -397,7 +413,7 @@ async function handleFileSelect(event: Event): Promise<void> {
   }
 }
 
-function handleClearMedia(type: 'image' | 'video' | 'pdf' | 'ppt'): void {
+function handleClearMedia(type: 'image' | 'video' | 'pdf' | 'ppt' | 'word'): void {
   switch (type) {
     case 'image':
       chatStore.setPendingMedia({ image: undefined })
@@ -414,10 +430,13 @@ function handleClearMedia(type: 'image' | 'video' | 'pdf' | 'ppt'): void {
     case 'ppt':
       chatStore.setPendingMedia({ pptImages: undefined, pptName: undefined, pptTotalPages: undefined })
       break
+    case 'word':
+      chatStore.setPendingMedia({ wordImages: undefined, wordName: undefined, wordTotalPages: undefined })
+      break
   }
 }
 
-function reuseMedia(mediaType: 'image' | 'video' | 'pdf' | 'ppt', mediaData: string | string[], videoBase64?: string, fileName?: string, totalPages?: number): void {
+function reuseMedia(mediaType: 'image' | 'video' | 'pdf' | 'ppt' | 'word', mediaData: string | string[], videoBase64?: string, fileName?: string, totalPages?: number): void {
   try {
     chatStore.clearPendingMedia()
     switch (mediaType) {
@@ -443,6 +462,12 @@ function reuseMedia(mediaType: 'image' | 'video' | 'pdf' | 'ppt', mediaData: str
         if (Array.isArray(mediaData)) {
           chatStore.setPendingMedia({ pptImages: mediaData, pptName: fileName || t('floating.pptDocument'), pptTotalPages: totalPages })
           message.success(t('floating.pptAdded'))
+        }
+        break
+      case 'word':
+        if (Array.isArray(mediaData)) {
+          chatStore.setPendingMedia({ wordImages: mediaData, wordName: fileName || t('floating.wordDocument'), wordTotalPages: totalPages })
+          message.success(t('floating.wordAdded'))
         }
         break
     }
@@ -519,10 +544,10 @@ async function handleDrop(event: DragEvent): Promise<void> {
   const files = event.dataTransfer?.files
   if (!files || files.length === 0) return
   const file = files[0]
-  const allowedTypes = ['image/', 'video/', 'application/pdf', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation']
+  const allowedTypes = ['image/', 'video/', 'application/pdf', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
   const isAllowedType = allowedTypes.some(type => file.type.startsWith(type) || file.type === type)
   if (!isAllowedType) {
-    message.error('不支持的文件类型，请拖入图片、视频、PDF或PPT文件')
+    message.error('不支持的文件类型，请拖入图片、视频、PDF、PPT或Word文件')
     return
   }
   isFileUploading.value = true
@@ -548,6 +573,9 @@ async function sendMessage(): Promise<void> {
     chatStore.pendingMedia.pptImages || [],
     chatStore.pendingMedia.pptName || '',
     chatStore.pendingMedia.pptTotalPages || null,
+    chatStore.pendingMedia.wordImages || [],
+    chatStore.pendingMedia.wordName || '',
+    chatStore.pendingMedia.wordTotalPages || null,
     () => {
       inputText.value = ''
     },

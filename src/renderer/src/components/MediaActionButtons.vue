@@ -35,7 +35,7 @@ import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
 
 interface Props {
-  mediaType: 'image' | 'video' | 'pdf' | 'ppt'
+  mediaType: 'image' | 'video' | 'pdf' | 'ppt' | 'word'
   showDownload?: boolean
 }
 
@@ -53,7 +53,8 @@ const mediaTypeName = computed(() => {
     image: t('mediaActions.image'),
     video: t('mediaActions.video'),
     pdf: 'PDF',
-    ppt: 'PPT'
+    ppt: 'PPT',
+    word: 'Word'
   }
   return names[props.mediaType]
 })
