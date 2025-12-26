@@ -1,0 +1,16 @@
+singleQuote: true
+semi: false
+printWidth: 400
+trailingComma: none
+htmlWhitespaceSensitivity: ignore
+vueIndentScriptAndStyle: false
+singleAttributePerLine: false
+bracketSameLine: true
+arrowParens: avoid
+# 去除多余空格的配置
+useTabs: false
+tabWidth: 2
+endOfLine: lf
+insertPragma: false
+requirePragma: false
+proseWrap: preserve

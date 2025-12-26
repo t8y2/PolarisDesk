@@ -1,0 +1,265 @@
+/* Highlight.js 代码高亮样式 - One Dark Pro 主题 */
+.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 1em;
+  background: #282c34 !important;
+  color: #abb2bf !important;
+  border-radius: 0 0 6px 6px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0 !important;
+}
+
+/* 代码块容器样式 */
+.code-block-wrapper {
+  position: relative;
+  margin: 16px 0;
+  border: 1px solid #3e4451;
+  border-radius: 6px;
+  background: #282c34;
+  overflow: hidden;
+}
+
+/* 代码块头部 */
+.code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: #21252b;
+  border-bottom: 1px solid #3e4451;
+  font-size: 12px;
+}
+
+/* 语言标签 */
+.language-label {
+  color: #abb2bf;
+  font-weight: 500;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* 代码操作容器 */
+.code-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+/* 复制按钮 */
+.copy-button {
+  background: transparent;
+  border: 1px solid #3e4451;
+  color: #abb2bf;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+  opacity: 0.7;
+}
+
+.copy-button:hover {
+  background: #3e4451;
+  border-color: #528bff;
+  opacity: 1;
+}
+
+.copy-button:active {
+  background: #4b5263;
+}
+
+.copy-button svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* 预览按钮 */
+.preview-button {
+  background: transparent;
+  border: 1px solid #3e4451;
+  color: #abb2bf;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+  opacity: 0.7;
+}
+
+.preview-button:hover {
+  background: #3e4451;
+  border-color: #528bff;
+  opacity: 1;
+}
+
+.preview-button:active {
+  background: #4b5263;
+}
+
+.preview-button svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* 代码块预处理 */
+pre {
+  margin: 0 !important;
+  padding: 0 !important;
+  background: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+pre code {
+  background: none !important;
+  padding: 1em !important;
+  border-radius: 0 !important;
+  color: inherit !important;
+  display: block !important;
+}
+
+/* One Dark Pro 语法高亮颜色 */
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-section,
+.hljs-link {
+  color: #c678dd !important;
+}
+
+.hljs-string,
+.hljs-title,
+.hljs-name,
+.hljs-type,
+.hljs-attribute,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition,
+.hljs-variable,
+.hljs-template-tag,
+.hljs-template-variable {
+  color: #98c379 !important;
+}
+
+.hljs-comment,
+.hljs-quote,
+.hljs-deletion,
+.hljs-meta {
+  color: #5c6370 !important;
+}
+
+.hljs-literal,
+.hljs-number {
+  color: #d19a66 !important;
+}
+
+.hljs-function {
+  color: #61afef !important;
+}
+
+.hljs-class .hljs-title {
+  color: #e5c07b !important;
+}
+
+.hljs-built_in {
+  color: #e06c75 !important;
+}
+
+.hljs-tag {
+  color: #e06c75 !important;
+}
+
+.hljs-tag .hljs-name {
+  color: #e06c75 !important;
+}
+
+.hljs-tag .hljs-attr {
+  color: #d19a66 !important;
+}
+
+.hljs-regexp {
+  color: #56b6c2 !important;
+}
+
+.hljs-params {
+  color: #abb2bf !important;
+}
+
+/* 行内代码样式 */
+code:not(.hljs) {
+  background-color: rgba(62, 68, 81, 0.6) !important;
+  color: #abb2bf !important;
+  padding: 2px 4px !important;
+  border-radius: 3px !important;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+  font-size: 0.9em !important;
+}
+
+/* 代码块滚动条样式 */
+.hljs::-webkit-scrollbar {
+  height: 4px;
+}
+
+.hljs::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 1px;
+}
+
+.hljs::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 1px;
+}
+
+.hljs::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* 答案块样式 */
+.answer-box {
+  margin: 16px 0;
+  border: 1px solid #22c55e;
+  border-radius: 8px;
+  background: rgba(34, 197, 94, 0.1);
+  overflow: hidden;
+}
+
+.answer-box-header {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  background: rgba(34, 197, 94, 0.2);
+  border-bottom: 1px solid rgba(34, 197, 94, 0.3);
+  font-size: 12px;
+  gap: 6px;
+}
+
+.answer-box-icon {
+  font-size: 14px;
+}
+
+.answer-box-label {
+  color: #22c55e;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.answer-box-content {
+  padding: 12px 16px;
+  color: #abb2bf;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  background: rgba(34, 197, 94, 0.05);
+  border-radius: 0 0 6px 6px;
+}

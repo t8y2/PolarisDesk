@@ -1,0 +1,138 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Electron</title>
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://fonts.googleapis.com https://cdnjs.cloudflare.com data:; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://open.bigmodel.cn https://*.openai.com https://*.chatglm.cn https://*.anthropic.com https://*.cohere.ai https://*.together.xyz https://*.deepseek.com;" />
+    <style>
+      /* 全局Loading样式 */
+      #global-loading {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #000;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      }
+
+      /* 预设默认CSS变量，防止布局跳跃 */
+      :root {
+        --user-message-width: 80%;
+        --ai-message-width: 75%;
+      }
+
+      /* 防止任何布局抖动 */
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      .start-loading-logo {
+        font-size: 32px;
+        font-weight: bold;
+        color: #fff;
+        margin-bottom: 24px;
+        letter-spacing: 2px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .start-loading-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+      }
+
+      .start-loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(255, 255, 255, 0.2);
+        border-top: 3px solid #fff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 16px;
+      }
+
+      .start-loading-text {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 14px;
+        margin-bottom: 8px;
+      }
+
+      .start-loading-version {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 12px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      @keyframes fadeOut {
+        0% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+
+      /* 淡出动画 */
+      #global-loading.fade-out {
+        animation: fadeOut 0.5s ease-out forwards;
+      }
+
+      /* 防止页面内容在loading期间显示，确保布局稳定 */
+      #app {
+        opacity: 0;
+        transition: opacity 0.3s ease-in;
+        /* 确保在透明状态下也占据正确的空间，避免布局跳跃 */
+        visibility: visible;
+        /* 防止FOUC(Flash of Unstyled Content)和布局抖动 */
+        min-height: 100vh;
+        width: 100%;
+      }
+
+      #app.loaded {
+        opacity: 1;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- 全局Loading框 -->
+    <div id="global-loading">
+      <div class="start-loading-logo">
+        <img src="/src/assets/app-icon.png" alt="PolarisDesk" class="start-loading-icon" />
+        PolarisDesk
+      </div>
+      <div class="start-loading-spinner"></div>
+      <div class="start-loading-text">正在启动应用...</div>
+    </div>
+
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
