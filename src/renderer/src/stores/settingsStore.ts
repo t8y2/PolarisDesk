@@ -194,7 +194,7 @@ export const useSettingsStore = defineStore('settings', () => {
                 const typedKey = key as keyof AppSettings
                 try {
                   // 尝试解析 JSON 格式的值
-                  savedSettings[typedKey] = JSON.parse(value) as never
+                  savedSettings[typedKey] = JSON.parse(value as string) as never
                 } catch {
                   // 如果不是 JSON，直接使用
                   savedSettings[typedKey] = value as never

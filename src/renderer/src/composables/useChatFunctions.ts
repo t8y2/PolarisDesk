@@ -14,7 +14,22 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
   ReturnType<typeof useFileProcessing> &
   ReturnType<typeof useScreenshot> & {
     chatStore: ReturnType<typeof useChatStore>
-    sendMessage: (inputMessage: string, imageData: string | null, videoData: string | null, videoBase64: string | null, pdfImages: string[] | null, pdfName: string | null, pptImages: string[] | null, pptName: string | null, pptTotalPages: number | null, wordImages: string[] | null, wordName: string | null, wordTotalPages: number | null, clearInputs: () => void, scrollToBottom: () => void) => Promise<void>
+    sendMessage: (
+      inputMessage: string,
+      imageData: string | null,
+      videoData: string | null,
+      videoBase64: string | null,
+      pdfImages: string[] | null,
+      pdfName: string | null,
+      pptImages: string[] | null,
+      pptName: string | null,
+      pptTotalPages: number | null,
+      wordImages: string[] | null,
+      wordName: string | null,
+      wordTotalPages: number | null,
+      clearInputs: () => void,
+      scrollToBottom: () => void
+    ) => Promise<void>
     handleKeyDown: (e: KeyboardEvent, sendMessageCallback: () => Promise<void>) => Promise<void>
     handleMessageClick: (message: ChatMessage) => void
     confirmClearMessages: (onClearCallback?: () => void) => void
@@ -73,7 +88,22 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
   }
 
   // 发送消息核心逻辑
-  const sendMessage = async (inputMessage: string, imageData: string | null, videoData: string | null, videoBase64: string | null, pdfImages: string[] | null, pdfName: string | null, pptImages: string[] | null, pptName: string | null, pptTotalPages: number | null, wordImages: string[] | null, wordName: string | null, wordTotalPages: number | null, clearInputs: () => void, scrollToBottom: () => void): Promise<void> => {
+  const sendMessage = async (
+    inputMessage: string,
+    imageData: string | null,
+    videoData: string | null,
+    videoBase64: string | null,
+    pdfImages: string[] | null,
+    pdfName: string | null,
+    pptImages: string[] | null,
+    pptName: string | null,
+    pptTotalPages: number | null,
+    wordImages: string[] | null,
+    wordName: string | null,
+    wordTotalPages: number | null,
+    clearInputs: () => void,
+    scrollToBottom: () => void
+  ): Promise<void> => {
     // 安全地处理当前请求控制器
     if (currentRequestController) {
       currentRequestController.abort()
@@ -374,10 +404,7 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
     }> = []
 
     // 添加系统提示词（基础提示词 + 用户自定义）
-    const systemPrompt = buildSystemPrompt(
-      settingsStore.settings.systemPrompt,
-      settingsStore.settings.language
-    )
+    const systemPrompt = buildSystemPrompt(settingsStore.settings.systemPrompt, settingsStore.settings.language)
     if (systemPrompt.trim()) {
       messages.push({
         role: 'system',

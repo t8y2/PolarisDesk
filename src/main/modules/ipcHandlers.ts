@@ -492,10 +492,6 @@ export class IpcHandlers {
       return databaseService.cleanup(keepRecentCount)
     })
 
-    ipcMain.handle('db-cleanup-duplicates', () => {
-      return databaseService.cleanupDuplicateMessages()
-    })
-
     // 设置相关处理器
     ipcMain.handle('db-save-setting', (_, key: string, value: string) => {
       return databaseService.saveSetting(key, value)
@@ -710,6 +706,9 @@ export class IpcHandlers {
 
   // 命令执行相关处理器
   private registerCommandHandlers(): void {
+    // 存储命令取消函数的 Map
+    const commandCancelFunctions = new Map<string, () => void>()
+
     // 执行命令
     ipcMain.handle('execute-command', async (_, command: string) => {
       return await commandExecutorService.executeCommand(command)
@@ -723,24 +722,24 @@ export class IpcHandlers {
 
       const onComplete = (exitCode: number): void => {
         event.sender.send('command-stream-complete', streamId, exitCode)
+        // 清理取消函数
+        commandCancelFunctions.delete(streamId)
       }
 
       const cancelFn = commandExecutorService.executeCommandStream(command, onData, onComplete)
 
-      // 存储取消函数，以便后续可以取消
-      const cancelKey = `command-cancel-${streamId}`
-        ; (global as any)[cancelKey] = cancelFn
+      // 存储取消函数
+      commandCancelFunctions.set(streamId, cancelFn)
 
       return { success: true }
     })
 
     // 取消命令执行
     ipcMain.handle('cancel-command-stream', (_, streamId: string) => {
-      const cancelKey = `command-cancel-${streamId}`
-      const cancelFn = (global as any)[cancelKey]
+      const cancelFn = commandCancelFunctions.get(streamId)
       if (cancelFn) {
         cancelFn()
-        delete (global as any)[cancelKey]
+        commandCancelFunctions.delete(streamId)
       }
       return { success: true }
     })

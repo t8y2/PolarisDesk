@@ -75,14 +75,18 @@ const commandBlocks = computed(() => {
 })
 
 // 监听内容变化，确保响应式更新
-watch(() => props.message.content, (newContent, oldContent) => {
-  if (newContent && newContent.includes('<command>')) {
-    console.log('🔄 检测到命令标签，触发更新')
-    console.log('旧内容长度:', oldContent?.length || 0)
-    console.log('新内容长度:', newContent.length)
-    console.log('命令数量:', extractCommands(newContent).length)
-  }
-}, { immediate: true })
+watch(
+  () => props.message.content,
+  (newContent, oldContent) => {
+    if (newContent && newContent.includes('<command>')) {
+      console.log('🔄 检测到命令标签，触发更新')
+      console.log('旧内容长度:', oldContent?.length || 0)
+      console.log('新内容长度:', newContent.length)
+      console.log('命令数量:', extractCommands(newContent).length)
+    }
+  },
+  { immediate: true }
+)
 
 const mainContent = computed(() => {
   let content = props.removeThinkContent(props.message.content || '')

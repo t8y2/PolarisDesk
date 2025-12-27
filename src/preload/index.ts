@@ -101,7 +101,6 @@ const api = {
     searchConversations: (keyword: string) => ipcRenderer.invoke('db-search-conversations', keyword),
     getStats: () => ipcRenderer.invoke('db-get-stats'),
     cleanup: (keepRecentCount?: number) => ipcRenderer.invoke('db-cleanup', keepRecentCount),
-    cleanupDuplicates: () => ipcRenderer.invoke('db-cleanup-duplicates'),
     // 设置相关功能
     saveSetting: (key: string, value: string) => ipcRenderer.invoke('db-save-setting', key, value),
     getSetting: (key: string) => ipcRenderer.invoke('db-get-setting', key),

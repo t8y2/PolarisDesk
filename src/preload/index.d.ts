@@ -122,6 +122,10 @@ declare global {
         searchConversations: (keyword: string) => Promise<Array<{ id: string; title: string; timestamp: number; messageCount: number }>>
         getStats: () => Promise<{ totalConversations: number; totalMessages: number; dbSize: string }>
         cleanup: (keepRecentCount?: number) => Promise<boolean>
+        saveSetting: (key: string, value: string) => Promise<boolean>
+        getSetting: (key: string) => Promise<string | null>
+        getAllSettings: () => Promise<Record<string, string>>
+        deleteSetting: (key: string) => Promise<boolean>
       }
 
       // 获取应用版本号
