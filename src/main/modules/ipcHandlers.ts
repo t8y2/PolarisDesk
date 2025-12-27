@@ -711,8 +711,8 @@ export class IpcHandlers {
       const senderWindow = BrowserWindow.fromWebContents(event.sender)
       if (!senderWindow) return false
 
-      // 将百分比转换为0-1的值
-      const opacityValue = Math.max(0.1, Math.min(1, opacity / 100))
+      // 将百分比转换为0-1的值，最小50%
+      const opacityValue = Math.max(0.5, Math.min(1, opacity / 100))
       senderWindow.setOpacity(opacityValue)
       logger.debug(`设置窗口透明度: ${opacity}% (${opacityValue})`)
 

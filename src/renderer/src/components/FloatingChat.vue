@@ -864,6 +864,18 @@ const checkPinStatus = async (): Promise<void> => {
   }
 }
 
+// 应用保存的透明度设置
+const applyOpacitySetting = async (): Promise<void> => {
+  try {
+    const opacity = settingsStore.settings.windowOpacity
+    if (window.api?.setWindowOpacity && opacity) {
+      await window.api.setWindowOpacity(opacity)
+    }
+  } catch (error) {
+    console.error('应用透明度设置失败:', error)
+  }
+}
+
 // 监听置顶状态刷新请求
 const setupPinStatusListener = (): void => {
   if (window.api?.onRefreshPinStatus) {
@@ -887,6 +899,16 @@ watch(
     nextTick(() => {
       scrollToBottom()
     })
+  }
+)
+
+// 监听透明度设置变化
+watch(
+  () => settingsStore.settings.windowOpacity,
+  async newOpacity => {
+    if (window.api?.setWindowOpacity) {
+      await window.api.setWindowOpacity(newOpacity)
+    }
   }
 )
 
@@ -942,6 +964,9 @@ onMounted(() => {
 
   checkPinStatus()
   setupPinStatusListener()
+
+  // 应用保存的透明度设置
+  applyOpacitySetting()
 
   // 添加新建对话快捷键监听器
   if (window.electron?.ipcRenderer) {

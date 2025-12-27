@@ -197,7 +197,7 @@
                   <n-slider v-model:value="localSettings.aiMessageWidth" :min="50" :max="100" :step="5" :format-tooltip="value => `${value}%`" style="width: 100%" />
                 </n-form-item>
                 <n-form-item :label="t('settings.windowOpacity')" class="col-span-2">
-                  <n-slider v-model:value="localSettings.windowOpacity" :min="10" :max="100" :step="5" :format-tooltip="value => `${value}%`" style="width: 100%" @update:value="handleOpacityChange" />
+                  <n-slider v-model:value="localSettings.windowOpacity" :min="50" :max="100" :step="5" :format-tooltip="value => `${value}%`" style="width: 100%" @update:value="handleOpacityChange" />
                 </n-form-item>
               </div>
             </div>
