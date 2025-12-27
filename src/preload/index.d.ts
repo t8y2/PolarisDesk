@@ -126,6 +126,34 @@ declare global {
 
       // 获取应用版本号
       getAppVersion: () => Promise<string>
+
+      // 检查是否是首次启动
+      isFirstLaunch: () => Promise<boolean>
+
+      // 自动更新相关
+      updater: {
+        checkForUpdates: () => Promise<{ success: boolean }>
+        downloadUpdate: () => Promise<{ success: boolean }>
+        quitAndInstall: () => Promise<{ success: boolean }>
+        onUpdateStatus: (callback: (event: string, data: unknown) => void) => (event: Electron.IpcRendererEvent, ...args: unknown[]) => void
+        offUpdateStatus: (wrappedCallback: (event: Electron.IpcRendererEvent, ...args: unknown[]) => void) => void
+      }
+
+      // 命令执行相关
+      command: {
+        execute: (command: string) => Promise<{
+          success: boolean
+          output: string
+          error?: string
+          exitCode?: number
+        }>
+        executeStream: (command: string, streamId: string) => Promise<{ success: boolean }>
+        cancelStream: (streamId: string) => Promise<{ success: boolean }>
+        onStreamData: (callback: (streamId: string, data: string, isError: boolean) => void) => (event: Electron.IpcRendererEvent, ...args: unknown[]) => void
+        onStreamComplete: (callback: (streamId: string, exitCode: number) => void) => (event: Electron.IpcRendererEvent, ...args: unknown[]) => void
+        offStreamData: (wrappedCallback: (event: Electron.IpcRendererEvent, ...args: unknown[]) => void) => void
+        offStreamComplete: (wrappedCallback: (event: Electron.IpcRendererEvent, ...args: unknown[]) => void) => void
+      }
     }
   }
 }

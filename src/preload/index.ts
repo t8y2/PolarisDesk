@@ -126,6 +126,25 @@ const api = {
       return wrappedCallback
     },
     offUpdateStatus: (wrappedCallback: (event: Electron.IpcRendererEvent, ...args: unknown[]) => void) => ipcRenderer.removeListener('update-status', wrappedCallback)
+  },
+
+  // 命令执行相关
+  command: {
+    execute: (command: string) => ipcRenderer.invoke('execute-command', command),
+    executeStream: (command: string, streamId: string) => ipcRenderer.invoke('execute-command-stream', command, streamId),
+    cancelStream: (streamId: string) => ipcRenderer.invoke('cancel-command-stream', streamId),
+    onStreamData: (callback: (streamId: string, data: string, isError: boolean) => void) => {
+      const wrappedCallback = (_: Electron.IpcRendererEvent, streamId: string, data: string, isError: boolean): void => callback(streamId, data, isError)
+      ipcRenderer.on('command-stream-data', wrappedCallback)
+      return wrappedCallback
+    },
+    onStreamComplete: (callback: (streamId: string, exitCode: number) => void) => {
+      const wrappedCallback = (_: Electron.IpcRendererEvent, streamId: string, exitCode: number): void => callback(streamId, exitCode)
+      ipcRenderer.on('command-stream-complete', wrappedCallback)
+      return wrappedCallback
+    },
+    offStreamData: (wrappedCallback: (event: Electron.IpcRendererEvent, ...args: unknown[]) => void) => ipcRenderer.removeListener('command-stream-data', wrappedCallback),
+    offStreamComplete: (wrappedCallback: (event: Electron.IpcRendererEvent, ...args: unknown[]) => void) => ipcRenderer.removeListener('command-stream-complete', wrappedCallback)
   }
 }
 

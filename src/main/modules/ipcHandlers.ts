@@ -2,6 +2,7 @@ import { ipcMain, desktopCapturer, screen, clipboard, dialog, app, shell, Browse
 import { windowManager } from './windowManager'
 import { apiProxy } from './apiProxy'
 import { databaseService } from '../services/database'
+import { commandExecutorService } from '../services/commandExecutor'
 import { createResponseWindow, createHtmlPreviewWindow } from '../utils/windowCreators'
 import { logger } from '../utils/logger'
 import { autoUpdaterService } from './autoUpdater'
@@ -131,6 +132,7 @@ export class IpcHandlers {
     this.registerWindowHandlers()
     this.registerUtilityHandlers()
     this.registerUpdateHandlers()
+    this.registerCommandHandlers()
     logger.groupEnd()
     logger.success('所有 IPC 处理器注册完成')
   }
@@ -702,6 +704,44 @@ export class IpcHandlers {
     // 退出并安装更新
     ipcMain.handle('quit-and-install', () => {
       autoUpdaterService.quitAndInstall()
+      return { success: true }
+    })
+  }
+
+  // 命令执行相关处理器
+  private registerCommandHandlers(): void {
+    // 执行命令
+    ipcMain.handle('execute-command', async (_, command: string) => {
+      return await commandExecutorService.executeCommand(command)
+    })
+
+    // 流式执行命令
+    ipcMain.handle('execute-command-stream', (event, command: string, streamId: string) => {
+      const onData = (data: string, isError: boolean): void => {
+        event.sender.send('command-stream-data', streamId, data, isError)
+      }
+
+      const onComplete = (exitCode: number): void => {
+        event.sender.send('command-stream-complete', streamId, exitCode)
+      }
+
+      const cancelFn = commandExecutorService.executeCommandStream(command, onData, onComplete)
+
+      // 存储取消函数，以便后续可以取消
+      const cancelKey = `command-cancel-${streamId}`
+        ; (global as any)[cancelKey] = cancelFn
+
+      return { success: true }
+    })
+
+    // 取消命令执行
+    ipcMain.handle('cancel-command-stream', (_, streamId: string) => {
+      const cancelKey = `command-cancel-${streamId}`
+      const cancelFn = (global as any)[cancelKey]
+      if (cancelFn) {
+        cancelFn()
+        delete (global as any)[cancelKey]
+      }
       return { success: true }
     })
   }

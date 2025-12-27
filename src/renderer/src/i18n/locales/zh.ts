@@ -292,5 +292,24 @@ export default {
   },
   welcome: {
     message: '你好！我是PolarisDesk，可以帮你分析图片、视频和回答问题。你可以截图、上传图片/视频或直接输入文字与我对话。'
+  },
+  command: {
+    title: 'AI 命令行',
+    description: 'AI 理解意图并执行系统命令',
+    inputPlaceholder: '描述你想执行的操作，AI 会帮你生成并执行命令...',
+    generating: '正在生成命令...',
+    executing: '正在执行命令...',
+    success: '执行成功',
+    failed: '执行失败',
+    cancel: '取消执行',
+    retry: '重试',
+    commandGenerated: '生成的命令',
+    output: '执行输出',
+    error: '错误信息',
+    confirmExecution: '确认执行',
+    confirmMessage: '即将执行以下命令，请确认：',
+    dangerWarning: '⚠️ 警告：此命令可能会修改系统文件或设置，请谨慎确认',
+    execute: '执行',
+    exitCode: '退出码'
   }
 }

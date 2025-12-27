@@ -292,5 +292,24 @@ export default {
   },
   welcome: {
     message: 'Hello! I am PolarisDesk, I can help you analyze images, videos and answer questions. You can take screenshots, upload images/videos or chat with me directly.'
+  },
+  command: {
+    title: 'AI Command Line',
+    description: 'AI understands intent and executes system commands',
+    inputPlaceholder: 'Describe what you want to do, AI will generate and execute commands...',
+    generating: 'Generating command...',
+    executing: 'Executing command...',
+    success: 'Execution successful',
+    failed: 'Execution failed',
+    cancel: 'Cancel execution',
+    retry: 'Retry',
+    commandGenerated: 'Generated command',
+    output: 'Output',
+    error: 'Error',
+    confirmExecution: 'Confirm Execution',
+    confirmMessage: 'About to execute the following command, please confirm:',
+    dangerWarning: '⚠️ Warning: This command may modify system files or settings, please confirm carefully',
+    execute: 'Execute',
+    exitCode: 'Exit code'
   }
 }

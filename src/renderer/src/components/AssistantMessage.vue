@@ -12,6 +12,9 @@
       </div>
     </div>
 
+    <!-- 命令块 - 移到回复内容下面 -->
+    <CommandBlock :key="`commands-${message.id}-${commandBlocks.length}`" :commands="commandBlocks" />
+
     <!-- 答案块 -->
     <AnswerBlock v-if="answerBoxes.length > 0" :answers="answerBoxes" />
 
@@ -23,11 +26,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import MarkdownRenderer from './MarkdownRenderer.vue'
 import ThinkBlock from './ThinkBlock.vue'
 import AnswerBlock from './AnswerBlock.vue'
+import CommandBlock from './CommandBlock.vue'
 import { formatMessageTime, formatDetailedTime } from '../utils/timeFormat'
+import { extractCommands, removeCommandBlocks } from '../utils/commandExtractor'
 
 interface Message {
   id: string
@@ -53,9 +58,37 @@ const thinkContent = computed(() => {
   return props.extractThinkContent(props.message.content || '')
 })
 
+const commandBlocks = computed(() => {
+  const commands = extractCommands(props.message.content || '')
+  
+  // 输出调试信息到控制台
+  if (props.message.content) {
+    console.group('🤖 AI 回复消息')
+    console.log('消息 ID:', props.message.id)
+    console.log('完整内容:', props.message.content)
+    console.log('提取的命令:', commands)
+    console.log('是否包含 <command> 标签:', props.message.content.includes('<command>'))
+    console.groupEnd()
+  }
+  
+  return commands
+})
+
+// 监听内容变化，确保响应式更新
+watch(() => props.message.content, (newContent, oldContent) => {
+  if (newContent && newContent.includes('<command>')) {
+    console.log('🔄 检测到命令标签，触发更新')
+    console.log('旧内容长度:', oldContent?.length || 0)
+    console.log('新内容长度:', newContent.length)
+    console.log('命令数量:', extractCommands(newContent).length)
+  }
+}, { immediate: true })
+
 const mainContent = computed(() => {
-  const withoutThink = props.removeThinkContent(props.message.content || '')
-  return props.removeAnswerBoxes(withoutThink)
+  let content = props.removeThinkContent(props.message.content || '')
+  content = removeCommandBlocks(content)
+  content = props.removeAnswerBoxes(content)
+  return content
 })
 
 const answerBoxes = computed(() => {

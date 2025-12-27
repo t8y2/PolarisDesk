@@ -2,7 +2,7 @@ import { nextTick, onUnmounted } from 'vue'
 import { useDialog, useMessage } from 'naive-ui'
 import { modelAPI } from '../utils/modelAPI'
 import { useChatStore, type ChatMessage } from '../stores/chatStore'
-import { useSettingsStore } from '../stores/settingsStore'
+import { useSettingsStore, buildSystemPrompt } from '../stores/settingsStore'
 import { useTextProcessing } from './useTextProcessing'
 import { useFileProcessing } from './useFileProcessing'
 import { useScreenshot } from './useScreenshot'
@@ -289,6 +289,17 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
         contentLength: fullResponse.length,
         hasThinking: thinkingContent.length > 0
       })
+
+      // 输出最终完整内容到控制台
+      console.group('✅ AI 流式输出完成')
+      console.log('消息 ID:', assistantMessageId)
+      console.log('总长度:', fullResponse.length)
+      console.log('思考内容长度:', thinkingContent.length)
+      console.log('回复内容长度:', responseContent.length)
+      console.log('完整内容:', fullResponse)
+      console.log('包含 <command> 标签:', fullResponse.includes('<command>'))
+      console.groupEnd()
+
       chatStore.saveToStorage()
 
       // 设置生成状态为false
@@ -362,8 +373,11 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
       }>
     }> = []
 
-    // 添加系统提示词（如果有的话）
-    const systemPrompt = settingsStore.settings.systemPrompt
+    // 添加系统提示词（基础提示词 + 用户自定义）
+    const systemPrompt = buildSystemPrompt(
+      settingsStore.settings.systemPrompt,
+      settingsStore.settings.language
+    )
     if (systemPrompt.trim()) {
       messages.push({
         role: 'system',

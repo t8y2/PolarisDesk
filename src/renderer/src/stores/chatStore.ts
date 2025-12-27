@@ -197,6 +197,15 @@ export const useChatStore = defineStore(STORE_ID, () => {
     messages.value.push(message)
     saveToStorage()
 
+    // 输出到控制台用于调试
+    console.group('💬 新增 AI 消息')
+    console.log('消息 ID:', message.id)
+    console.log('内容长度:', content.length)
+    console.log('完整内容:', content)
+    console.log('包含 <command> 标签:', content.includes('<command>'))
+    console.log('包含 <think> 标签:', content.includes('<think>'))
+    console.groupEnd()
+
     // 只在消息内容不为空时同步
     if (content.trim().length > 0) {
       syncMessageToOtherWindows('assistant', message)
@@ -208,7 +217,16 @@ export const useChatStore = defineStore(STORE_ID, () => {
   const updateAssistantMessageContent = (messageId: string, content: string): void => {
     const messageIndex = messages.value.findIndex(msg => msg.id === messageId)
     if (messageIndex !== -1) {
-      messages.value[messageIndex].content = content
+      // 使用 Vue 3 的响应式方式更新对象属性
+      messages.value[messageIndex] = {
+        ...messages.value[messageIndex],
+        content: content
+      }
+
+      // 输出更新日志（仅在内容较长时输出，避免流式输出时刷屏）
+      if (content.length > 100 && content.length % 500 < 50) {
+        console.log('📝 更新 AI 消息:', messageId, '长度:', content.length)
+      }
     }
   }
 
