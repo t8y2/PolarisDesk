@@ -21,7 +21,7 @@ const languageOptions = [
   { label: 'English', value: 'en' }
 ]
 
-const handleLanguageChange = (value: string) => {
+const handleLanguageChange = (value: string): void => {
   switchLanguage(value as 'zh' | 'en')
 }
 </script>

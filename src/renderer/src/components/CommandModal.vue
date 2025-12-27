@@ -5,7 +5,7 @@
 
       <div class="command-input-section">
         <n-input v-model:value="userInput" type="textarea" :placeholder="t('command.inputPlaceholder')" :autosize="{ minRows: 3, maxRows: 6 }" @keydown="handleKeyDown" />
-        <n-button type="primary" :loading="isGenerating || isExecuting" :disabled="!userInput.trim()" @click="handleGenerate" class="mt-3">
+        <n-button type="primary" :loading="isGenerating || isExecuting" :disabled="!userInput.trim()" class="mt-3" @click="handleGenerate">
           {{ isGenerating ? t('command.generating') : isExecuting ? t('command.executing') : t('common.confirm') }}
         </n-button>
       </div>
@@ -14,7 +14,7 @@
         <div class="result-header">
           <span class="label">{{ t('command.commandGenerated') }}</span>
           <n-button-group size="small">
-            <n-button @click="handleExecute" :loading="isExecuting" :disabled="isExecuting">
+            <n-button :loading="isExecuting" :disabled="isExecuting" @click="handleExecute">
               {{ t('command.execute') }}
             </n-button>
             <n-button @click="handleRetry">{{ t('command.retry') }}</n-button>
@@ -71,14 +71,14 @@ const isExecuting = ref(false)
 const exitCode = ref<number | null>(null)
 const rawAIOutput = ref('') // 添加原始输出
 
-const handleKeyDown = (e: KeyboardEvent) => {
+const handleKeyDown = (e: KeyboardEvent): void => {
   if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
     e.preventDefault()
     handleGenerate()
   }
 }
 
-const handleGenerate = async () => {
+const handleGenerate = async (): Promise<void> => {
   if (!userInput.value.trim()) return
 
   isGenerating.value = true
@@ -229,7 +229,7 @@ const handleGenerate = async () => {
   }
 }
 
-const handleExecute = () => {
+const handleExecute = (): void => {
   if (!generatedCommand.value) return
 
   const dangerousPatterns = [/rm\s+-rf\s+\//, /format\s+/i, /del\s+\/[sf]/i, /shutdown/i, /reboot/i]
@@ -247,7 +247,7 @@ const handleExecute = () => {
   })
 }
 
-const executeCommand = async () => {
+const executeCommand = async (): Promise<void> => {
   isExecuting.value = true
   commandOutput.value = ''
   commandError.value = ''
@@ -258,7 +258,18 @@ const executeCommand = async () => {
       throw new Error('命令执行功能不可用')
     }
 
-    const result = await (window.api as any).command.execute(generatedCommand.value)
+    const result = await (
+      window.api as typeof window.api & {
+        command: {
+          execute: (cmd: string) => Promise<{
+            success: boolean
+            output: string
+            error?: string
+            exitCode?: number
+          }>
+        }
+      }
+    ).command.execute(generatedCommand.value)
 
     exitCode.value = result.exitCode || 0
     commandOutput.value = result.output || ''
@@ -277,7 +288,7 @@ const executeCommand = async () => {
   }
 }
 
-const handleRetry = () => {
+const handleRetry = (): void => {
   handleGenerate()
 }
 </script>

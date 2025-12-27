@@ -3,13 +3,17 @@ import { useI18n } from 'vue-i18n'
 import { useSettingsStore } from '../stores/settingsStore'
 import { useChatStore } from '../stores/chatStore'
 
-export function useLanguage() {
+export function useLanguage(): {
+  locale: import('vue').Ref<string>
+  initLanguage: () => void
+  switchLanguage: (lang: 'zh' | 'en') => Promise<void>
+} {
   const { locale } = useI18n()
   const settingsStore = useSettingsStore()
   const chatStore = useChatStore()
 
   // 初始化语言
-  const initLanguage = () => {
+  const initLanguage = (): void => {
     locale.value = settingsStore.settings.language
   }
 
@@ -24,7 +28,7 @@ export function useLanguage() {
   )
 
   // 切换语言
-  const switchLanguage = async (lang: 'zh' | 'en') => {
+  const switchLanguage = async (lang: 'zh' | 'en'): Promise<void> => {
     await settingsStore.updateSetting('language', lang)
   }
 

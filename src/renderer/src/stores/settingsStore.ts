@@ -118,9 +118,10 @@ export function buildSystemPrompt(userPrompt: string, language: 'zh' | 'en' = 'z
   const osInfo = getOSInfo()
 
   // 添加操作系统信息
-  const osInfoText = language === 'en'
-    ? `\n## System Environment\n\n- **Operating System**: ${osInfo.platform}\n- **Important**: When generating commands, only provide commands suitable for ${osInfo.platform}. Do not include commands for other operating systems.`
-    : `\n## 系统环境\n\n- **操作系统**: ${osInfo.description}\n- **重要提示**: 生成命令时，只提供适用于 ${osInfo.description} 的命令，不要包含其他操作系统的命令。`
+  const osInfoText =
+    language === 'en'
+      ? `\n## System Environment\n\n- **Operating System**: ${osInfo.platform}\n- **Important**: When generating commands, only provide commands suitable for ${osInfo.platform}. Do not include commands for other operating systems.`
+      : `\n## 系统环境\n\n- **操作系统**: ${osInfo.description}\n- **重要提示**: 生成命令时，只提供适用于 ${osInfo.description} 的命令，不要包含其他操作系统的命令。`
 
   if (!trimmedUserPrompt) {
     return basePrompt + osInfoText

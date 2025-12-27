@@ -30,14 +30,15 @@ export class CommandExecutorService {
         output: output.trim(),
         exitCode: 0
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { stdout?: string; stderr?: string; message?: string; code?: number }
       logger.error(`命令执行失败: ${command}`, error)
 
       return {
         success: false,
-        output: error.stdout || '',
-        error: error.stderr || error.message,
-        exitCode: error.code || 1
+        output: err.stdout || '',
+        error: err.stderr || err.message || 'Unknown error',
+        exitCode: err.code || 1
       }
     }
   }

@@ -84,12 +84,18 @@ const executionStates = ref<
 // 转换为命令对象 - 响应式计算
 const commands = computed<Command[]>(() => {
   // 使用 refreshTrigger 来强制重新计算（通过访问它的值）
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _ = refreshTrigger.value
-  
+  void refreshTrigger.value
+
   return props.commands.map(cmd => {
-    const execState = executionStates.value.get(cmd.command) || {}
-    
+    const execState = executionStates.value.get(cmd.command) || {
+      executing: false,
+      executed: undefined,
+      dismissed: undefined,
+      exitCode: undefined,
+      output: undefined,
+      error: undefined
+    }
+
     // 优先使用 executionStates 中的状态，然后是 props.commands 中的持久化状态
     return {
       ...cmd,
@@ -108,37 +114,40 @@ const commands = computed<Command[]>(() => {
 watch(
   () => props.commands,
   newCommands => {
-    console.log('🔄 CommandBlock: 命令列表更新', newCommands.map(cmd => ({
-      command: cmd.command,
-      executed: cmd.executed,
-      dismissed: cmd.dismissed
-    })))
+    console.log(
+      '🔄 CommandBlock: 命令列表更新',
+      newCommands.map(cmd => ({
+        command: cmd.command,
+        executed: cmd.executed,
+        dismissed: cmd.dismissed
+      }))
+    )
   },
   { immediate: true, deep: true }
 )
 
 // 更新消息中的命令状态
-const updateMessageCommandState = (commandText: string, state: Partial<Omit<CommandState, 'command'>>) => {
+const updateMessageCommandState = (commandText: string, state: Partial<Omit<CommandState, 'command'>>): void => {
   const messageIndex = chatStore.messages.findIndex(msg => msg.id === props.messageId)
   if (messageIndex !== -1) {
     const currentMessage = chatStore.messages[messageIndex]
     const updatedContent = updateCommandState(currentMessage.content || '', commandText, state)
-    
+
     // 创建新的消息对象以触发响应式更新
     const newMessage = {
       ...currentMessage,
       content: updatedContent
     }
-    
+
     // 使用 splice 替换消息以确保响应式更新
     chatStore.messages.splice(messageIndex, 1, newMessage)
-    
+
     // 保存到存储
     chatStore.saveToStorage()
-    
+
     // 强制刷新 commands 计算属性
     refreshTrigger.value++
-    
+
     // 输出调试信息
     console.log('✅ 命令状态已更新:', {
       command: commandText,
@@ -152,7 +161,7 @@ const updateMessageCommandState = (commandText: string, state: Partial<Omit<Comm
   }
 }
 
-const executeCommand = (index: number) => {
+const executeCommand = (index: number): void => {
   const cmd = commands.value[index]
 
   // 危险命令检测
@@ -171,10 +180,10 @@ const executeCommand = (index: number) => {
   })
 }
 
-const doExecute = async (index: number) => {
+const doExecute = async (index: number): Promise<void> => {
   const cmd = commands.value[index]
   const cmdText = cmd.command
-  
+
   console.log('🚀 开始执行命令:', cmdText, '索引:', index)
 
   // 创建 AbortController 用于取消
@@ -185,7 +194,7 @@ const doExecute = async (index: number) => {
     executing: true,
     abortController
   })
-  
+
   console.log('⏳ 执行状态已设置为 executing')
 
   try {
@@ -211,7 +220,7 @@ const doExecute = async (index: number) => {
     }
 
     const result = await api.command.execute(cmdText)
-    
+
     console.log('✅ 命令执行完成:', result)
 
     // 再次检查是否已被取消
@@ -227,10 +236,10 @@ const doExecute = async (index: number) => {
       output: result.output || '',
       error: result.error || ''
     })
-    
+
     // 强制刷新界面
     refreshTrigger.value++
-    
+
     console.log('📝 准备更新消息状态...')
 
     // 更新消息中的命令状态（持久化）
@@ -240,11 +249,11 @@ const doExecute = async (index: number) => {
       output: result.output || '',
       error: result.error || ''
     })
-    
+
     console.log('✨ 状态更新完成')
   } catch (error) {
     const errorMsg = (error as Error).message
-    
+
     console.error('❌ 命令执行失败:', errorMsg)
 
     // 清除执行状态，但保留错误信息
@@ -254,7 +263,7 @@ const doExecute = async (index: number) => {
       exitCode: 1,
       error: errorMsg
     })
-    
+
     // 强制刷新界面
     refreshTrigger.value++
 
@@ -267,7 +276,7 @@ const doExecute = async (index: number) => {
   }
 }
 
-const cancelExecution = (index: number) => {
+const cancelExecution = (index: number): void => {
   const cmd = commands.value[index]
   const cmdText = cmd.command
   const state = executionStates.value.get(cmdText)
@@ -282,7 +291,7 @@ const cancelExecution = (index: number) => {
       exitCode: 130,
       error: '用户中止执行'
     })
-    
+
     // 强制刷新界面
     refreshTrigger.value++
 
@@ -295,16 +304,16 @@ const cancelExecution = (index: number) => {
   }
 }
 
-const dismissCommand = (index: number) => {
+const dismissCommand = (index: number): void => {
   const cmd = commands.value[index]
   const cmdText = cmd.command
-  
+
   // 更新本地状态
   executionStates.value.set(cmdText, {
     executing: false,
     dismissed: true
   })
-  
+
   // 强制刷新界面
   refreshTrigger.value++
 
@@ -315,14 +324,14 @@ const dismissCommand = (index: number) => {
 }
 
 // 自动执行命令
-const autoExecuteCommands = () => {
+const autoExecuteCommands = (): void => {
   if (!settingsStore.settings.autoExecuteCommands) {
     return
   }
 
   // 找到所有未执行且未取消的命令
   const commandsToExecute: number[] = []
-  
+
   commands.value.forEach((cmd, index) => {
     // 检查命令是否已经执行过、正在执行或已取消
     if (cmd.executed || cmd.executing || cmd.dismissed) {
