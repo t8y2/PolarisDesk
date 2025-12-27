@@ -670,6 +670,11 @@ function handleStorageClearEvent(event: StorageEvent): void {
 }
 
 /* 滚动容器样式 */
+.flex-1.overflow-y-auto,
+.virtual-scroller {
+  scrollbar-gutter: stable;
+}
+
 .flex-1.overflow-y-auto::-webkit-scrollbar,
 .virtual-scroller::-webkit-scrollbar {
   width: 6px;
