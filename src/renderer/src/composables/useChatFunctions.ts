@@ -128,8 +128,8 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
       }
     }
 
-    // 如果自动截图成功，使用截图数据
-    const finalImageData = autoScreenshotData || imageData
+    // 优先使用用户提供的图片，只有在没有用户图片时才使用自动截图
+    const finalImageData = imageData || autoScreenshotData
 
     // 安全地处理当前请求控制器
     if (currentRequestController) {
