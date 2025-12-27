@@ -69,6 +69,8 @@ Supports custom endpoints compatible with OpenAI API format
 
 ## 🚀 Quick Start
 
+> 💡 **Downloading the installer?** Check out the [Installation Guide](docs/INSTALLATION.md) for detailed installation steps and troubleshooting.
+
 ### Requirements
 
 - Node.js >= 18
@@ -158,6 +160,42 @@ Application config files are located in user data directory:
 - **Windows**: `%APPDATA%/polaris-desk`
 - **macOS**: `~/Library/Application Support/polaris-desk`
 - **Linux**: `~/.config/polaris-desk`
+
+## 🍎 macOS Installation Guide
+
+### Fixing "App is Damaged" Error
+
+Since the app is not notarized by Apple, you may see a "damaged and can't be opened" message on first launch. This is a normal security prompt. Here's how to fix it:
+
+#### Method 1: Terminal Command (Recommended)
+
+```bash
+# After downloading the .dmg file, open Terminal and run:
+xattr -cr /Applications/PolarisDesk.app
+```
+
+#### Method 2: System Settings
+
+1. Open **System Settings** > **Privacy & Security**
+2. Find the blocked app notification at the bottom
+3. Click **Open Anyway**
+
+#### Method 3: Right-Click Open
+
+1. Find PolarisDesk.app in Finder
+2. Hold **Control** key and click the app icon
+3. Select **Open**
+4. Click **Open** in the dialog
+
+### Why Does This Happen?
+
+- The app is not code-signed or notarized by Apple
+- This is macOS Gatekeeper's security mechanism
+- The app itself is safe - the source code is fully open source
+
+### Future Plans
+
+We plan to add code signing and notarization in future releases to eliminate this issue.
 
 ## 🤝 Contributing
 

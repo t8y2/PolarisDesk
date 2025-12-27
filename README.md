@@ -69,6 +69,8 @@ PolarisDesk（北极星桌面）寓意如同北极星为航海者指引方向一
 
 ## 🚀 快速开始
 
+> 💡 **下载安装包？** 请查看 [安装指南](docs/INSTALLATION.md) 了解详细的安装步骤和常见问题解决方案。
+
 ### 环境要求
 
 - Node.js >= 18
@@ -158,6 +160,42 @@ PolarisDesk/
 - **Windows**: `%APPDATA%/polaris-desk`
 - **macOS**: `~/Library/Application Support/polaris-desk`
 - **Linux**: `~/.config/polaris-desk`
+
+## 🍎 macOS 安装说明
+
+### 解决"应用已损坏"问题
+
+由于应用未经过 Apple 公证，首次打开时可能会提示"已损坏，无法打开"。这是正常的安全提示，请按以下步骤解决：
+
+#### 方法 1: 使用终端命令（推荐）
+
+```bash
+# 下载 .dmg 文件后，打开终端执行：
+xattr -cr /Applications/PolarisDesk.app
+```
+
+#### 方法 2: 系统设置
+
+1. 打开 **系统设置** > **隐私与安全性**
+2. 在底部找到被阻止的应用提示
+3. 点击 **仍要打开**
+
+#### 方法 3: 右键打开
+
+1. 在 Finder 中找到 PolarisDesk.app
+2. 按住 **Control** 键点击应用图标
+3. 选择 **打开**
+4. 在弹出的对话框中点击 **打开**
+
+### 为什么会出现这个问题？
+
+- 应用未经过 Apple 的代码签名和公证流程
+- 这是 macOS Gatekeeper 的安全机制
+- 应用本身是安全的，源代码完全开源
+
+### 未来计划
+
+我们计划在后续版本中添加代码签名和公证，届时将不再出现此问题。
 
 ## 🤝 贡献
 
