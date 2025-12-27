@@ -142,6 +142,7 @@ export interface AppSettings {
   defaultExpandThink: boolean
   saveRecordingLocally: boolean
   autoExecuteCommands: boolean
+  autoScreenshot: boolean
   language: 'zh' | 'en'
   theme: 'dark' | 'light'
 
@@ -167,6 +168,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   defaultExpandThink: true,
   saveRecordingLocally: false,
   autoExecuteCommands: false,
+  autoScreenshot: false,
   language: 'zh',
   theme: 'dark',
 

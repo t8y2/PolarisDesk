@@ -98,6 +98,8 @@ export default {
     defaultExpandThink: '默认展开思考过程',
     saveRecordingLocally: '本地保存录音',
     autoExecuteCommands: '静默执行命令',
+    autoScreenshot: '自动截图',
+    autoScreenshotTip: '开启后，发送消息时如果没有附带任何媒体资源，将自动截取整个屏幕',
 
     // API 配置
     connectionSettings: '连接设置',

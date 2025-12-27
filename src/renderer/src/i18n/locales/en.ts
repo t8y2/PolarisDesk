@@ -98,6 +98,8 @@ export default {
     defaultExpandThink: 'Expand Thinking Process by Default',
     saveRecordingLocally: 'Save Recording Locally',
     autoExecuteCommands: 'Auto Execute Commands',
+    autoScreenshot: 'Auto Screenshot',
+    autoScreenshotTip: 'When enabled, automatically capture the entire screen when sending a message without any media attachments',
 
     // API configuration
     connectionSettings: 'Connection Settings',

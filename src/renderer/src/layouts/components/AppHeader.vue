@@ -180,6 +180,14 @@
                 <n-form-item :label="t('settings.autoExecuteCommands')">
                   <n-switch v-model:value="localSettings.autoExecuteCommands" :rail-style="switchRailStyle" />
                 </n-form-item>
+                <n-form-item :label="t('settings.autoScreenshot')">
+                  <n-tooltip trigger="hover" placement="top" :show-arrow="false" :delay="300">
+                    <template #trigger>
+                      <n-switch v-model:value="localSettings.autoScreenshot" :rail-style="switchRailStyle" />
+                    </template>
+                    {{ t('settings.autoScreenshotTip') }}
+                  </n-tooltip>
+                </n-form-item>
               </div>
               <div class="grid grid-cols-2 gap-x-4 gap-y-2 ml-8">
                 <n-form-item :label="t('settings.userMessageWidth')">

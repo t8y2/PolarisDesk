@@ -113,6 +113,24 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
       return
     }
 
+    // 自动截图功能：如果开启了自动截图且没有任何媒体资源，则自动截取整屏
+    let autoScreenshotData: string | null = null
+    if (settingsStore.settings.autoScreenshot && !hasMedia) {
+      try {
+        logger.info('自动截图已开启，正在截取整屏...')
+        if (window.api && 'quickScreenshot' in window.api) {
+          autoScreenshotData = await (window.api as { quickScreenshot: () => Promise<string> }).quickScreenshot()
+          logger.success('自动截图完成')
+        }
+      } catch (error) {
+        logger.warn('自动截图失败，继续发送消息', error)
+        // 截图失败不影响消息发送
+      }
+    }
+
+    // 如果自动截图成功，使用截图数据
+    const finalImageData = autoScreenshotData || imageData
+
     // 安全地处理当前请求控制器
     if (currentRequestController) {
       currentRequestController.abort()
@@ -122,7 +140,7 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
     currentRequestController = new AbortController()
 
     const mediaData: MediaData = {
-      image: imageData || undefined,
+      image: finalImageData || undefined,
       video: videoData || undefined,
       videoBase64: videoBase64 || undefined,
       pdfImages: pdfImages || undefined,
@@ -162,7 +180,8 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
       logger.stream('开始流式对话', {
         provider: settingsStore.settings.provider,
         model: settingsStore.settings.model,
-        hasMedia: !!(videoBase64 || pdfImages || pptImages || wordImages || imageData)
+        hasMedia: !!(videoBase64 || pdfImages || pptImages || wordImages || finalImageData),
+        autoScreenshot: !!autoScreenshotData
       })
 
       await handleStreamResponse(scrollToBottom)

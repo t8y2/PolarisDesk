@@ -208,16 +208,23 @@ export class IpcHandlers {
       try {
         logger.ipc('执行快速截图')
         const allWindows = BrowserWindow.getAllWindows()
-        const windowsVisibility = allWindows.map(win => win.isVisible())
 
+        // 保存窗口状态（透明度和位置）
+        const windowStates = allWindows.map(win => ({
+          opacity: win.getOpacity(),
+          bounds: win.getBounds(),
+          isVisible: win.isVisible()
+        }))
+
+        // 将所有可见窗口设置为完全透明，而不是隐藏
         allWindows.forEach(win => {
           if (win.isVisible()) {
-            win.hide()
+            win.setOpacity(0)
           }
         })
 
-        // 给系统一点时间来完成窗口隐藏
-        await new Promise(resolve => setTimeout(resolve, 200))
+        // 给系统一点时间来完成透明度变化（比隐藏窗口需要的时间短）
+        await new Promise(resolve => setTimeout(resolve, 50))
 
         const display = screen.getPrimaryDisplay()
         const { width, height } = display.size
@@ -227,10 +234,10 @@ export class IpcHandlers {
           thumbnailSize: { width, height }
         })
 
-        // 恢复窗口可见状态
+        // 恢复窗口透明度
         allWindows.forEach((win, index) => {
-          if (windowsVisibility[index]) {
-            win.show()
+          if (windowStates[index].isVisible) {
+            win.setOpacity(windowStates[index].opacity)
           }
         })
 
@@ -241,8 +248,13 @@ export class IpcHandlers {
         logger.success('快速截图完成')
         return sources[0].thumbnail.toDataURL()
       } catch (error) {
-        // 发生错误时确保窗口恢复显示
-        BrowserWindow.getAllWindows().forEach(win => win.show())
+        // 发生错误时确保窗口恢复透明度
+        const allWindows = BrowserWindow.getAllWindows()
+        allWindows.forEach(win => {
+          if (win.isVisible()) {
+            win.setOpacity(1)
+          }
+        })
         logger.error('快速截图失败', error)
         throw error
       }
@@ -255,29 +267,32 @@ export class IpcHandlers {
     // 添加快速截图功能
     ipcMain.handle('capture-screen', async () => {
       try {
-        // 保存当前所有窗口的可见状态
+        // 保存当前所有窗口的可见状态和透明度
         const allWindows = BrowserWindow.getAllWindows()
-        const windowsVisibility = allWindows.map(win => win.isVisible())
+        const windowStates = allWindows.map(win => ({
+          opacity: win.getOpacity(),
+          isVisible: win.isVisible()
+        }))
 
-        // 隐藏所有窗口
+        // 将所有可见窗口设置为完全透明
         allWindows.forEach(win => {
           if (win.isVisible()) {
-            win.hide()
+            win.setOpacity(0)
           }
         })
 
-        // 给系统一点时间来完成窗口隐藏
-        await new Promise(resolve => setTimeout(resolve, 200))
+        // 给系统一点时间来完成透明度变化
+        await new Promise(resolve => setTimeout(resolve, 50))
 
         const sources = await desktopCapturer.getSources({
           types: ['screen'],
           thumbnailSize: { width: 1920, height: 1080 }
         })
 
-        // 恢复窗口可见状态
+        // 恢复窗口透明度
         allWindows.forEach((win, index) => {
-          if (windowsVisibility[index]) {
-            win.show()
+          if (windowStates[index].isVisible) {
+            win.setOpacity(windowStates[index].opacity)
           }
         })
 
@@ -287,8 +302,12 @@ export class IpcHandlers {
         }
         throw new Error('No screen sources available')
       } catch (error) {
-        // 发生错误时确保窗口恢复显示
-        BrowserWindow.getAllWindows().forEach(win => win.show())
+        // 发生错误时确保窗口恢复透明度
+        BrowserWindow.getAllWindows().forEach(win => {
+          if (win.isVisible()) {
+            win.setOpacity(1)
+          }
+        })
         console.error('Error capturing screen:', error)
         throw error
       }
@@ -302,12 +321,20 @@ export class IpcHandlers {
           const windows = BrowserWindow.getAllWindows()
           const activeWindow = BrowserWindow.getFocusedWindow()
 
-          // 隐藏所有窗口
+          // 保存窗口状态
+          const windowStates = windows.map(win => ({
+            opacity: win.getOpacity(),
+            isVisible: win.isVisible()
+          }))
+
+          // 将所有窗口设置为完全透明
           windows.forEach(win => {
-            win.hide()
+            if (win.isVisible()) {
+              win.setOpacity(0)
+            }
           })
 
-          // 等待窗口隐藏完成
+          // 等待透明度变化完成
           setTimeout(async () => {
             try {
               // 获取屏幕截图作为参考
@@ -369,8 +396,12 @@ export class IpcHandlers {
                   console.log('原始相对坐标:', area)
                   console.log('转换后绝对坐标:', absoluteArea)
 
-                  // 只恢复原来活动的窗口
+                  // 恢复原来活动窗口的透明度
                   if (activeWindow && !activeWindow.isDestroyed()) {
+                    const activeIndex = windows.indexOf(activeWindow)
+                    if (activeIndex !== -1) {
+                      activeWindow.setOpacity(windowStates[activeIndex].opacity)
+                    }
                     activeWindow.show()
                     activeWindow.focus()
                   }
@@ -378,8 +409,11 @@ export class IpcHandlers {
                   resolve({ fullImage, area: absoluteArea })
                 } catch (error) {
                   // 如果原窗口有问题，恢复所有窗口
-                  windows.forEach(win => {
-                    if (!win.isDestroyed()) win.show()
+                  windows.forEach((win, index) => {
+                    if (!win.isDestroyed() && windowStates[index].isVisible) {
+                      win.setOpacity(windowStates[index].opacity)
+                      win.show()
+                    }
                   })
                   reject(error)
                 }
@@ -387,8 +421,12 @@ export class IpcHandlers {
 
               const handleSelectionCancelled = (): void => {
                 selectionWindow.close()
-                // 只恢复原来活动的窗口
+                // 恢复原来活动窗口的透明度
                 if (activeWindow && !activeWindow.isDestroyed()) {
+                  const activeIndex = windows.indexOf(activeWindow)
+                  if (activeIndex !== -1) {
+                    activeWindow.setOpacity(windowStates[activeIndex].opacity)
+                  }
                   activeWindow.show()
                   activeWindow.focus()
                 }
@@ -403,20 +441,27 @@ export class IpcHandlers {
               selectionWindow.on('closed', () => {
                 ipcMain.removeListener('area-selected', handleAreaSelected)
                 ipcMain.removeListener('area-selection-cancelled', handleSelectionCancelled)
-                // 只恢复原来活动的窗口
+                // 恢复原来活动窗口的透明度
                 if (activeWindow && !activeWindow.isDestroyed()) {
+                  const activeIndex = windows.indexOf(activeWindow)
+                  if (activeIndex !== -1) {
+                    activeWindow.setOpacity(windowStates[activeIndex].opacity)
+                  }
                   activeWindow.show()
                   activeWindow.focus()
                 }
               })
             } catch (error) {
               // 出错时恢复所有窗口
-              windows.forEach(win => {
-                if (!win.isDestroyed()) win.show()
+              windows.forEach((win, index) => {
+                if (!win.isDestroyed() && windowStates[index].isVisible) {
+                  win.setOpacity(windowStates[index].opacity)
+                  win.show()
+                }
               })
               reject(error)
             }
-          }, 300)
+          }, 100)
         })
       } catch (error) {
         console.error('区域截图失败:', error)
