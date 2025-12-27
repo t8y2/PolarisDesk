@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'docs-site/**'
+      - '.github/workflows/deploy-docs.yml'
 
 permissions:
   contents: read
@@ -30,11 +33,11 @@ jobs:
           node-version: 18
           cache: pnpm
 
-      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+      - name: Install VitePress
+        run: pnpm add -D vitepress
 
       - name: Build docs
-        run: pnpm docs:build
+        run: pnpm vitepress build docs-site
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
