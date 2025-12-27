@@ -182,22 +182,7 @@ watch(
 )
 
 async function handleInputPaste(event: ClipboardEvent): Promise<void> {
-  await handlePaste(event, (file: File) => {
-    processFile(
-      file,
-      (data: string | null) => chatStore.setPendingMedia({ image: data || undefined }),
-      (data: string | null) => chatStore.setPendingMedia({ video: data || undefined }),
-      (data: string | null) => chatStore.setPendingMedia({ videoBase64: data || undefined }),
-      (data: string[] | null) => chatStore.setPendingMedia({ pdfImages: data || undefined }),
-      (name: string | null) => chatStore.setPendingMedia({ pdfName: name || undefined }),
-      (data: string[] | null) => chatStore.setPendingMedia({ pptImages: data || undefined }),
-      (name: string | null) => chatStore.setPendingMedia({ pptName: name || undefined }),
-      (totalPages: number | null) => chatStore.setPendingMedia({ pptTotalPages: totalPages || undefined }),
-      (data: string[] | null) => chatStore.setPendingMedia({ wordImages: data || undefined }),
-      (name: string | null) => chatStore.setPendingMedia({ wordName: name || undefined }),
-      (totalPages: number | null) => chatStore.setPendingMedia({ wordTotalPages: totalPages || undefined })
-    )
-  })
+  await handlePaste(event, (file: File) => handleFileUpload(file))
 }
 
 function handleScroll(): void {
@@ -321,96 +306,100 @@ function uploadFile(): void {
   // 允许所有模型上传文件
 }
 
-async function handleFileSelect(event: Event): Promise<void> {
-  const file = (event.target as HTMLInputElement).files?.[0]
-  if (!file) return
-  const maxSize = 50 * 1024 * 1024
-  if (file.size > maxSize) {
-    message.error(t('chatView.fileSizeExceeded50MB'))
-    ;(event.target as HTMLInputElement).value = ''
+// 统一的媒体设置函数
+function setMediaData(type: 'image' | 'video' | 'pdf' | 'ppt' | 'word', data: string | string[], extra?: { videoBase64?: string; fileName?: string; totalPages?: number }): void {
+  const mediaMap = {
+    image: { image: data as string },
+    video: { video: data as string, videoBase64: extra?.videoBase64 },
+    pdf: { pdfImages: data as string[], pdfName: extra?.fileName },
+    ppt: { pptImages: data as string[], pptName: extra?.fileName, pptTotalPages: extra?.totalPages },
+    word: { wordImages: data as string[], wordName: extra?.fileName, wordTotalPages: extra?.totalPages }
+  }
+  chatStore.setPendingMedia(mediaMap[type])
+}
+
+// 文件大小验证
+function validateFileSize(file: File): boolean {
+  const sizeMap = {
+    image: { max: 10 * 1024 * 1024, error: 'chatView.imageSizeExceeded10MB' },
+    video: { max: 20 * 1024 * 1024, error: 'chatView.videoSizeExceeded20MB' },
+    default: { max: 50 * 1024 * 1024, error: 'chatView.fileSizeExceeded50MB' }
+  }
+  
+  const type = file.type.startsWith('image/') ? 'image' : file.type.startsWith('video/') ? 'video' : 'default'
+  const { max, error } = sizeMap[type]
+  
+  if (file.size > max) {
+    message.error(t(error))
+    return false
+  }
+  return true
+}
+
+// 处理简单文件（图片/视频）
+async function handleSimpleFile(file: File): Promise<void> {
+  const isImage = file.type.startsWith('image/')
+  const type = isImage ? 'image' : 'video'
+  
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = e => {
+      const result = e.target?.result as string
+      setMediaData(type, result, isImage ? undefined : { videoBase64: result })
+      message.success(t(`chatView.${type}UploadSuccess`))
+      resolve()
+    }
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })
+}
+
+// 统一的文件处理函数
+async function handleFileUpload(file: File, resetInput?: () => void): Promise<void> {
+  if (!validateFileSize(file)) {
+    resetInput?.()
     return
   }
+
   try {
     isFileUploading.value = true
-    if (file.type.startsWith('image/')) {
-      const imageMaxSize = 10 * 1024 * 1024
-      if (file.size > imageMaxSize) {
-        message.error(t('chatView.imageSizeExceeded10MB'))
-        ;(event.target as HTMLInputElement).value = ''
-        return
-      }
-      const reader = new FileReader()
-      reader.onload = e => {
-        chatStore.setPendingMedia({
-          image: e.target?.result as string,
-          video: undefined,
-          videoBase64: undefined,
-          pdfImages: undefined,
-          pdfName: undefined,
-          pptImages: undefined,
-          pptName: undefined,
-          wordImages: undefined,
-          wordName: undefined
-        })
-        message.success(t('chatView.imageUploadSuccess'))
-        // 重置 file input
-        ;(event.target as HTMLInputElement).value = ''
-      }
-      reader.readAsDataURL(file)
-    } else if (file.type.startsWith('video/')) {
-      const videoMaxSize = 20 * 1024 * 1024
-      if (file.size > videoMaxSize) {
-        message.error(t('chatView.videoSizeExceeded20MB'))
-        ;(event.target as HTMLInputElement).value = ''
-        return
-      }
-      const reader = new FileReader()
-      reader.onload = e => {
-        const result = e.target?.result as string
-        chatStore.setPendingMedia({
-          video: result,
-          videoBase64: result,
-          image: undefined,
-          pdfImages: undefined,
-          pdfName: undefined,
-          pptImages: undefined,
-          pptName: undefined,
-          wordImages: undefined,
-          wordName: undefined
-        })
-        message.success(t('chatView.videoUploadSuccess'))
-        // 重置 file input
-        ;(event.target as HTMLInputElement).value = ''
-      }
-      reader.readAsDataURL(file)
-    } else if (file.type === 'application/pdf' || file.type === 'application/vnd.ms-powerpoint' || file.type === 'application/vnd.openxmlformats-officedocument.presentationml.presentation' || file.type === 'application/msword' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+    
+    if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
+      await handleSimpleFile(file)
+    } else if (['application/pdf', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(file.type)) {
       await processFile(
         file,
-        (data: string | null) => chatStore.setPendingMedia({ image: data || undefined }),
-        (data: string | null) => chatStore.setPendingMedia({ video: data || undefined }),
-        (data: string | null) => chatStore.setPendingMedia({ videoBase64: data || undefined }),
-        (data: string[] | null) => chatStore.setPendingMedia({ pdfImages: data || undefined }),
+        (data: string | null) => setMediaData('image', data || ''),
+        (data: string | null) => setMediaData('video', data || ''),
+        (data: string | null) => setMediaData('video', '', { videoBase64: data || undefined }),
+        (data: string[] | null) => setMediaData('pdf', data || []),
         (name: string | null) => chatStore.setPendingMedia({ pdfName: name || undefined }),
-        (data: string[] | null) => chatStore.setPendingMedia({ pptImages: data || undefined }),
+        (data: string[] | null) => setMediaData('ppt', data || []),
         (name: string | null) => chatStore.setPendingMedia({ pptName: name || undefined }),
         (totalPages: number | null) => chatStore.setPendingMedia({ pptTotalPages: totalPages || undefined }),
-        (data: string[] | null) => chatStore.setPendingMedia({ wordImages: data || undefined }),
+        (data: string[] | null) => setMediaData('word', data || []),
         (name: string | null) => chatStore.setPendingMedia({ wordName: name || undefined }),
         (totalPages: number | null) => chatStore.setPendingMedia({ wordTotalPages: totalPages || undefined })
       )
-      // 重置 file input
-      ;(event.target as HTMLInputElement).value = ''
     } else {
       message.error(t('chatView.unsupportedFileType'))
-      ;(event.target as HTMLInputElement).value = ''
     }
+    resetInput?.()
   } catch (error) {
     console.error('文件上传处理失败:', error)
     message.error(t('chatView.fileProcessFailed'))
-    ;(event.target as HTMLInputElement).value = ''
+    resetInput?.()
   } finally {
     isFileUploading.value = false
   }
+}
+
+async function handleFileSelect(event: Event): Promise<void> {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+  
+  await handleFileUpload(file, () => { input.value = '' })
 }
 
 function handleClearMedia(type: 'image' | 'video' | 'pdf' | 'ppt' | 'word'): void {
@@ -541,25 +530,19 @@ async function handleDrop(event: DragEvent): Promise<void> {
   event.stopPropagation()
   dragCounter = 0
   isDragOver.value = false
-  const files = event.dataTransfer?.files
-  if (!files || files.length === 0) return
-  const file = files[0]
+  
+  const file = event.dataTransfer?.files?.[0]
+  if (!file) return
+  
   const allowedTypes = ['image/', 'video/', 'application/pdf', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
   const isAllowedType = allowedTypes.some(type => file.type.startsWith(type) || file.type === type)
+  
   if (!isAllowedType) {
     message.error('不支持的文件类型，请拖入图片、视频、PDF、PPT或Word文件')
     return
   }
-  isFileUploading.value = true
-  try {
-    const mockEvent = { target: { files: [file], value: '' } } as unknown as Event
-    await handleFileSelect(mockEvent)
-  } catch (error) {
-    console.error('拖拽文件处理失败:', error)
-    message.error('文件处理失败，请重试')
-  } finally {
-    isFileUploading.value = false
-  }
+  
+  await handleFileUpload(file)
 }
 
 async function sendMessage(): Promise<void> {
