@@ -1,0 +1,148 @@
+name: Release Build
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            platform: mac
+          - os: windows-latest
+            platform: win
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build application
+        run: pnpm build:${{ matrix.platform }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # macOS 代码签名（可选，需要配置 secrets）
+          # CSC_LINK: ${{ secrets.MAC_CERT_BASE64 }}
+          # CSC_KEY_PASSWORD: ${{ secrets.MAC_CERT_PASSWORD }}
+          # APPLE_ID: ${{ secrets.APPLE_ID }}
+          # APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+          # APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+      - name: List dist directory (debug)
+        shell: bash
+        run: |
+          echo "Contents of dist directory:"
+          ls -la dist/ || echo "dist directory not found"
+
+      - name: Upload macOS artifacts
+        if: matrix.platform == 'mac'
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos-build
+          path: |
+            dist/*.dmg
+            dist/*.zip
+            dist/*-mac.zip
+            dist/*.pkg
+          if-no-files-found: warn
+
+      - name: Upload Windows artifacts
+        if: matrix.platform == 'win'
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-build
+          path: |
+            dist/*.exe
+            dist/*.msi
+            dist/*.zip
+          if-no-files-found: warn
+
+  create-release:
+    needs: release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download macOS artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: macos-build
+          path: ./artifacts/macos
+
+      - name: Download Windows artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: windows-build
+          path: ./artifacts/windows
+
+      - name: List artifacts (debug)
+        run: |
+          echo "macOS artifacts:"
+          ls -la ./artifacts/macos/ || echo "No macOS artifacts"
+          echo "Windows artifacts:"
+          ls -la ./artifacts/windows/ || echo "No Windows artifacts"
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ./artifacts/macos/*
+            ./artifacts/windows/*
+          draft: false
+          prerelease: ${{ contains(steps.version.outputs.VERSION, 'beta') || contains(steps.version.outputs.VERSION, 'alpha') }}
+          generate_release_notes: true
+          name: Release ${{ steps.version.outputs.VERSION }}
+          body: |
+            ## 🎉 PolarisDesk ${{ steps.version.outputs.VERSION }}
+            
+            ### 📦 下载 / Downloads
+            
+            - **macOS**: 下载 `.dmg` 文件
+            - **Windows**: 下载 `.exe` 文件
+            
+            ### 📝 更新日志 / Changelog
+            
+            查看下方自动生成的更新日志。
+            See the auto-generated release notes below.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
