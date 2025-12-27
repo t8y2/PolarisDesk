@@ -73,10 +73,13 @@
           </div>
         </div>
         <div ref="messagesContainer" class="flex-1 overflow-y-auto p-0.5 flex flex-col gap-1 scrollbar scrollbar-w-1 scrollbar-track-white/5 scrollbar-thumb-white/20 hover:scrollbar-thumb-white/30 relative">
-          <div v-for="(message, index) in chatStore.messages" :key="index" :class="[message.role === 'user' ? 'message-user' : 'message-ai']">
-            <!-- 用户消息 -->
-            <div v-if="message.role === 'user'" :title="t('floating.clickToSwitchMain')" @click="handleMessageClick(message)">
-              <div v-if="message.image" class="mb-1 relative media-hover-container">
+          <template v-for="(message, index) in chatStore.messages" :key="index">
+            <!-- 只有当消息有内容时才渲染 -->
+            <div v-if="message.role === 'user' || extractThinkContent(message.content || '').trim() || formatAnswerBoxes(removeThinkContent(message.content || '')).trim()" :class="[message.role === 'user' ? 'message-user' : 'message-ai']">
+              <!-- 用户消息 -->
+              <template v-if="message.role === 'user'">
+                <div :title="t('floating.clickToSwitchMain')" @click="handleMessageClick(message)">
+                  <div v-if="message.image" class="mb-1 relative media-hover-container">
                 <img :src="message.image" alt="截图" class="w-full h-auto rounded object-contain" />
                 <!-- 媒体操作按钮 -->
                 <div class="media-action-buttons">
@@ -184,13 +187,14 @@
                     </template>
                     {{ t('floating.reusePpt') }}
                   </n-tooltip>
+                  </div>
                 </div>
+                <div class="message-text">{{ message.content }}</div>
               </div>
-              <div class="message-text">{{ message.content }}</div>
-            </div>
+            </template>
 
             <!-- AI消息 -->
-            <div v-else>
+            <template v-else>
               <!-- 思考块 -->
               <div v-if="extractThinkContent(message.content || '').trim()" class="mb-1.5">
                 <n-collapse :default-expanded-names="settingsStore.settings.defaultExpandThink ? ['think'] : []" :arrow-placement="'right'" class="think-collapse-floating">
@@ -216,8 +220,9 @@
               <div v-if="formatAnswerBoxes(removeThinkContent(message.content || '')).trim()" class="message-text" :title="t('floating.clickToViewFull')" @click="handleMessageClick(message)">
                 {{ formatAnswerBoxes(removeThinkContent(message.content || '')) }}
               </div>
-            </div>
+            </template>
           </div>
+          </template>
 
           <!-- Loading 提示 -->
           <div v-if="chatStore.isLoading" class="mb-1.5 px-1.5 py-1 rounded text-2.75 bg-white/8 text-white border border-white/15 opacity-80">
