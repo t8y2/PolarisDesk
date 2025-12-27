@@ -67,6 +67,36 @@ PolarisDesk（北极星桌面）寓意如同北极星为航海者指引方向一
 - ⚡ **性能优化** - 代码分割、懒加载、虚拟滚动
 - 🌐 **国际化** - 支持中英文双语切换
 
+## 👥 加入社区
+
+欢迎加入 PolarisDesk 社区，与其他用户交流使用心得、分享经验、获取帮助！
+
+<div align="center">
+<table>
+  <tr>
+    <td align="center" width="33%">
+      <h3>💬 微信交流群</h3>
+      <img src="docs/images/community-wx.jpg" alt="微信群二维码" width="180"><br>
+      <sub>扫码添加好友<br>备注「PolarisDesk」拉你进群</sub>
+    </td>
+    <td align="center" width="33%">
+      <h3>👤 个人微信</h3>
+      <img src="docs/images/personal-wx.jpg" alt="个人微信二维码" width="180"><br>
+      <sub>扫码添加作者微信<br>交流反馈</sub>
+    </td>
+    <td align="center" width="33%">
+      <h3>🌐 Discord 社区</h3>
+      <br><br>
+      <a href="https://discord.gg/6XR6b73PrE">
+        <img src="https://img.shields.io/badge/Discord-加入我们-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord">
+      </a>
+      <br><br>
+      <sub>点击加入 Discord 服务器<br>国际化交流平台</sub>
+    </td>
+  </tr>
+</table>
+</div>
+
 ## 🚀 快速开始
 
 > 💡 **下载安装包？** 请查看 [安装指南](docs/INSTALLATION.md) 了解详细的安装步骤和常见问题解决方案。

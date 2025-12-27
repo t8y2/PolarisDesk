@@ -67,6 +67,36 @@ Supports custom endpoints compatible with OpenAI API format
 - ⚡ **Performance Optimized** - Code splitting, lazy loading, virtual scrolling
 - 🌐 **Internationalization** - Supports Chinese and English
 
+## 👥 Join the Community
+
+Welcome to join the PolarisDesk community to exchange experiences, share tips, and get help!
+
+<div align="center">
+<table>
+  <tr>
+    <td align="center" width="33%">
+      <h3>💬 WeChat Group</h3>
+      <img src="docs/images/community-wx.jpg" alt="WeChat Group QR Code" width="180"><br>
+      <sub>Scan to add friend<br>Note "PolarisDesk" to join group</sub>
+    </td>
+    <td align="center" width="33%">
+      <h3>👤 Personal WeChat</h3>
+      <img src="docs/images/personal-wx.jpg" alt="Personal WeChat QR Code" width="180"><br>
+      <sub>Scan to add author's WeChat<br>For communication & feedback</sub>
+    </td>
+    <td align="center" width="33%">
+      <h3>🌐 Discord Community</h3>
+      <br><br>
+      <a href="https://discord.gg/6XR6b73PrE">
+        <img src="https://img.shields.io/badge/Discord-Join%20Us-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord">
+      </a>
+      <br><br>
+      <sub>Click to join Discord server<br>International community platform</sub>
+    </td>
+  </tr>
+</table>
+</div>
+
 ## 🚀 Quick Start
 
 > 💡 **Downloading the installer?** Check out the [Installation Guide](docs/INSTALLATION.md) for detailed installation steps and troubleshooting.
