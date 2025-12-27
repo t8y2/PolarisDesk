@@ -697,6 +697,29 @@ export class IpcHandlers {
 
       return senderWindow.isAlwaysOnTop()
     })
+
+    // 设置窗口透明度
+    ipcMain.handle('set-window-opacity', (event, opacity: number) => {
+      const senderWindow = BrowserWindow.fromWebContents(event.sender)
+      if (!senderWindow) return false
+
+      // 将百分比转换为0-1的值
+      const opacityValue = Math.max(0.1, Math.min(1, opacity / 100))
+      senderWindow.setOpacity(opacityValue)
+      logger.debug(`设置窗口透明度: ${opacity}% (${opacityValue})`)
+
+      return true
+    })
+
+    // 获取窗口透明度
+    ipcMain.handle('get-window-opacity', event => {
+      const senderWindow = BrowserWindow.fromWebContents(event.sender)
+      if (!senderWindow) return 100
+
+      // 将0-1的值转换为百分比
+      const opacity = Math.round(senderWindow.getOpacity() * 100)
+      return opacity
+    })
   }
 
   // 工具相关处理器

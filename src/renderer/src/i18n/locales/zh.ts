@@ -121,6 +121,7 @@ export default {
     // UI 配置
     userMessageWidth: '用户消息宽度',
     aiMessageWidth: 'AI 回复宽度',
+    windowOpacity: '窗口透明度',
 
     // 快捷键
     shortcuts: '快捷键',

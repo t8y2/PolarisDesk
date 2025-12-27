@@ -82,6 +82,10 @@ const api = {
   toggleAlwaysOnTop: () => ipcRenderer.invoke('toggle-always-on-top'),
   getAlwaysOnTopStatus: () => ipcRenderer.invoke('get-always-on-top-status'),
 
+  // 窗口透明度功能
+  setWindowOpacity: (opacity: number) => ipcRenderer.invoke('set-window-opacity', opacity),
+  getWindowOpacity: () => ipcRenderer.invoke('get-window-opacity'),
+
   // 置顶状态刷新监听
   onRefreshPinStatus: (callback: () => void) => ipcRenderer.on('refresh-pin-status', callback),
   offRefreshPinStatus: (callback: () => void) => ipcRenderer.removeListener('refresh-pin-status', callback),

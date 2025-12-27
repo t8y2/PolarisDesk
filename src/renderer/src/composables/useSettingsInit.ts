@@ -13,6 +13,11 @@ export function useSettingsInit(): { settingsStore: ReturnType<typeof useSetting
     // 加载设置（现在是异步的）
     await settingsStore.loadSettings()
 
+    // 应用窗口透明度
+    if (window.api?.setWindowOpacity) {
+      window.api.setWindowOpacity(settingsStore.settings.windowOpacity)
+    }
+
     // 设置跨窗口同步
     cleanup = settingsStore.setupCrossWindowSync()
 

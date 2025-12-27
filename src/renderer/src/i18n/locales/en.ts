@@ -121,6 +121,7 @@ export default {
     // UI configuration
     userMessageWidth: 'User Message Width',
     aiMessageWidth: 'AI Message Width',
+    windowOpacity: 'Window Opacity',
 
     // Shortcuts
     shortcuts: 'Shortcuts',

@@ -196,6 +196,9 @@
                 <n-form-item :label="t('settings.aiMessageWidth')">
                   <n-slider v-model:value="localSettings.aiMessageWidth" :min="50" :max="100" :step="5" :format-tooltip="value => `${value}%`" style="width: 100%" />
                 </n-form-item>
+                <n-form-item :label="t('settings.windowOpacity')" class="col-span-2">
+                  <n-slider v-model:value="localSettings.windowOpacity" :min="10" :max="100" :step="5" :format-tooltip="value => `${value}%`" style="width: 100%" @update:value="handleOpacityChange" />
+                </n-form-item>
               </div>
             </div>
 
@@ -418,6 +421,13 @@ function handleProviderChange(provider: ProviderType): void {
   localSettings.value.topP = config.topP
 
   message.info(t('messages.providerSwitched', { provider: config.name }), { duration: 3000 })
+}
+
+// 处理透明度变化 - 实时预览
+function handleOpacityChange(value: number): void {
+  if (window.api?.setWindowOpacity) {
+    window.api.setWindowOpacity(value)
+  }
 }
 
 // 打开设置时保存当前设置并创建本地副本

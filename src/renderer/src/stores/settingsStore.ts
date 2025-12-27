@@ -160,6 +160,7 @@ export interface AppSettings {
   // UI配置
   userMessageWidth: number
   aiMessageWidth: number
+  windowOpacity: number
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
@@ -185,7 +186,8 @@ const DEFAULT_SETTINGS: AppSettings = {
 
   // UI配置
   userMessageWidth: 80,
-  aiMessageWidth: 75
+  aiMessageWidth: 75,
+  windowOpacity: 100
 }
 
 const STORAGE_KEY = 'polaris-desk-settings'
@@ -361,6 +363,12 @@ export const useSettingsStore = defineStore('settings', () => {
     } else if (key === 'aiMessageWidth') {
       document.documentElement.style.setProperty('--ai-message-width', `${value}%`)
       logger.debug('实时更新AI回复宽度', { value })
+    } else if (key === 'windowOpacity') {
+      // 实时更新窗口透明度
+      if (window.api?.setWindowOpacity) {
+        window.api.setWindowOpacity(value as number)
+        logger.debug('实时更新窗口透明度', { value })
+      }
     }
 
     // 记录重要设置的变更

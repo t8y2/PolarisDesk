@@ -91,6 +91,10 @@ interface Window {
     toggleAlwaysOnTop: () => Promise<boolean>
     getAlwaysOnTopStatus: () => Promise<boolean>
 
+    // 窗口透明度功能
+    setWindowOpacity: (opacity: number) => Promise<boolean>
+    getWindowOpacity: () => Promise<number>
+
     // 置顶状态刷新监听
     onRefreshPinStatus: (callback: () => void) => void
     offRefreshPinStatus: (callback: () => void) => void
@@ -117,6 +121,23 @@ interface Window {
       searchConversations: (keyword: string) => Promise<Array<{ id: string; title: string; timestamp: number; messageCount: number }>>
       getStats: () => Promise<{ totalConversations: number; totalMessages: number; dbSize: string }>
       cleanup: (keepRecentCount?: number) => Promise<boolean>
+      // 设置相关功能
+      saveSetting: (key: string, value: string) => Promise<boolean>
+      getSetting: (key: string) => Promise<string | null>
+      getAllSettings: () => Promise<Record<string, string>>
+      deleteSetting: (key: string) => Promise<boolean>
+    }
+
+    // 获取应用版本号
+    getAppVersion: () => Promise<string>
+
+    // 自动更新相关
+    updater?: {
+      checkForUpdates: () => Promise<void>
+      downloadUpdate: () => Promise<void>
+      quitAndInstall: () => Promise<void>
+      onUpdateStatus: (callback: (event: string, data: unknown) => void) => (event: Electron.IpcRendererEvent, ...args: unknown[]) => void
+      offUpdateStatus: (wrappedCallback: (event: Electron.IpcRendererEvent, ...args: unknown[]) => void) => void
     }
   }
 }
