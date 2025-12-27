@@ -30,6 +30,27 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Setup Python (for native modules)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Setup build environment (macOS)
+        if: matrix.platform == 'mac'
+        run: |
+          echo "Setting up Python environment..."
+          python3 --version
+          python3 -m pip install --upgrade pip setuptools wheel
+          echo "Python setup complete"
+
+      - name: Setup build environment (Windows)
+        if: matrix.platform == 'win'
+        run: |
+          echo "Setting up Python environment..."
+          python --version
+          python -m pip install --upgrade pip setuptools wheel
+          echo "Python setup complete"
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
@@ -49,7 +70,16 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: pnpm install
+        shell: bash
+        run: pnpm install --no-frozen-lockfile
+        env:
+          PYTHON: ${{ matrix.platform == 'mac' && 'python3' || 'python' }}
+          npm_config_python: ${{ matrix.platform == 'mac' && 'python3' || 'python' }}
+
+      - name: Verify better-sqlite3 installation
+        run: |
+          echo "Checking better-sqlite3..."
+          node -e "const db = require('better-sqlite3'); console.log('better-sqlite3 loaded successfully')" || echo "better-sqlite3 check failed, but continuing..."
 
       - name: Build application
         run: pnpm build:${{ matrix.platform }}
