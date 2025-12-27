@@ -104,6 +104,15 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
     clearInputs: () => void,
     scrollToBottom: () => void
   ): Promise<void> => {
+    const messageContent = inputMessage.trim()
+    const hasMedia = imageData || videoData || (pdfImages && pdfImages.length > 0) || (pptImages && pptImages.length > 0) || (wordImages && wordImages.length > 0)
+
+    // 验证：如果消息内容为空且没有媒体数据，则不发送
+    if (!messageContent && !hasMedia) {
+      logger.warn('消息内容和媒体数据都为空，取消发送')
+      return
+    }
+
     // 安全地处理当前请求控制器
     if (currentRequestController) {
       currentRequestController.abort()
@@ -112,7 +121,6 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
     // 创建新的请求控制器
     currentRequestController = new AbortController()
 
-    const messageContent = inputMessage.trim()
     const mediaData: MediaData = {
       image: imageData || undefined,
       video: videoData || undefined,
