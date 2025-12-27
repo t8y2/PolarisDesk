@@ -6,3 +6,7 @@ out
 *.log*
 .vscode
 
+# VitePress
+docs-site/.vitepress/cache
+docs-site/.vitepress/dist
+

@@ -26,7 +26,10 @@
     "build:mac": "npm run build && electron-builder --mac",
     "build:linux": "npm run build && electron-builder --linux",
     "build:icons": "scripts/generate-icons.sh",
-    "prepare": "husky"
+    "prepare": "husky",
+    "docs:dev": "vitepress dev docs-site",
+    "docs:build": "vitepress build docs-site",
+    "docs:preview": "vitepress preview docs-site"
   },
   "lint-staged": {
     "*.{js,ts,vue,json,md}": [
@@ -87,6 +90,7 @@
     "typescript": "^5.9.3",
     "unocss": "^66.5.11",
     "vite": "^7.3.0",
+    "vitepress": "^1.6.4",
     "vue": "^3.5.26",
     "vue-eslint-parser": "^10.2.0",
     "vue-tsc": "^3.2.1"

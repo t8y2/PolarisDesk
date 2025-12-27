@@ -1,6 +1,11 @@
-# PolarisDesk
-
-简体中文 | [English](./README.md)
+<div align="center">
+  <div style="display: flex; justify-content: space-between; align-items: center; max-width: 800px; margin: 0 auto;">
+    <h1 style="margin: 0;">PolarisDesk</h1>
+    <div>
+      <a href="./README.md">简体中文</a> | English
+    </div>
+  </div>
+</div>
 
 <div align="center">
   <img src="resources/icon.png" alt="PolarisDesk Logo" width="120" height="120">
