@@ -136,6 +136,7 @@ export const useChatStore = defineStore(STORE_ID, () => {
   }
 
   const initialize = async (): Promise<void> => {
+    // 先从 storage 加载上次的对话
     initFromStorage()
 
     // 安全检查：确保加载状态的正确性
@@ -145,18 +146,31 @@ export const useChatStore = defineStore(STORE_ID, () => {
       localStorage.setItem(KEYS.LOADING, JSON.stringify(false))
     }
 
-    setupMessageListeners()
-
-    // 如果当前没有消息，尝试加载最新的对话
-    if (messages.value.length === 0) {
-      const loaded = await loadLatestConversation()
-      if (!loaded) {
-        addWelcomeMessageIfNeeded()
-      }
+    // 如果有完整的对话，保存它
+    if (hasCompleteConversation.value) {
+      console.log('应用启动：保存上次对话到历史记录')
+      await saveCurrentConversation()
     }
 
+    // 清空当前消息，开始新对话
+    messages.value = []
+    welcomeAdded.value = false
+    currentConversationId.value = null
+    clearPendingMedia()
+
+    // 清理本地存储
+    localStorage.removeItem(KEYS.MESSAGES)
+    localStorage.setItem(KEYS.WELCOME, JSON.stringify(false))
+    localStorage.setItem(KEYS.LOADING, JSON.stringify(false))
+    isLoading.value = false
+
+    setupMessageListeners()
+
+    // 添加欢迎消息，开始新对话
+    addWelcomeMessageIfNeeded()
+
     const isFloating = window.location.hash === '#/floating' || window.location.hash === '#floating'
-    console.log(`Chat store initialized in ${isFloating ? 'floating window' : 'main window'}`)
+    console.log(`Chat store initialized in ${isFloating ? 'floating window' : 'main window'} - 新对话已开始`)
   }
 
   // ========== 消息管理 ==========

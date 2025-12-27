@@ -13,7 +13,7 @@
     </div>
 
     <!-- 命令块 - 移到回复内容下面 -->
-    <CommandBlock :key="`commands-${message.id}-${commandBlocks.length}`" :commands="commandBlocks" />
+    <CommandBlock :key="`commands-${message.id}-${commandBlocks.length}`" :commands="commandBlocks" :message-id="message.id" />
 
     <!-- 答案块 -->
     <AnswerBlock v-if="answerBoxes.length > 0" :answers="answerBoxes" />

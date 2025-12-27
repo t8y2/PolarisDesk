@@ -64,47 +64,43 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { NButton, NCode, NTag, useMessage, useDialog } from 'naive-ui'
+import { useChatStore } from '../stores/chatStore'
+import { updateCommandState, type CommandState } from '../utils/commandExtractor'
 
-interface Command {
-  command: string
+interface Command extends CommandState {
   executing: boolean
-  executed: boolean
-  dismissed: boolean
-  output?: string
-  error?: string
-  exitCode?: number
 }
 
 interface Props {
-  commands: string[]
+  commands: CommandState[]
+  messageId: string
 }
 
 const props = defineProps<Props>()
 const message = useMessage()
 const dialog = useDialog()
+const chatStore = useChatStore()
 
-// 执行状态映射表 - 使用命令文本作为key
+// 执行状态映射表 - 存储临时的执行中状态和输出结果
 const executionStates = ref<Map<string, {
   executing: boolean
-  executed: boolean
-  dismissed: boolean  // 是否已取消（不执行）
   output?: string
   error?: string
-  exitCode?: number
   abortController?: AbortController
 }>>(new Map())
 
-// 转换为命令对象 - 响应式计算，保留执行状态
+// 转换为命令对象 - 响应式计算
 const commands = computed<Command[]>(() => {
   return props.commands.map(cmd => {
-    const state = executionStates.value.get(cmd) || {
-      executing: false,
-      executed: false,
-      dismissed: false
+    const execState = executionStates.value.get(cmd.command) || {
+      executing: false
     }
     return {
-      command: cmd,
-      ...state
+      ...cmd,
+      executing: execState.executing,
+      // 如果有临时输出，使用临时输出；否则使用持久化的输出
+      output: execState.output || cmd.output,
+      error: execState.error || cmd.error
     }
   })
 })
@@ -113,6 +109,20 @@ const commands = computed<Command[]>(() => {
 watch(() => props.commands, (newCommands) => {
   console.log('🔄 CommandBlock: 命令列表更新', newCommands)
 }, { immediate: true, deep: true })
+
+// 更新消息中的命令状态
+const updateMessageCommandState = (commandText: string, state: Partial<Omit<CommandState, 'command'>>) => {
+  const messageIndex = chatStore.messages.findIndex(msg => msg.id === props.messageId)
+  if (messageIndex !== -1) {
+    const currentMessage = chatStore.messages[messageIndex]
+    const updatedContent = updateCommandState(currentMessage.content || '', commandText, state)
+    chatStore.messages[messageIndex] = {
+      ...currentMessage,
+      content: updatedContent
+    }
+    chatStore.saveToStorage()
+  }
+}
 
 const executeCommand = (index: number) => {
   const cmd = commands.value[index]
@@ -149,8 +159,6 @@ const doExecute = async (index: number) => {
   // 更新执行状态
   executionStates.value.set(cmdText, {
     executing: true,
-    executed: false,
-    dismissed: false,
     abortController
   })
   
@@ -183,11 +191,16 @@ const doExecute = async (index: number) => {
       throw new Error('命令执行已取消')
     }
     
-    // 更新执行结果
+    // 清除执行状态，但保留输出结果
     executionStates.value.set(cmdText, {
       executing: false,
+      output: result.output || '',
+      error: result.error || ''
+    })
+    
+    // 更新消息中的命令状态（持久化）
+    updateMessageCommandState(cmdText, {
       executed: true,
-      dismissed: false,
       exitCode: result.exitCode || 0,
       output: result.output || '',
       error: result.error || ''
@@ -201,15 +214,20 @@ const doExecute = async (index: number) => {
   } catch (error) {
     const errorMsg = (error as Error).message
     
+    // 清除执行状态，但保留错误信息
+    executionStates.value.set(cmdText, {
+      executing: false,
+      error: errorMsg
+    })
+    
     // 如果是取消操作，不显示错误
     if (errorMsg !== '命令执行已取消') {
       message.error('执行命令失败: ' + errorMsg)
     }
     
-    executionStates.value.set(cmdText, {
-      executing: false,
+    // 更新消息中的命令状态（持久化）
+    updateMessageCommandState(cmdText, {
       executed: true,
-      dismissed: false,
       exitCode: 1,
       error: errorMsg
     })
@@ -225,11 +243,15 @@ const cancelExecution = (index: number) => {
     state.abortController.abort()
     message.info('已中止命令执行')
     
-    // 更新状态
+    // 保留错误信息
     executionStates.value.set(cmdText, {
       executing: false,
+      error: '用户中止执行'
+    })
+    
+    // 更新消息中的命令状态（持久化）
+    updateMessageCommandState(cmdText, {
       executed: true,
-      dismissed: false,
       exitCode: 130, // 130 是 SIGINT 的退出码
       error: '用户中止执行'
     })
@@ -240,10 +262,8 @@ const dismissCommand = (index: number) => {
   const cmd = commands.value[index]
   const cmdText = cmd.command
   
-  // 标记为已取消，但保留命令块显示
-  executionStates.value.set(cmdText, {
-    executing: false,
-    executed: false,
+  // 更新消息中的命令状态（持久化）
+  updateMessageCommandState(cmdText, {
     dismissed: true
   })
   
@@ -289,12 +309,12 @@ const dismissCommand = (index: number) => {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  overflow-x: auto; /* 添加横向滚动 */
+  overflow-x: auto;
 }
 
 .command-code {
   font-size: 13px;
-  min-width: 0; /* 允许收缩 */
+  min-width: 0;
 }
 
 /* 命令代码块的滚动条样式 */
@@ -346,13 +366,13 @@ const dismissCommand = (index: number) => {
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid rgba(59, 130, 246, 0.2);
-  overflow-x: auto; /* 添加横向滚动 */
+  overflow-x: auto;
 }
 
 .result-output,
 .result-error {
   margin-bottom: 8px;
-  overflow-x: auto; /* 添加横向滚动 */
+  overflow-x: auto;
 }
 
 /* 结果输出的滚动条样式 */
