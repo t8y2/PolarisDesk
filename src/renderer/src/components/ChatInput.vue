@@ -37,7 +37,7 @@
             <n-button circle :loading="isFileUploading" class="action-button" @click="handleUploadFile">
               <template #icon>
                 <n-icon>
-                  <Document />
+                  <Attachment />
                 </n-icon>
               </template>
             </n-button>
@@ -84,7 +84,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { NInput, NButton, NTooltip, NIcon } from 'naive-ui'
-import { Camera, Document } from '@vicons/carbon'
+import { Camera, Attachment } from '@vicons/carbon'
 import { Cut } from '@vicons/tabler'
 import { useI18n } from 'vue-i18n'
 import MediaPreviewCard from './MediaPreviewCard.vue'

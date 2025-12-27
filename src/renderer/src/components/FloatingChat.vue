@@ -20,10 +20,7 @@
             <template #trigger>
               <button class="border-none rounded text-white text-2.75 cursor-pointer px-1.5 py-1 transition-all-200 min-w-5 h-5 flex items-center justify-center" :class="chatStore.isPrivateMode ? 'bg-purple/60 hover:bg-purple/80' : 'bg-white/10 hover:bg-white/20'" @click="togglePrivateMode">
                 <n-icon size="12">
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path
-                      d="M12,2C9.24,2 7,4.24 7,7C7,7.68 7.16,8.32 7.43,8.89L2.5,12.5C2.5,15.87 4.5,21 12,21C19.5,21 21.5,15.87 21.5,12.5L16.57,8.89C16.84,8.32 17,7.68 17,7C17,4.24 14.76,2 12,2M12,4C13.66,4 15,5.34 15,7C15,8.66 13.66,10 12,10C10.34,10 9,8.66 9,7C9,5.34 10.34,4 12,4M9,13A1,1 0 0,1 10,14A1,1 0 0,1 9,15A1,1 0 0,1 8,14A1,1 0 0,1 9,13M15,13A1,1 0 0,1 16,14A1,1 0 0,1 15,15A1,1 0 0,1 14,14A1,1 0 0,1 15,13Z" />
-                  </svg>
+                  <ViewOff />
                 </n-icon>
               </button>
             </template>
@@ -346,7 +343,7 @@
                       <span class="w-1 h-1 bg-white/60 rounded-full animate-[loading-pulse_1.4s_ease-in-out_infinite_both]"></span>
                     </div>
                     <n-icon v-else size="14">
-                      <Document />
+                      <Attachment />
                     </n-icon>
                   </button>
                 </template>
@@ -404,7 +401,7 @@
 <script setup lang="ts">
 import { ref, nextTick, onMounted, onUnmounted, computed, watch } from 'vue'
 import { NTooltip, NIcon, NCollapse, NCollapseItem, useMessage } from 'naive-ui'
-import { Send, Document, Camera } from '@vicons/carbon'
+import { Send, Attachment, Camera, ViewOff } from '@vicons/carbon'
 import { Cut } from '@vicons/tabler'
 import { useI18n } from 'vue-i18n'
 import { useChatFunctions } from '../composables/useChatFunctions'
