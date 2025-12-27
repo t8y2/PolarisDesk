@@ -1,11 +1,5 @@
 <template>
-  <n-select
-    v-model:value="currentLanguage"
-    :options="languageOptions"
-    size="small"
-    style="width: 120px"
-    @update:value="handleLanguageChange"
-  />
+  <n-select v-model:value="currentLanguage" :options="languageOptions" size="small" style="width: 120px" @update:value="handleLanguageChange" />
 </template>
 
 <script setup lang="ts">
@@ -17,7 +11,7 @@ const { locale, switchLanguage } = useLanguage()
 
 const currentLanguage = computed({
   get: () => locale.value,
-  set: (value) => {
+  set: value => {
     switchLanguage(value as 'zh' | 'en')
   }
 })

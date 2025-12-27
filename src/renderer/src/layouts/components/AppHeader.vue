@@ -177,6 +177,9 @@
                 <n-form-item :label="t('settings.starryBackground')">
                   <n-switch v-model:value="localSettings.starryBackground" :rail-style="switchRailStyle" />
                 </n-form-item>
+                <n-form-item :label="t('settings.autoExecuteCommands')">
+                  <n-switch v-model:value="localSettings.autoExecuteCommands" :rail-style="switchRailStyle" />
+                </n-form-item>
               </div>
               <div class="grid grid-cols-2 gap-x-4 gap-y-2 ml-8">
                 <n-form-item :label="t('settings.userMessageWidth')">

@@ -6,19 +6,8 @@
     </div>
 
     <div class="command-input-area">
-      <n-input
-        v-model:value="userInput"
-        type="textarea"
-        :placeholder="t('command.inputPlaceholder')"
-        :autosize="{ minRows: 3, maxRows: 6 }"
-        @keydown="handleKeyDown"
-      />
-      <n-button
-        type="primary"
-        :loading="isGenerating || isExecuting"
-        :disabled="!userInput.trim()"
-        @click="handleGenerate"
-      >
+      <n-input v-model:value="userInput" type="textarea" :placeholder="t('command.inputPlaceholder')" :autosize="{ minRows: 3, maxRows: 6 }" @keydown="handleKeyDown" />
+      <n-button type="primary" :loading="isGenerating || isExecuting" :disabled="!userInput.trim()" @click="handleGenerate">
         {{ isGenerating ? t('command.generating') : isExecuting ? t('command.executing') : t('common.confirm') }}
       </n-button>
     </div>
@@ -34,7 +23,7 @@
         </n-button-group>
       </div>
       <n-code :code="generatedCommand" language="bash" />
-      
+
       <!-- 调试区域：显示原始 AI 输出 -->
       <n-collapse class="mt-3">
         <n-collapse-item title="🔍 调试：查看 AI 原始输出" name="debug">
@@ -46,9 +35,7 @@
     <div v-if="commandOutput" class="command-output">
       <div class="output-header">
         <span class="label">{{ t('command.output') }}</span>
-        <n-tag :type="exitCode === 0 ? 'success' : 'error'" size="small">
-          {{ t('command.exitCode') }}: {{ exitCode }}
-        </n-tag>
+        <n-tag :type="exitCode === 0 ? 'success' : 'error'" size="small">{{ t('command.exitCode') }}: {{ exitCode }}</n-tag>
       </div>
       <n-code :code="commandOutput" language="text" />
     </div>
@@ -137,7 +124,7 @@ const handleGenerate = async () => {
     let fullResponse = ''
     let reasoningContent = '' // 分离思考内容
     let actualContent = '' // 实际输出内容
-    
+
     await modelAPI.chatCompletion(
       systemPrompt,
       {
@@ -176,14 +163,20 @@ const handleGenerate = async () => {
     cleaned = cleaned.replace(/^```(?:bash|sh|shell|zsh)?\n?/i, '').replace(/\n?```$/i, '')
 
     // 2. 移除特殊标记
-    cleaned = cleaned.replace(/<\|begin_of_box\|>/g, '').replace(/<\|end_of_box\|>/g, '').replace(/【.*?】/g, '')
+    cleaned = cleaned
+      .replace(/<\|begin_of_box\|>/g, '')
+      .replace(/<\|end_of_box\|>/g, '')
+      .replace(/【.*?】/g, '')
 
     // 3. 尝试提取最后一个看起来像命令的部分
-    const lines = cleaned.split('\n').map(l => l.trim()).filter(l => l)
-    
+    const lines = cleaned
+      .split('\n')
+      .map(l => l.trim())
+      .filter(l => l)
+
     // 查找最短且最像命令的行（通常命令很短）
     let commandLine = ''
-    
+
     // 策略1: 查找最后一个不包含中文、句号、逗号的短行
     for (let i = lines.length - 1; i >= 0; i--) {
       const line = lines[i]
@@ -193,7 +186,7 @@ const handleGenerate = async () => {
       if (line.length > 100) continue // 太长
       if (line.startsWith('//') || (line.startsWith('#') && !line.startsWith('#!'))) continue // 注释
       if (/^(the command|explanation|note|output):/i.test(line)) continue // 英文说明
-      
+
       // 找到了可能的命令
       commandLine = line
       break
@@ -215,9 +208,7 @@ const handleGenerate = async () => {
     if (!commandLine) {
       const nonChineseLines = lines.filter(l => !/[\u4e00-\u9fa5]/.test(l))
       if (nonChineseLines.length > 0) {
-        commandLine = nonChineseLines.reduce((shortest, current) => 
-          current.length < shortest.length ? current : shortest
-        )
+        commandLine = nonChineseLines.reduce((shortest, current) => (current.length < shortest.length ? current : shortest))
       }
     }
 
@@ -241,13 +232,7 @@ const handleExecute = () => {
   if (!generatedCommand.value) return
 
   // 检查危险命令
-  const dangerousPatterns = [
-    /rm\s+-rf\s+\//,
-    /format\s+/i,
-    /del\s+\/[sf]/i,
-    /shutdown/i,
-    /reboot/i
-  ]
+  const dangerousPatterns = [/rm\s+-rf\s+\//, /format\s+/i, /del\s+\/[sf]/i, /shutdown/i, /reboot/i]
 
   const isDangerous = dangerousPatterns.some(pattern => pattern.test(generatedCommand.value))
 

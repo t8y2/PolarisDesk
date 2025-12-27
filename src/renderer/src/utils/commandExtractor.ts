@@ -67,16 +67,9 @@ export function removeCommandBlocks(content: string): string {
 /**
  * 更新消息中的命令状态
  */
-export function updateCommandState(
-  content: string,
-  commandText: string,
-  state: Partial<Omit<CommandState, 'command'>>
-): string {
+export function updateCommandState(content: string, commandText: string, state: Partial<Omit<CommandState, 'command'>>): string {
   const escapedCommand = escapeRegExp(commandText)
-  const regex = new RegExp(
-    `<command([^>]*)>${escapedCommand}(?:<output>[\\s\\S]*?<\\/output>)?(?:<error>[\\s\\S]*?<\\/error>)?<\\/command>`,
-    'g'
-  )
+  const regex = new RegExp(`<command([^>]*)>${escapedCommand}(?:<output>[\\s\\S]*?<\\/output>)?(?:<error>[\\s\\S]*?<\\/error>)?<\\/command>`, 'g')
 
   return content.replace(regex, (fullMatch, attributes) => {
     // 解析现有属性
@@ -152,13 +145,7 @@ function unescapeHtml(text: string): string {
  * 检测内容是否可能包含命令意图
  */
 export function hasCommandIntent(content: string): boolean {
-  const commandKeywords = [
-    '执行', '运行', '命令', '帮我', '帮忙',
-    '列出', '显示', '查看', '创建', '删除',
-    '查找', '搜索', '安装', '启动', '停止',
-    'execute', 'run', 'command', 'list', 'show',
-    'create', 'delete', 'find', 'search', 'install'
-  ]
+  const commandKeywords = ['执行', '运行', '命令', '帮我', '帮忙', '列出', '显示', '查看', '创建', '删除', '查找', '搜索', '安装', '启动', '停止', 'execute', 'run', 'command', 'list', 'show', 'create', 'delete', 'find', 'search', 'install']
 
   const lowerContent = content.toLowerCase()
   return commandKeywords.some(keyword => lowerContent.includes(keyword))

@@ -21,10 +21,10 @@ PolarisDesk（北极星桌面）寓意如同北极星为航海者指引方向一
 
 <div align="center">
 
-| OpenAI | Anthropic | Google |
-|:------:|:---------:|:------:|
-| **DeepSeek** | **Moonshot** | **OpenRouter** |
-| **SiliconCloud** | **Ollama** | **智谱 AI** |
+|      OpenAI      |  Anthropic   |     Google     |
+| :--------------: | :----------: | :------------: |
+|   **DeepSeek**   | **Moonshot** | **OpenRouter** |
+| **SiliconCloud** |  **Ollama**  |  **智谱 AI**   |
 
 支持自定义兼容 OpenAI API 格式的服务
 
@@ -113,17 +113,20 @@ pnpm build:linux
 ## 🛠️ 技术栈
 
 ### 核心框架
+
 - **Electron** - 跨平台桌面应用框架
 - **Vue 3** - 渐进式 JavaScript 框架
 - **TypeScript** - 类型安全的 JavaScript 超集
 - **Vite** - 下一代前端构建工具
 
 ### UI 组件
+
 - **Naive UI** - Vue 3 组件库
 - **UnoCSS** - 即时按需原子化 CSS 引擎
 - **Vue Virtual Scroller** - 虚拟滚动优化
 
 ### 功能库
+
 - **Markdown-it** - Markdown 解析器
 - **Highlight.js** - 代码语法高亮
 - **KaTeX** - 数学公式渲染
@@ -216,22 +219,20 @@ xattr -cr /Applications/PolarisDesk.app
 
 ## 🚀 后期规划
 
-| 功能 | 描述 | 状态 |
-|------|------|------|
-| 🤖 AI 驱动命令行 | AI 理解意图并执行系统命令 | 规划中 |
-| 🔌 插件系统 | 支持第三方插件扩展 | 规划中 |
-| 🌐 多语言支持 | 国际化界面 | ✅ 已完成 |
-| 🎙️ 语音交互 | 语音输入输出 | 规划中 |
-| 🎨 主题支持 | 支持更多主题扩展 | 规划中 |
-| 💡 More | 更多 | 规划中 |
-
+| 功能             | 描述                      | 状态      |
+| ---------------- | ------------------------- | --------- |
+| 🤖 AI 驱动命令行 | AI 理解意图并执行系统命令 | 规划中    |
+| 🔌 插件系统      | 支持第三方插件扩展        | 规划中    |
+| 🌐 多语言支持    | 国际化界面                | ✅ 已完成 |
+| 🎙️ 语音交互      | 语音输入输出              | 规划中    |
+| 🎨 主题支持      | 支持更多主题扩展          | 规划中    |
+| 💡 More          | 更多                      | 规划中    |
 
 欢迎开发者提交 PR 参与贡献！
 
 ## 📄 许可证
 
 本项目采用 [MIT](LICENSE) 许可证。
-
 
 ## 📮 联系方式
 

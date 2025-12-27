@@ -63,7 +63,7 @@ const thinkContent = computed(() => {
 
 const commandBlocks = computed(() => {
   const commands = extractCommands(props.message.content || '')
-  
+
   // 输出调试信息到控制台
   if (props.message.content) {
     console.group('🤖 AI 回复消息')
@@ -73,7 +73,7 @@ const commandBlocks = computed(() => {
     console.log('是否包含 <command> 标签:', props.message.content.includes('<command>'))
     console.groupEnd()
   }
-  
+
   return commands
 })
 

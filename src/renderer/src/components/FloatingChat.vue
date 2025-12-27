@@ -77,148 +77,148 @@
               <template v-if="message.role === 'user'">
                 <div :title="t('floating.clickToSwitchMain')" @click="handleMessageClick(message)">
                   <div v-if="message.image" class="mb-1 relative media-hover-container">
-                <img :src="message.image" alt="截图" class="w-full h-auto rounded object-contain" />
-                <!-- 媒体操作按钮 -->
-                <div class="media-action-buttons">
-                  <n-tooltip trigger="hover" placement="top" :show-arrow="false">
-                    <template #trigger>
-                      <button class="media-action-btn" @click.stop="reuseMedia(message.image, 'image')">
-                        <n-icon size="14">
-                          <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
-                          </svg>
-                        </n-icon>
-                      </button>
-                    </template>
-                    {{ t('floating.reuseImage') }}
-                  </n-tooltip>
-                  <n-tooltip trigger="hover" placement="top" :show-arrow="false">
-                    <template #trigger>
-                      <button class="media-action-btn" @click.stop="downloadMedia(message.image, 'image')">
-                        <n-icon size="14">
-                          <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
-                          </svg>
-                        </n-icon>
-                      </button>
-                    </template>
-                    {{ t('floating.downloadImage') }}
-                  </n-tooltip>
-                </div>
-              </div>
-              <div v-if="message.video" class="mb-1 relative media-hover-container">
-                <VideoPlayer :src="message.video" :video-base64="message.videoBase64" class="w-full h-auto rounded object-contain" />
-                <!-- 媒体操作按钮 -->
-                <div class="media-action-buttons">
-                  <n-tooltip trigger="hover" placement="top" :show-arrow="false">
-                    <template #trigger>
-                      <button class="media-action-btn" @click.stop="reuseMedia(message.video, 'video', message.videoBase64)">
-                        <n-icon size="14">
-                          <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
-                          </svg>
-                        </n-icon>
-                      </button>
-                    </template>
-                    {{ t('floating.reuseVideo') }}
-                  </n-tooltip>
-                  <n-tooltip trigger="hover" placement="top" :show-arrow="false">
-                    <template #trigger>
-                      <button class="media-action-btn" @click.stop="downloadMedia(message.video || message.videoBase64 || '', 'video')">
-                        <n-icon size="14">
-                          <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
-                          </svg>
-                        </n-icon>
-                      </button>
-                    </template>
-                    {{ t('floating.downloadVideo') }}
-                  </n-tooltip>
-                </div>
-              </div>
-              <div v-if="message.pdfImages && message.pdfImages.length > 0" class="mb-1 relative media-hover-container">
-                <div class="bg-white/8 border border-white/15 rounded-1.5 px-2 py-1.5 flex items-center gap-2">
-                  <div class="w-5 h-5">
-                    <img src="@renderer/assets/icons/pdf3.svg" alt="PDF" class="w-full h-full" />
+                    <img :src="message.image" alt="截图" class="w-full h-auto rounded object-contain" />
+                    <!-- 媒体操作按钮 -->
+                    <div class="media-action-buttons">
+                      <n-tooltip trigger="hover" placement="top" :show-arrow="false">
+                        <template #trigger>
+                          <button class="media-action-btn" @click.stop="reuseMedia(message.image, 'image')">
+                            <n-icon size="14">
+                              <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
+                              </svg>
+                            </n-icon>
+                          </button>
+                        </template>
+                        {{ t('floating.reuseImage') }}
+                      </n-tooltip>
+                      <n-tooltip trigger="hover" placement="top" :show-arrow="false">
+                        <template #trigger>
+                          <button class="media-action-btn" @click.stop="downloadMedia(message.image, 'image')">
+                            <n-icon size="14">
+                              <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+                              </svg>
+                            </n-icon>
+                          </button>
+                        </template>
+                        {{ t('floating.downloadImage') }}
+                      </n-tooltip>
+                    </div>
                   </div>
-                  <div class="flex-1 min-w-0">
-                    <div class="text-white/90 text-2.75 font-medium truncate">{{ message.pdfName || t('floating.pdfDocument') }} ({{ t('floating.pages', { count: message.pdfImages.length }) }})</div>
+                  <div v-if="message.video" class="mb-1 relative media-hover-container">
+                    <VideoPlayer :src="message.video" :video-base64="message.videoBase64" class="w-full h-auto rounded object-contain" />
+                    <!-- 媒体操作按钮 -->
+                    <div class="media-action-buttons">
+                      <n-tooltip trigger="hover" placement="top" :show-arrow="false">
+                        <template #trigger>
+                          <button class="media-action-btn" @click.stop="reuseMedia(message.video, 'video', message.videoBase64)">
+                            <n-icon size="14">
+                              <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
+                              </svg>
+                            </n-icon>
+                          </button>
+                        </template>
+                        {{ t('floating.reuseVideo') }}
+                      </n-tooltip>
+                      <n-tooltip trigger="hover" placement="top" :show-arrow="false">
+                        <template #trigger>
+                          <button class="media-action-btn" @click.stop="downloadMedia(message.video || message.videoBase64 || '', 'video')">
+                            <n-icon size="14">
+                              <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+                              </svg>
+                            </n-icon>
+                          </button>
+                        </template>
+                        {{ t('floating.downloadVideo') }}
+                      </n-tooltip>
+                    </div>
                   </div>
-                </div>
-                <!-- 媒体操作按钮 -->
-                <div class="media-action-buttons">
-                  <n-tooltip trigger="hover" placement="top" :show-arrow="false">
-                    <template #trigger>
-                      <button class="media-action-btn" @click.stop="reuseMedia(message.pdfImages, 'pdf', undefined, message.pdfName)">
-                        <n-icon size="14">
-                          <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
-                          </svg>
-                        </n-icon>
-                      </button>
-                    </template>
-                    {{ t('floating.reusePdf') }}
-                  </n-tooltip>
-                </div>
-              </div>
-              <div v-if="message.pptImages && message.pptImages.length > 0" class="mb-1 relative media-hover-container">
-                <div class="bg-white/8 border border-white/15 rounded-1.5 px-2 py-1.5 flex items-center gap-2">
-                  <div class="w-5 h-5">
-                    <img src="@renderer/assets/icons/ppt3.svg" alt="PPT" class="w-full h-full" />
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <div class="text-white/90 text-2.75 font-medium truncate">{{ message.pptName || t('floating.pptDocument') }} ({{ t('floating.pages', { count: message.pptTotalPages || message.pptImages.length }) }})</div>
-                  </div>
-                </div>
-                <!-- 媒体操作按钮 -->
-                <div class="media-action-buttons">
-                  <n-tooltip trigger="hover" placement="top" :show-arrow="false">
-                    <template #trigger>
-                      <button class="media-action-btn" @click.stop="reuseMedia(message.pptImages, 'ppt', undefined, message.pptName, message.pptTotalPages)">
-                        <n-icon size="14">
-                          <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
-                          </svg>
-                        </n-icon>
-                      </button>
-                    </template>
-                    {{ t('floating.reusePpt') }}
-                  </n-tooltip>
-                  </div>
-                </div>
-                <div class="message-text">{{ message.content }}</div>
-              </div>
-            </template>
-
-            <!-- AI消息 -->
-            <template v-else>
-              <!-- 思考块 -->
-              <div v-if="extractThinkContent(message.content || '').trim()" class="mb-1.5">
-                <n-collapse :default-expanded-names="settingsStore.settings.defaultExpandThink ? ['think'] : []" :arrow-placement="'right'" class="think-collapse-floating">
-                  <n-collapse-item name="think" class="think-collapse-item-floating">
-                    <template #header>
-                      <div class="think-header-floating">
-                        <span class="think-icon-floating">{{ (index === chatStore.messages.length - 1 && chatStore.isGenerating) ? '✨' : '✓' }}</span>
-                        <span class="think-label-floating" :class="{ 'thinking-blink-floating': index === chatStore.messages.length - 1 && chatStore.isGenerating }">
-                          {{ (index === chatStore.messages.length - 1 && chatStore.isGenerating) ? t('think.thinking') : t('think.thinkingComplete') }}
-                        </span>
+                  <div v-if="message.pdfImages && message.pdfImages.length > 0" class="mb-1 relative media-hover-container">
+                    <div class="bg-white/8 border border-white/15 rounded-1.5 px-2 py-1.5 flex items-center gap-2">
+                      <div class="w-5 h-5">
+                        <img src="@renderer/assets/icons/pdf3.svg" alt="PDF" class="w-full h-full" />
                       </div>
-                    </template>
-                    <div class="think-content-floating" :class="{ 'think-content-generating-floating': index === chatStore.messages.length - 1 && chatStore.isGenerating }">
-                      <div class="text-white/60 text-2.5 leading-1.3 whitespace-pre-wrap">
-                        {{ extractThinkContent(message.content || '') }}
-                        <span v-if="index === chatStore.messages.length - 1 && chatStore.isGenerating" class="loading-dots-floating"></span>
+                      <div class="flex-1 min-w-0">
+                        <div class="text-white/90 text-2.75 font-medium truncate">{{ message.pdfName || t('floating.pdfDocument') }} ({{ t('floating.pages', { count: message.pdfImages.length }) }})</div>
                       </div>
                     </div>
-                  </n-collapse-item>
-                </n-collapse>
-              </div>
-              <!-- AI回复内容 -->
-              <div v-if="formatAnswerBoxes(removeThinkContent(message.content || '')).trim()" class="message-text" :title="t('floating.clickToViewFull')" @click="handleMessageClick(message)">
-                {{ formatAnswerBoxes(removeThinkContent(message.content || '')) }}
-              </div>
-            </template>
-          </div>
+                    <!-- 媒体操作按钮 -->
+                    <div class="media-action-buttons">
+                      <n-tooltip trigger="hover" placement="top" :show-arrow="false">
+                        <template #trigger>
+                          <button class="media-action-btn" @click.stop="reuseMedia(message.pdfImages, 'pdf', undefined, message.pdfName)">
+                            <n-icon size="14">
+                              <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
+                              </svg>
+                            </n-icon>
+                          </button>
+                        </template>
+                        {{ t('floating.reusePdf') }}
+                      </n-tooltip>
+                    </div>
+                  </div>
+                  <div v-if="message.pptImages && message.pptImages.length > 0" class="mb-1 relative media-hover-container">
+                    <div class="bg-white/8 border border-white/15 rounded-1.5 px-2 py-1.5 flex items-center gap-2">
+                      <div class="w-5 h-5">
+                        <img src="@renderer/assets/icons/ppt3.svg" alt="PPT" class="w-full h-full" />
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="text-white/90 text-2.75 font-medium truncate">{{ message.pptName || t('floating.pptDocument') }} ({{ t('floating.pages', { count: message.pptTotalPages || message.pptImages.length }) }})</div>
+                      </div>
+                    </div>
+                    <!-- 媒体操作按钮 -->
+                    <div class="media-action-buttons">
+                      <n-tooltip trigger="hover" placement="top" :show-arrow="false">
+                        <template #trigger>
+                          <button class="media-action-btn" @click.stop="reuseMedia(message.pptImages, 'ppt', undefined, message.pptName, message.pptTotalPages)">
+                            <n-icon size="14">
+                              <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
+                              </svg>
+                            </n-icon>
+                          </button>
+                        </template>
+                        {{ t('floating.reusePpt') }}
+                      </n-tooltip>
+                    </div>
+                  </div>
+                  <div class="message-text">{{ message.content }}</div>
+                </div>
+              </template>
+
+              <!-- AI消息 -->
+              <template v-else>
+                <!-- 思考块 -->
+                <div v-if="extractThinkContent(message.content || '').trim()" class="mb-1.5">
+                  <n-collapse :default-expanded-names="settingsStore.settings.defaultExpandThink ? ['think'] : []" :arrow-placement="'right'" class="think-collapse-floating">
+                    <n-collapse-item name="think" class="think-collapse-item-floating">
+                      <template #header>
+                        <div class="think-header-floating">
+                          <span class="think-icon-floating">{{ index === chatStore.messages.length - 1 && chatStore.isGenerating ? '✨' : '✓' }}</span>
+                          <span class="think-label-floating" :class="{ 'thinking-blink-floating': index === chatStore.messages.length - 1 && chatStore.isGenerating }">
+                            {{ index === chatStore.messages.length - 1 && chatStore.isGenerating ? t('think.thinking') : t('think.thinkingComplete') }}
+                          </span>
+                        </div>
+                      </template>
+                      <div class="think-content-floating" :class="{ 'think-content-generating-floating': index === chatStore.messages.length - 1 && chatStore.isGenerating }">
+                        <div class="text-white/60 text-2.5 leading-1.3 whitespace-pre-wrap">
+                          {{ extractThinkContent(message.content || '') }}
+                          <span v-if="index === chatStore.messages.length - 1 && chatStore.isGenerating" class="loading-dots-floating"></span>
+                        </div>
+                      </div>
+                    </n-collapse-item>
+                  </n-collapse>
+                </div>
+                <!-- AI回复内容 -->
+                <div v-if="formatAnswerBoxes(removeThinkContent(message.content || '')).trim()" class="message-text" :title="t('floating.clickToViewFull')" @click="handleMessageClick(message)">
+                  {{ formatAnswerBoxes(removeThinkContent(message.content || '')) }}
+                </div>
+              </template>
+            </div>
           </template>
 
           <!-- Loading 提示 -->
@@ -311,9 +311,9 @@
             <div class="bg-white/10 backdrop-blur-sm rounded px-2 py-1.5 flex items-center gap-2">
               <div class="w-7 h-7">
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" fill="#2B579A"/>
-                  <path d="M14 2V8H20" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M8 13H16M8 17H16M10 9H12" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                  <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" fill="#2B579A" />
+                  <path d="M14 2V8H20" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M8 13H16M8 17H16M10 9H12" stroke="white" stroke-width="1.5" stroke-linecap="round" />
                 </svg>
               </div>
               <div class="flex-1 min-w-0">
@@ -784,7 +784,22 @@ const sendMessage = async (): Promise<void> => {
     // 待发送媒体在store的addUserMessage中清空
   }
 
-  await sendMessageCore(inputMessage.value, chatStore.pendingMedia.image || '', chatStore.pendingMedia.video || '', chatStore.pendingMedia.videoBase64 || '', chatStore.pendingMedia.pdfImages || [], chatStore.pendingMedia.pdfName || '', chatStore.pendingMedia.pptImages || [], chatStore.pendingMedia.pptName || '', chatStore.pendingMedia.pptTotalPages || null, chatStore.pendingMedia.wordImages || [], chatStore.pendingMedia.wordName || '', chatStore.pendingMedia.wordTotalPages || null, clearInputs, scrollToBottom)
+  await sendMessageCore(
+    inputMessage.value,
+    chatStore.pendingMedia.image || '',
+    chatStore.pendingMedia.video || '',
+    chatStore.pendingMedia.videoBase64 || '',
+    chatStore.pendingMedia.pdfImages || [],
+    chatStore.pendingMedia.pdfName || '',
+    chatStore.pendingMedia.pptImages || [],
+    chatStore.pendingMedia.pptName || '',
+    chatStore.pendingMedia.pptTotalPages || null,
+    chatStore.pendingMedia.wordImages || [],
+    chatStore.pendingMedia.wordName || '',
+    chatStore.pendingMedia.wordTotalPages || null,
+    clearInputs,
+    scrollToBottom
+  )
 }
 
 // 停止生成

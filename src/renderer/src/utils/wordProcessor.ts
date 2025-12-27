@@ -37,9 +37,7 @@ export async function processWordToImages(file: File): Promise<WordProcessingRes
   console.log('开始处理 Word 文件:', file.name, 'type:', file.type, 'size:', file.size)
 
   // 检查文件类型
-  const validTypes = [
-    'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-  ]
+  const validTypes = ['application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
 
   if (!validTypes.includes(file.type)) {
     console.error('不支持的文件类型:', file.type)
@@ -198,11 +196,7 @@ async function convertHtmlToImages(htmlContent: string): Promise<string[]> {
  * @param height 页面高度
  * @returns Promise<string | null>
  */
-async function renderPageToImage(
-  elements: HTMLElement[],
-  width: number,
-  height: number
-): Promise<string | null> {
+async function renderPageToImage(elements: HTMLElement[], width: number, height: number): Promise<string | null> {
   try {
     const canvas = document.createElement('canvas')
     const ctx = canvas.getContext('2d')
@@ -281,13 +275,7 @@ async function renderFullContentToImage(container: HTMLElement, width: number): 
  * @param y Y 坐标
  * @param maxWidth 最大宽度
  */
-async function renderElementToCanvas(
-  ctx: CanvasRenderingContext2D,
-  element: HTMLElement,
-  x: number,
-  y: number,
-  maxWidth: number
-): Promise<void> {
+async function renderElementToCanvas(ctx: CanvasRenderingContext2D, element: HTMLElement, x: number, y: number, maxWidth: number): Promise<void> {
   const tagName = element.tagName.toLowerCase()
   const text = element.textContent || ''
 

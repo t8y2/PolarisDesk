@@ -140,10 +140,7 @@ export function useFileProcessing(): {
         console.error('PPT处理失败:', error)
         message.error(`PPT处理失败: ${error instanceof Error ? error.message : '未知错误'}`)
       }
-    } else if (
-      file.type === 'application/msword' ||
-      file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    ) {
+    } else if (file.type === 'application/msword' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
       if (!validateWordFile(file)) {
         message.error('无效的 Word 文件')
         return

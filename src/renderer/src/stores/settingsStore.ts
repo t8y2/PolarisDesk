@@ -24,8 +24,9 @@ const BASE_SYSTEM_PROMPT_ZH = `你是 Polaris，一个专业、友好且高效�
 
 1. **使用标签**：将命令用 <command>命令</command> 标签包裹
 2. **一命令一标签**：不要在一个标签内放多个命令
-3. **简洁准确**：命令应该可以直接执行，不需要额外修改
-4. **提供说明**：在命令前后解释命令的作用和预期结果
+3. **只生成适用命令**：根据用户的操作系统，只生成一个适用的命令，不要列举多个系统的命令
+4. **简洁准确**：命令应该可以直接执行，不需要额外修改
+5. **提供说明**：在命令前后解释命令的作用和预期结果
 
 示例：
 用户：帮我列出当前目录的所有文件
@@ -70,8 +71,9 @@ When users need to execute system commands:
 
 1. **Use Tags**: Wrap commands with <command>command</command> tags
 2. **One Command Per Tag**: Don't put multiple commands in one tag
-3. **Concise and Accurate**: Commands should be directly executable without modification
-4. **Provide Explanation**: Explain the command's purpose and expected results
+3. **Generate Only Applicable Commands**: Based on the user's operating system, generate only one applicable command, do not list commands for multiple systems
+4. **Concise and Accurate**: Commands should be directly executable without modification
+5. **Provide Explanation**: Explain the command's purpose and expected results
 
 Example:
 User: Help me list all files in the current directory
@@ -94,18 +96,39 @@ For complex problems requiring reasoning, use <think> tags:
 
 Then provide your answer and suggestions.`
 
+// 获取操作系统信息
+function getOSInfo(): { platform: string; description: string } {
+  const platform = navigator.platform.toLowerCase()
+  const userAgent = navigator.userAgent.toLowerCase()
+
+  if (platform.includes('mac') || userAgent.includes('mac')) {
+    return { platform: 'macOS', description: 'macOS 系统' }
+  } else if (platform.includes('win') || userAgent.includes('win')) {
+    return { platform: 'Windows', description: 'Windows 系统' }
+  } else if (platform.includes('linux') || userAgent.includes('linux')) {
+    return { platform: 'Linux', description: 'Linux 系统' }
+  }
+  return { platform: 'Unknown', description: '未知系统' }
+}
+
 // 合并基础提示词和用户自定义提示词
 export function buildSystemPrompt(userPrompt: string, language: 'zh' | 'en' = 'zh'): string {
   const basePrompt = language === 'en' ? BASE_SYSTEM_PROMPT_EN : BASE_SYSTEM_PROMPT_ZH
   const trimmedUserPrompt = userPrompt.trim()
+  const osInfo = getOSInfo()
+
+  // 添加操作系统信息
+  const osInfoText = language === 'en'
+    ? `\n## System Environment\n\n- **Operating System**: ${osInfo.platform}\n- **Important**: When generating commands, only provide commands suitable for ${osInfo.platform}. Do not include commands for other operating systems.`
+    : `\n## 系统环境\n\n- **操作系统**: ${osInfo.description}\n- **重要提示**: 生成命令时，只提供适用于 ${osInfo.description} 的命令，不要包含其他操作系统的命令。`
 
   if (!trimmedUserPrompt) {
-    return basePrompt
+    return basePrompt + osInfoText
   }
 
   const customInstructionsLabel = language === 'en' ? '## Custom Instructions' : '## 用户自定义指令'
 
-  return `${basePrompt}
+  return `${basePrompt}${osInfoText}
 
 ${customInstructionsLabel}
 
@@ -117,6 +140,7 @@ export interface AppSettings {
   starryBackground: boolean
   defaultExpandThink: boolean
   saveRecordingLocally: boolean
+  autoExecuteCommands: boolean
   language: 'zh' | 'en'
   theme: 'dark' | 'light'
 
@@ -141,6 +165,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   starryBackground: true,
   defaultExpandThink: true,
   saveRecordingLocally: false,
+  autoExecuteCommands: false,
   language: 'zh',
   theme: 'dark',
 

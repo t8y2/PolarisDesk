@@ -97,6 +97,7 @@ export default {
     starryBackground: 'Starry Background',
     defaultExpandThink: 'Expand Thinking Process by Default',
     saveRecordingLocally: 'Save Recording Locally',
+    autoExecuteCommands: 'Auto Execute Commands',
 
     // API configuration
     connectionSettings: 'Connection Settings',

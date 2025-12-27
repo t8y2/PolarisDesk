@@ -21,10 +21,10 @@ PolarisDesk, like the North Star guiding sailors, provides intelligent guidance 
 
 <div align="center">
 
-| OpenAI | Anthropic | Google |
-|:------:|:---------:|:------:|
-| **DeepSeek** | **Moonshot** | **OpenRouter** |
-| **SiliconCloud** | **Ollama** | **Zhipu AI** |
+|      OpenAI      |  Anthropic   |     Google     |
+| :--------------: | :----------: | :------------: |
+|   **DeepSeek**   | **Moonshot** | **OpenRouter** |
+| **SiliconCloud** |  **Ollama**  |  **Zhipu AI**  |
 
 Supports custom endpoints compatible with OpenAI API format
 
@@ -113,17 +113,20 @@ pnpm build:linux
 ## 🛠️ Tech Stack
 
 ### Core
+
 - **Electron** - Cross-platform desktop framework
 - **Vue 3** - Progressive JavaScript framework
 - **TypeScript** - Type-safe JavaScript superset
 - **Vite** - Next-generation frontend build tool
 
 ### UI Components
+
 - **Naive UI** - Vue 3 component library
 - **UnoCSS** - Instant on-demand atomic CSS engine
 - **Vue Virtual Scroller** - Virtual scrolling optimization
 
 ### Features
+
 - **Markdown-it** - Markdown parser
 - **Highlight.js** - Code syntax highlighting
 - **KaTeX** - Math formula rendering
@@ -216,14 +219,14 @@ Contributions, issues, and feature requests are welcome!
 
 ## 🚀 Roadmap
 
-| Feature | Description | Status |
-|---------|-------------|--------|
-| 🤖 AI-Powered CLI | AI understands intent and executes system commands | Planned |
-| 🔌 Plugin System | Third-party plugin support | Planned |
-| 🌐 Multi-language | Internationalization | ✅ Completed |
-| 🎙️ Voice Interaction | Voice input/output | Planned |
-| 🎨 Theme Support | More theme extensions | Planned |
-| 💡 More | And more | Planned |
+| Feature              | Description                                        | Status       |
+| -------------------- | -------------------------------------------------- | ------------ |
+| 🤖 AI-Powered CLI    | AI understands intent and executes system commands | Planned      |
+| 🔌 Plugin System     | Third-party plugin support                         | Planned      |
+| 🌐 Multi-language    | Internationalization                               | ✅ Completed |
+| 🎙️ Voice Interaction | Voice input/output                                 | Planned      |
+| 🎨 Theme Support     | More theme extensions                              | Planned      |
+| 💡 More              | And more                                           | Planned      |
 
 Developers are welcome to contribute via PR!
 

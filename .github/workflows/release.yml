@@ -164,34 +164,34 @@ jobs:
           name: Release ${{ steps.version.outputs.VERSION }}
           body: |
             ## 🎉 PolarisDesk ${{ steps.version.outputs.VERSION }}
-            
+
             ### 📦 下载 / Downloads
-            
+
             - **macOS**: 下载 `.dmg` 文件
             - **Windows**: 下载 `.exe` 文件
-            
+
             ### 🍎 macOS 用户必读 / macOS Users Please Read
-            
+
             **首次打开提示"应用已损坏"？/ "App is Damaged" Error?**
-            
+
             由于应用未经过 Apple 公证，首次打开时需要执行以下命令：
             Since the app is not notarized by Apple, run this command after installation:
-            
+
             ```bash
             xattr -cr /Applications/PolarisDesk.app
             ```
-            
+
             或者 / Or:
             1. 打开 **系统设置** > **隐私与安全性** / Open **System Settings** > **Privacy & Security**
             2. 点击 **仍要打开** / Click **Open Anyway**
-            
+
             **为什么会这样？/ Why does this happen?**
             - 应用未经过 Apple 代码签名和公证 / App is not code-signed or notarized by Apple
             - 这是 macOS 的安全机制 / This is macOS Gatekeeper's security mechanism
             - 应用本身是安全的，源代码完全开源 / The app is safe - source code is fully open source
-            
+
             ### 📝 更新日志 / Changelog
-            
+
             查看下方自动生成的更新日志。
             See the auto-generated release notes below.
         env:

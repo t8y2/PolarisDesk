@@ -554,11 +554,11 @@ export class ModelAPI {
       text?: string
       image_url?: { url: string }
     }> = [
-        {
-          type: 'text',
-          text: prompt
-        }
-      ]
+      {
+        type: 'text',
+        text: prompt
+      }
+    ]
 
     // 添加所有图片
     images.forEach(image => {

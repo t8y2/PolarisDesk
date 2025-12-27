@@ -9,33 +9,13 @@
         <div class="command-actions">
           <!-- 未执行且未取消：显示执行和取消按钮 -->
           <template v-if="!cmd.executed && !cmd.executing && !cmd.dismissed">
-            <n-button
-              size="tiny"
-              type="primary"
-              @click="executeCommand(index)"
-            >
-              执行
-            </n-button>
-            <n-button
-              size="tiny"
-              @click="dismissCommand(index)"
-            >
-              取消
-            </n-button>
+            <n-button size="tiny" type="primary" @click="executeCommand(index)">执行</n-button>
+            <n-button size="tiny" @click="dismissCommand(index)">取消</n-button>
           </template>
           <!-- 执行中状态：显示中止按钮 -->
-          <n-button
-            v-if="cmd.executing"
-            size="tiny"
-            type="warning"
-            @click="cancelExecution(index)"
-          >
-            中止
-          </n-button>
+          <n-button v-if="cmd.executing" size="tiny" type="warning" @click="cancelExecution(index)">中止</n-button>
           <!-- 已取消状态：显示取消标签 -->
-          <n-tag v-if="cmd.dismissed" type="default" size="small">
-            已取消
-          </n-tag>
+          <n-tag v-if="cmd.dismissed" type="default" size="small">已取消</n-tag>
           <!-- 已完成状态：显示状态标签 -->
           <n-tag v-if="cmd.executed && !cmd.dismissed" :type="cmd.exitCode === 0 ? 'success' : 'error'" size="small">
             {{ cmd.exitCode === 0 ? '✓ 成功' : '✗ 失败' }}
@@ -45,7 +25,7 @@
       <div class="command-content">
         <n-code :code="cmd.command" language="bash" class="command-code" />
       </div>
-      
+
       <!-- 执行结果 -->
       <div v-if="cmd.output || cmd.error" class="command-result">
         <div v-if="cmd.output" class="result-output">
@@ -62,9 +42,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import { NButton, NCode, NTag, useMessage, useDialog } from 'naive-ui'
+import { ref, computed, watch, onMounted } from 'vue'
+import { NButton, NCode, NTag, useDialog } from 'naive-ui'
 import { useChatStore } from '../stores/chatStore'
+import { useSettingsStore } from '../stores/settingsStore'
 import { updateCommandState, type CommandState } from '../utils/commandExtractor'
 
 interface Command extends CommandState {
@@ -77,27 +58,45 @@ interface Props {
 }
 
 const props = defineProps<Props>()
-const message = useMessage()
 const dialog = useDialog()
 const chatStore = useChatStore()
+const settingsStore = useSettingsStore()
+
+// 强制刷新触发器
+const refreshTrigger = ref(0)
 
 // 执行状态映射表 - 存储临时的执行中状态和输出结果
-const executionStates = ref<Map<string, {
-  executing: boolean
-  output?: string
-  error?: string
-  abortController?: AbortController
-}>>(new Map())
+const executionStates = ref<
+  Map<
+    string,
+    {
+      executing: boolean
+      executed?: boolean
+      dismissed?: boolean
+      exitCode?: number
+      output?: string
+      error?: string
+      abortController?: AbortController
+    }
+  >
+>(new Map())
 
 // 转换为命令对象 - 响应式计算
 const commands = computed<Command[]>(() => {
+  // 使用 refreshTrigger 来强制重新计算（通过访问它的值）
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _ = refreshTrigger.value
+  
   return props.commands.map(cmd => {
-    const execState = executionStates.value.get(cmd.command) || {
-      executing: false
-    }
+    const execState = executionStates.value.get(cmd.command) || {}
+    
+    // 优先使用 executionStates 中的状态，然后是 props.commands 中的持久化状态
     return {
       ...cmd,
-      executing: execState.executing,
+      executing: execState.executing ?? false,
+      executed: execState.executed ?? cmd.executed,
+      dismissed: execState.dismissed ?? cmd.dismissed,
+      exitCode: execState.exitCode ?? cmd.exitCode,
       // 如果有临时输出，使用临时输出；否则使用持久化的输出
       output: execState.output || cmd.output,
       error: execState.error || cmd.error
@@ -106,9 +105,17 @@ const commands = computed<Command[]>(() => {
 })
 
 // 监听 props.commands 变化，输出调试信息
-watch(() => props.commands, (newCommands) => {
-  console.log('🔄 CommandBlock: 命令列表更新', newCommands)
-}, { immediate: true, deep: true })
+watch(
+  () => props.commands,
+  newCommands => {
+    console.log('🔄 CommandBlock: 命令列表更新', newCommands.map(cmd => ({
+      command: cmd.command,
+      executed: cmd.executed,
+      dismissed: cmd.dismissed
+    })))
+  },
+  { immediate: true, deep: true }
+)
 
 // 更新消息中的命令状态
 const updateMessageCommandState = (commandText: string, state: Partial<Omit<CommandState, 'command'>>) => {
@@ -116,28 +123,43 @@ const updateMessageCommandState = (commandText: string, state: Partial<Omit<Comm
   if (messageIndex !== -1) {
     const currentMessage = chatStore.messages[messageIndex]
     const updatedContent = updateCommandState(currentMessage.content || '', commandText, state)
-    chatStore.messages[messageIndex] = {
+    
+    // 创建新的消息对象以触发响应式更新
+    const newMessage = {
       ...currentMessage,
       content: updatedContent
     }
+    
+    // 使用 splice 替换消息以确保响应式更新
+    chatStore.messages.splice(messageIndex, 1, newMessage)
+    
+    // 保存到存储
     chatStore.saveToStorage()
+    
+    // 强制刷新 commands 计算属性
+    refreshTrigger.value++
+    
+    // 输出调试信息
+    console.log('✅ 命令状态已更新:', {
+      command: commandText,
+      state,
+      messageId: props.messageId,
+      updatedContent: updatedContent.substring(0, 200) + '...',
+      refreshTrigger: refreshTrigger.value
+    })
+  } else {
+    console.error('❌ 未找到消息:', props.messageId)
   }
 }
 
 const executeCommand = (index: number) => {
   const cmd = commands.value[index]
-  
+
   // 危险命令检测
-  const dangerousPatterns = [
-    /rm\s+-rf\s+\//,
-    /format\s+/i,
-    /del\s+\/[sf]/i,
-    /shutdown/i,
-    /reboot/i
-  ]
-  
+  const dangerousPatterns = [/rm\s+-rf\s+\//, /format\s+/i, /del\s+\/[sf]/i, /shutdown/i, /reboot/i]
+
   const isDangerous = dangerousPatterns.some(pattern => pattern.test(cmd.command))
-  
+
   dialog.warning({
     title: '确认执行',
     content: `即将执行以下命令：\n\n${cmd.command}\n\n${isDangerous ? '⚠️ 警告：此命令可能会修改系统文件或设置，请谨慎确认' : ''}`,
@@ -153,15 +175,19 @@ const doExecute = async (index: number) => {
   const cmd = commands.value[index]
   const cmdText = cmd.command
   
+  console.log('🚀 开始执行命令:', cmdText, '索引:', index)
+
   // 创建 AbortController 用于取消
   const abortController = new AbortController()
-  
+
   // 更新执行状态
   executionStates.value.set(cmdText, {
     executing: true,
     abortController
   })
   
+  console.log('⏳ 执行状态已设置为 executing')
+
   try {
     // 类型断言：window.api 包含 command 属性
     const api = window.api as typeof window.api & {
@@ -174,30 +200,39 @@ const doExecute = async (index: number) => {
         }>
       }
     }
-    
+
     if (!api?.command) {
       throw new Error('命令执行功能不可用')
     }
-    
+
     // 检查是否已被取消
     if (abortController.signal.aborted) {
       throw new Error('命令执行已取消')
     }
-    
+
     const result = await api.command.execute(cmdText)
     
+    console.log('✅ 命令执行完成:', result)
+
     // 再次检查是否已被取消
     if (abortController.signal.aborted) {
       throw new Error('命令执行已取消')
     }
-    
+
     // 清除执行状态，但保留输出结果
     executionStates.value.set(cmdText, {
       executing: false,
+      executed: true,
+      exitCode: result.exitCode || 0,
       output: result.output || '',
       error: result.error || ''
     })
     
+    // 强制刷新界面
+    refreshTrigger.value++
+    
+    console.log('📝 准备更新消息状态...')
+
     // 更新消息中的命令状态（持久化）
     updateMessageCommandState(cmdText, {
       executed: true,
@@ -206,25 +241,23 @@ const doExecute = async (index: number) => {
       error: result.error || ''
     })
     
-    if (result.success) {
-      message.success('命令执行成功')
-    } else {
-      message.error('命令执行失败')
-    }
+    console.log('✨ 状态更新完成')
   } catch (error) {
     const errorMsg = (error as Error).message
     
+    console.error('❌ 命令执行失败:', errorMsg)
+
     // 清除执行状态，但保留错误信息
     executionStates.value.set(cmdText, {
       executing: false,
+      executed: true,
+      exitCode: 1,
       error: errorMsg
     })
     
-    // 如果是取消操作，不显示错误
-    if (errorMsg !== '命令执行已取消') {
-      message.error('执行命令失败: ' + errorMsg)
-    }
-    
+    // 强制刷新界面
+    refreshTrigger.value++
+
     // 更新消息中的命令状态（持久化）
     updateMessageCommandState(cmdText, {
       executed: true,
@@ -238,17 +271,21 @@ const cancelExecution = (index: number) => {
   const cmd = commands.value[index]
   const cmdText = cmd.command
   const state = executionStates.value.get(cmdText)
-  
+
   if (state?.abortController) {
     state.abortController.abort()
-    message.info('已中止命令执行')
-    
+
     // 保留错误信息
     executionStates.value.set(cmdText, {
       executing: false,
+      executed: true,
+      exitCode: 130,
       error: '用户中止执行'
     })
     
+    // 强制刷新界面
+    refreshTrigger.value++
+
     // 更新消息中的命令状态（持久化）
     updateMessageCommandState(cmdText, {
       executed: true,
@@ -262,13 +299,76 @@ const dismissCommand = (index: number) => {
   const cmd = commands.value[index]
   const cmdText = cmd.command
   
+  // 更新本地状态
+  executionStates.value.set(cmdText, {
+    executing: false,
+    dismissed: true
+  })
+  
+  // 强制刷新界面
+  refreshTrigger.value++
+
   // 更新消息中的命令状态（持久化）
   updateMessageCommandState(cmdText, {
     dismissed: true
   })
-  
-  message.info('已取消命令')
 }
+
+// 自动执行命令
+const autoExecuteCommands = () => {
+  if (!settingsStore.settings.autoExecuteCommands) {
+    return
+  }
+
+  // 找到所有未执行且未取消的命令
+  const commandsToExecute: number[] = []
+  
+  commands.value.forEach((cmd, index) => {
+    // 检查命令是否已经执行过、正在执行或已取消
+    if (cmd.executed || cmd.executing || cmd.dismissed) {
+      console.log('⏭️ 跳过已处理的命令:', cmd.command, { executed: cmd.executed, executing: cmd.executing, dismissed: cmd.dismissed })
+      return
+    }
+
+    // 检查是否为危险命令
+    const dangerousPatterns = [/rm\s+-rf\s+\//, /format\s+/i, /del\s+\/[sf]/i, /shutdown/i, /reboot/i]
+
+    const isDangerous = dangerousPatterns.some(pattern => pattern.test(cmd.command))
+
+    // 危险命令不自动执行，需要用户手动确认
+    if (isDangerous) {
+      console.warn('⚠️ 检测到危险命令，跳过自动执行:', cmd.command)
+      return
+    }
+
+    commandsToExecute.push(index)
+  })
+
+  // 延迟执行，避免同时执行多个命令
+  commandsToExecute.forEach((index, i) => {
+    setTimeout(() => {
+      console.log('🚀 自动执行命令:', commands.value[index].command)
+      doExecute(index)
+    }, i * 100) // 每个命令间隔100ms
+  })
+}
+
+// 监听命令列表变化，自动执行新命令
+watch(
+  () => props.commands,
+  (newCommands, oldCommands) => {
+    // 只在有新命令添加时触发自动执行
+    if (newCommands.length > (oldCommands?.length || 0)) {
+      autoExecuteCommands()
+    }
+  },
+  { deep: true }
+)
+
+// 组件挂载时检查是否需要自动执行
+onMounted(() => {
+  autoExecuteCommands()
+})
 </script>
 
 <style scoped>

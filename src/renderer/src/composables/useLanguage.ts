@@ -16,7 +16,7 @@ export function useLanguage() {
   // 监听设置变化
   watch(
     () => settingsStore.settings.language,
-    (newLang) => {
+    newLang => {
       locale.value = newLang
       // 语言切换时更新欢迎消息
       chatStore.updateWelcomeMessage()

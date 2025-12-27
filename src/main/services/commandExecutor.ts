@@ -43,11 +43,7 @@ export class CommandExecutorService {
   }
 
   // 流式执行命令（实时输出）
-  executeCommandStream(
-    command: string,
-    onData: (data: string, isError: boolean) => void,
-    onComplete: (exitCode: number) => void
-  ): () => void {
+  executeCommandStream(command: string, onData: (data: string, isError: boolean) => void, onComplete: (exitCode: number) => void): () => void {
     logger.info(`流式执行命令: ${command}`)
 
     // 解析命令和参数

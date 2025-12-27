@@ -325,10 +325,10 @@ function validateFileSize(file: File): boolean {
     video: { max: 20 * 1024 * 1024, error: 'chatView.videoSizeExceeded20MB' },
     default: { max: 50 * 1024 * 1024, error: 'chatView.fileSizeExceeded50MB' }
   }
-  
+
   const type = file.type.startsWith('image/') ? 'image' : file.type.startsWith('video/') ? 'video' : 'default'
   const { max, error } = sizeMap[type]
-  
+
   if (file.size > max) {
     message.error(t(error))
     return false
@@ -340,7 +340,7 @@ function validateFileSize(file: File): boolean {
 async function handleSimpleFile(file: File): Promise<void> {
   const isImage = file.type.startsWith('image/')
   const type = isImage ? 'image' : 'video'
-  
+
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.onload = e => {
@@ -363,7 +363,7 @@ async function handleFileUpload(file: File, resetInput?: () => void): Promise<vo
 
   try {
     isFileUploading.value = true
-    
+
     if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
       await handleSimpleFile(file)
     } else if (['application/pdf', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(file.type)) {
@@ -398,8 +398,10 @@ async function handleFileSelect(event: Event): Promise<void> {
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
   if (!file) return
-  
-  await handleFileUpload(file, () => { input.value = '' })
+
+  await handleFileUpload(file, () => {
+    input.value = ''
+  })
 }
 
 function handleClearMedia(type: 'image' | 'video' | 'pdf' | 'ppt' | 'word'): void {
@@ -530,18 +532,18 @@ async function handleDrop(event: DragEvent): Promise<void> {
   event.stopPropagation()
   dragCounter = 0
   isDragOver.value = false
-  
+
   const file = event.dataTransfer?.files?.[0]
   if (!file) return
-  
+
   const allowedTypes = ['image/', 'video/', 'application/pdf', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
   const isAllowedType = allowedTypes.some(type => file.type.startsWith(type) || file.type === type)
-  
+
   if (!isAllowedType) {
     message.error('不支持的文件类型，请拖入图片、视频、PDF、PPT或Word文件')
     return
   }
-  
+
   await handleFileUpload(file)
 }
 
@@ -640,7 +642,6 @@ function handleStorageClearEvent(event: StorageEvent): void {
 </script>
 
 <style scoped>
-
 .user {
   max-width: var(--user-message-width, 80%);
   margin-left: auto;

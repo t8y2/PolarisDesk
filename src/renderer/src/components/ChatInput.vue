@@ -248,19 +248,19 @@ defineExpose({
 
 /* 发送按钮样式 */
 :deep(.send-button) {
-  background: rgba(96, 165, 250, 0.6) !important;
-  border: 1px solid rgba(96, 165, 250, 0.3) !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
   border-radius: 8px !important;
   padding: 0 20px !important;
   font-weight: 500 !important;
   transition: all 0.2s ease !important;
-  color: white !important;
+  color: #1a1a1a !important;
 }
 
 :deep(.send-button:hover:not(:disabled)) {
-  background: rgba(96, 165, 250, 0.8) !important;
-  border-color: rgba(96, 165, 250, 0.5) !important;
-  box-shadow: 0 2px 8px rgba(96, 165, 250, 0.3) !important;
+  background: rgba(255, 255, 255, 1) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.2) !important;
 }
 
 :deep(.send-button:active:not(:disabled)) {
@@ -270,8 +270,9 @@ defineExpose({
 :deep(.send-button:disabled) {
   opacity: 0.4 !important;
   cursor: not-allowed !important;
-  background: rgba(255, 255, 255, 0.05) !important;
+  background: rgba(255, 255, 255, 0.2) !important;
   border-color: rgba(255, 255, 255, 0.1) !important;
+  color: rgba(255, 255, 255, 0.4) !important;
 }
 
 /* 停止按钮样式 */

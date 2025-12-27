@@ -97,6 +97,7 @@ export default {
     starryBackground: '星空背景',
     defaultExpandThink: '默认展开思考过程',
     saveRecordingLocally: '本地保存录音',
+    autoExecuteCommands: '静默执行命令',
 
     // API 配置
     connectionSettings: '连接设置',
