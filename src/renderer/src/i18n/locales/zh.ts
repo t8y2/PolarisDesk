@@ -63,6 +63,7 @@ export default {
   },
   think: {
     thinking: '思考中',
+    thinkingComplete: '思考已完成',
     thinkingProcess: '思考过程',
     expand: '展开',
     collapse: '收起'

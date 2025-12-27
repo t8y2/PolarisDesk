@@ -16,7 +16,7 @@
               <UserMessage v-if="msg.role === 'user'" :message="msg" @preview="openPreview" @reuse="reuseMedia" @download="downloadMedia" />
 
               <!-- AI回复 -->
-              <AssistantMessage v-else :message="msg" :is-generating="chatStore.isGenerating" :extract-think-content="extractThinkContent" :remove-think-content="removeThinkContent" :extract-answer-boxes="extractAnswerBoxes" :remove-answer-boxes="removeAnswerBoxes" />
+              <AssistantMessage v-else :message="msg" :is-generating="index === chatStore.messages.length - 1 && chatStore.isGenerating" :extract-think-content="extractThinkContent" :remove-think-content="removeThinkContent" :extract-answer-boxes="extractAnswerBoxes" :remove-answer-boxes="removeAnswerBoxes" />
             </div>
           </div>
         </DynamicScrollerItem>
@@ -36,7 +36,7 @@
           <UserMessage v-if="msg.role === 'user'" :message="msg" @preview="openPreview" @reuse="reuseMedia" @download="downloadMedia" />
 
           <!-- AI回复 -->
-          <AssistantMessage v-else :message="msg" :is-generating="chatStore.isGenerating" :extract-think-content="extractThinkContent" :remove-think-content="removeThinkContent" :extract-answer-boxes="extractAnswerBoxes" :remove-answer-boxes="removeAnswerBoxes" />
+          <AssistantMessage v-else :message="msg" :is-generating="chatStore.messages.indexOf(msg) === chatStore.messages.length - 1 && chatStore.isGenerating" :extract-think-content="extractThinkContent" :remove-think-content="removeThinkContent" :extract-answer-boxes="extractAnswerBoxes" :remove-answer-boxes="removeAnswerBoxes" />
         </div>
       </div>
 

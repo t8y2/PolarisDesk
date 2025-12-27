@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col w-100%">
     <!-- 思考块 -->
-    <ThinkBlock :content="thinkContent" :is-generating="isGenerating" />
+    <ThinkBlock :content="thinkContent" :is-generating="isGenerating" :default-expanded="settingsStore.settings.defaultExpandThink" />
 
     <!-- AI回复内容 -->
     <div v-if="mainContent.trim()" class="flex items-start w-full mb-2">
@@ -33,6 +33,9 @@ import AnswerBlock from './AnswerBlock.vue'
 import CommandBlock from './CommandBlock.vue'
 import { formatMessageTime, formatDetailedTime } from '../utils/timeFormat'
 import { extractCommands, removeCommandBlocks } from '../utils/commandExtractor'
+import { useSettingsStore } from '../stores/settingsStore'
+
+const settingsStore = useSettingsStore()
 
 interface Message {
   id: string

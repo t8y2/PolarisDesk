@@ -63,6 +63,7 @@ export default {
   },
   think: {
     thinking: 'Thinking',
+    thinkingComplete: 'Thinking Complete',
     thinkingProcess: 'Thinking Process',
     expand: 'Expand',
     collapse: 'Collapse'

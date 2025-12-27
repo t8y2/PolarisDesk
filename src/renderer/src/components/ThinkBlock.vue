@@ -1,30 +1,28 @@
 <template>
   <div v-if="content.trim()" class="mb-2">
-    <div class="bg-purple-900/20 backdrop-blur-sm px-3 py-2 rounded-lg border border-purple-800/15 think-block">
-      <div class="think-header select-none">
-        <span class="think-icon">✨</span>
-        <span class="think-label">
-          {{ isGenerating ? t('think.thinking') : t('think.thinkingProcess') }}
-        </span>
-        <button class="think-toggle" @click="toggleExpanded">
-          <span v-if="isExpanded">{{ t('think.collapse') }}</span>
-          <span v-else>{{ t('think.expand') }}</span>
-        </button>
-      </div>
-      <div class="think-content-wrapper" :class="{ 'is-expanded': isExpanded }">
+    <n-collapse :default-expanded-names="defaultExpanded ? ['think'] : []" :arrow-placement="'right'" class="think-collapse">
+      <n-collapse-item name="think" class="think-collapse-item">
+        <template #header>
+          <div class="think-header">
+            <span class="think-icon">{{ isGenerating ? '✨' : '✓' }}</span>
+            <span class="think-label" :class="{ 'thinking-blink': isGenerating }">
+              {{ isGenerating ? t('think.thinking') : t('think.thinkingComplete') }}
+            </span>
+          </div>
+        </template>
         <div class="think-content" :class="{ 'think-content-generating': isGenerating }">
           <div class="prose prose-sm max-w-none prose-p:text-neutral-400 prose-p:my-1 whitespace-pre-wrap text-neutral-400 text-sm leading-5">
             {{ content }}
             <span v-if="isGenerating" class="loading-dots"></span>
           </div>
         </div>
-      </div>
-    </div>
+      </n-collapse-item>
+    </n-collapse>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { NCollapse, NCollapseItem } from 'naive-ui'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
@@ -35,92 +33,95 @@ interface Props {
   defaultExpanded?: boolean
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   isGenerating: false,
   defaultExpanded: true
-})
-
-const isExpanded = ref(props.defaultExpanded)
-
-function toggleExpanded(): void {
-  isExpanded.value = !isExpanded.value
-}
-
-// 暴露方法供父组件调用
-defineExpose({
-  toggleExpanded,
-  isExpanded
 })
 </script>
 
 <style scoped>
-/* 思考块样式 */
-.think-block {
-  font-size: 0.875rem;
-  position: relative;
+/* 思考块折叠面板样式 */
+:deep(.think-collapse) {
+  background: transparent !important;
+  border: none !important;
+}
+
+:deep(.think-collapse-item) {
+  background: rgba(147, 51, 234, 0.1) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(147, 51, 234, 0.2) !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+}
+
+:deep(.think-collapse-item .n-collapse-item__header) {
+  background: transparent !important;
+  padding: 6px 12px !important;
+  font-size: 0.875rem !important;
+  border: none !important;
+  min-height: unset !important;
+  line-height: 1.2 !important;
+}
+
+:deep(.think-collapse-item .n-collapse-item__header:hover) {
+  background: rgba(147, 51, 234, 0.05) !important;
+}
+
+:deep(.think-collapse-item .n-collapse-item__header-main) {
+  flex: 1 !important;
+}
+
+:deep(.think-collapse-item .n-collapse-item__arrow) {
+  color: rgb(147, 51, 234) !important;
+  font-size: 16px !important;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+:deep(.think-collapse-item .n-collapse-item__content-wrapper) {
+  border-top: 1px solid rgba(147, 51, 234, 0.15) !important;
+}
+
+:deep(.think-collapse-item .n-collapse-item__content-inner) {
+  padding: 8px 12px !important;
 }
 
 .think-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 2px 0;
-  font-size: 0.8rem;
+  width: 100%;
+  user-select: none;
 }
 
 .think-icon {
-  font-size: 14px;
+  font-size: 16px;
+  flex-shrink: 0;
 }
 
 .think-label {
-  color: rgb(156, 163, 175);
+  color: rgb(196, 181, 253);
   font-weight: 500;
   flex: 1;
+  font-size: 0.875rem;
 }
 
-.think-toggle {
-  background: none;
-  border: none;
-  color: rgb(96, 165, 250);
-  cursor: pointer;
-  font-size: 0.75rem;
-  padding: 2px 6px;
-  border-radius: 4px;
-  transition: all 0.2s;
+/* 思考中闪烁动画 */
+.thinking-blink {
+  animation: blink 1.5s ease-in-out infinite;
 }
 
-.think-toggle:hover {
-  background: rgba(96, 165, 250, 0.1);
-  color: rgb(147, 197, 253);
-}
-
-/* 使用 Grid 实现平滑的展开/收起动画 */
-.think-content-wrapper {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
-}
-
-.think-content-wrapper.is-expanded {
-  grid-template-rows: 1fr;
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
 }
 
 .think-content {
-  min-height: 0;
-  margin-top: 0;
-  padding-top: 0;
-  border-top: 1px solid transparent;
-  transition:
-    margin-top 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-    padding-top 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-    border-top-color 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.think-content-wrapper.is-expanded .think-content {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top-color: rgba(115, 115, 115, 0.3);
+  font-size: 0.875rem;
 }
 
 /* 生成中的思考块有固定高度和滚动 */
@@ -130,13 +131,25 @@ defineExpose({
 }
 
 .think-content-generating::-webkit-scrollbar {
-  width: 0;
-  display: none;
+  width: 4px;
+}
+
+.think-content-generating::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.think-content-generating::-webkit-scrollbar-thumb {
+  background: rgba(147, 51, 234, 0.3);
+  border-radius: 2px;
+}
+
+.think-content-generating::-webkit-scrollbar-thumb:hover {
+  background: rgba(147, 51, 234, 0.5);
 }
 
 .think-content .prose {
   font-size: 0.8rem;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 /* 加载动画 */
@@ -160,28 +173,26 @@ defineExpose({
 }
 
 /* 浅色主题样式 */
-body[data-theme='light'] .think-block {
-  background-color: rgba(149, 236, 105, 0.15) !important;
+body[data-theme='light'] :deep(.think-collapse-item) {
+  background: rgba(149, 236, 105, 0.12) !important;
   border-color: rgba(149, 236, 105, 0.3) !important;
+}
+
+body[data-theme='light'] :deep(.think-collapse-item .n-collapse-item__header:hover) {
+  background: rgba(149, 236, 105, 0.08) !important;
+}
+
+body[data-theme='light'] :deep(.think-collapse-item .n-collapse-item__arrow) {
+  color: #15803d !important;
+}
+
+body[data-theme='light'] :deep(.think-collapse-item .n-collapse-item__content-wrapper) {
+  border-top-color: rgba(149, 236, 105, 0.25) !important;
 }
 
 body[data-theme='light'] .think-label {
   color: #15803d !important;
   font-weight: 600 !important;
-}
-
-body[data-theme='light'] .think-toggle {
-  color: #15803d !important;
-  font-weight: 600 !important;
-}
-
-body[data-theme='light'] .think-toggle:hover {
-  background: rgba(149, 236, 105, 0.2) !important;
-  color: #166534 !important;
-}
-
-body[data-theme='light'] .think-toggle span {
-  color: #15803d !important;
 }
 
 body[data-theme='light'] .think-content,
@@ -191,7 +202,11 @@ body[data-theme='light'] .think-content div {
   color: #1a1a1a !important;
 }
 
-body[data-theme='light'] .think-content-wrapper.is-expanded .think-content {
-  border-top-color: rgba(149, 236, 105, 0.3) !important;
+body[data-theme='light'] .think-content-generating::-webkit-scrollbar-thumb {
+  background: rgba(149, 236, 105, 0.4);
+}
+
+body[data-theme='light'] .think-content-generating::-webkit-scrollbar-thumb:hover {
+  background: rgba(149, 236, 105, 0.6);
 }
 </style>

@@ -192,20 +192,25 @@
             <!-- AI消息 -->
             <div v-else>
               <!-- 思考块 -->
-              <div v-if="extractThinkContent(message.content || '').trim()" class="mb-1.5 px-2 py-1.5 bg-white/5 rounded-1.5 border border-white/10 text-2.75">
-                <div class="flex items-center gap-1 select-none">
-                  <span class="text-3">✨</span>
-                  <span class="text-white/70 font-medium flex-1 text-2.5">{{ chatStore.isGenerating ? t('floating.thinking') : t('think.thinking') }}</span>
-                  <button class="bg-transparent border-none text-blue/80 cursor-pointer text-2.25 px-1 py-0.5 rounded transition-all-200 hover:bg-blue/10 hover:text-blue" @click="toggleThinkExpanded(message.id || index.toString())">
-                    <span v-if="isThinkExpanded(message.id || index.toString())">{{ t('think.collapse') }}</span>
-                    <span v-else>{{ t('think.expand') }}</span>
-                  </button>
-                </div>
-                <transition name="think-expand-floating">
-                  <div v-if="isThinkExpanded(message.id || index.toString())" class="think-content-floating mt-1.5 pt-1.5 border-t border-white/10 text-white/60 text-2.5 leading-1.3 whitespace-pre-wrap" :class="{ 'think-generating': chatStore.isGenerating }">
-                    {{ extractThinkContent(message.content || '') }}
-                  </div>
-                </transition>
+              <div v-if="extractThinkContent(message.content || '').trim()" class="mb-1.5">
+                <n-collapse :default-expanded-names="settingsStore.settings.defaultExpandThink ? ['think'] : []" :arrow-placement="'right'" class="think-collapse-floating">
+                  <n-collapse-item name="think" class="think-collapse-item-floating">
+                    <template #header>
+                      <div class="think-header-floating">
+                        <span class="think-icon-floating">{{ (index === chatStore.messages.length - 1 && chatStore.isGenerating) ? '✨' : '✓' }}</span>
+                        <span class="think-label-floating" :class="{ 'thinking-blink-floating': index === chatStore.messages.length - 1 && chatStore.isGenerating }">
+                          {{ (index === chatStore.messages.length - 1 && chatStore.isGenerating) ? t('think.thinking') : t('think.thinkingComplete') }}
+                        </span>
+                      </div>
+                    </template>
+                    <div class="think-content-floating" :class="{ 'think-content-generating-floating': index === chatStore.messages.length - 1 && chatStore.isGenerating }">
+                      <div class="text-white/60 text-2.5 leading-1.3 whitespace-pre-wrap">
+                        {{ extractThinkContent(message.content || '') }}
+                        <span v-if="index === chatStore.messages.length - 1 && chatStore.isGenerating" class="loading-dots-floating"></span>
+                      </div>
+                    </div>
+                  </n-collapse-item>
+                </n-collapse>
               </div>
               <!-- AI回复内容 -->
               <div v-if="formatAnswerBoxes(removeThinkContent(message.content || '')).trim()" class="message-text" :title="t('floating.clickToViewFull')" @click="handleMessageClick(message)">
@@ -393,15 +398,19 @@
 
 <script setup lang="ts">
 import { ref, nextTick, onMounted, onUnmounted, computed, watch } from 'vue'
-import { NTooltip, NIcon, useMessage } from 'naive-ui'
+import { NTooltip, NIcon, NCollapse, NCollapseItem, useMessage } from 'naive-ui'
 import { Send, Document, Camera } from '@vicons/carbon'
 import { Cut } from '@vicons/tabler'
 import { useI18n } from 'vue-i18n'
 import { useChatFunctions } from '../composables/useChatFunctions'
+import { useSettingsStore } from '../stores/settingsStore'
 import VideoPlayer from './VideoPlayer.vue'
 
 // 使用组合式函数
-const { chatStore, extractThinkContent, removeThinkContent, formatAnswerBoxes, toggleThinkExpanded, isThinkExpanded, processFile, handlePaste, sendMessage: sendMessageCore, handleKeyDown: handleKeyDownCore, handleMessageClick, handleAreaScreenshot: handleAreaScreenshotCore, handleQuickScreenshot: handleQuickScreenshotCore, cleanup, cancelCurrentRequest } = useChatFunctions()
+const { chatStore, extractThinkContent, removeThinkContent, formatAnswerBoxes, processFile, handlePaste, sendMessage: sendMessageCore, handleKeyDown: handleKeyDownCore, handleMessageClick, handleAreaScreenshot: handleAreaScreenshotCore, handleQuickScreenshot: handleQuickScreenshotCore, cleanup, cancelCurrentRequest } = useChatFunctions()
+
+// 设置store
+const settingsStore = useSettingsStore()
 
 // 国际化
 const { t } = useI18n()
@@ -1172,42 +1181,131 @@ const handleDrop = async (event: DragEvent): Promise<void> => {
   transform: scale(0.95);
 }
 
-/* 思考块内容样式 */
+/* 悬浮窗思考块折叠面板样式 */
+:deep(.think-collapse-floating) {
+  background: transparent !important;
+  border: none !important;
+}
+
+:deep(.think-collapse-item-floating) {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 6px !important;
+  overflow: hidden !important;
+}
+
+:deep(.think-collapse-item-floating .n-collapse-item__header) {
+  background: transparent !important;
+  padding: 4px 8px !important;
+  font-size: 0.65rem !important;
+  border: none !important;
+  min-height: unset !important;
+  line-height: 1 !important;
+}
+
+:deep(.think-collapse-item-floating .n-collapse-item__header:hover) {
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+
+:deep(.think-collapse-item-floating .n-collapse-item__header-main) {
+  flex: 1 !important;
+}
+
+:deep(.think-collapse-item-floating .n-collapse-item__arrow) {
+  color: rgba(255, 255, 255, 0.6) !important;
+  font-size: 12px !important;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+:deep(.think-collapse-item-floating .n-collapse-item__content-wrapper) {
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+:deep(.think-collapse-item-floating .n-collapse-item__content-inner) {
+  padding: 4px 8px !important;
+}
+
+.think-header-floating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  user-select: none;
+}
+
+.think-icon-floating {
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.think-label-floating {
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+  flex: 1;
+  font-size: 0.65rem;
+}
+
+/* 思考中闪烁动画 */
+.thinking-blink-floating {
+  animation: blink-floating 1.5s ease-in-out infinite;
+}
+
+@keyframes blink-floating {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
 .think-content-floating {
-  overflow-x: hidden;
+  font-size: 0.65rem;
 }
 
 /* 生成中的思考块有固定高度和滚动 */
-.think-content-floating.think-generating {
+.think-content-generating-floating {
   max-height: 120px;
   overflow-y: auto;
 }
 
-.think-content-floating.think-generating::-webkit-scrollbar {
-  width: 0;
-  display: none;
+.think-content-generating-floating::-webkit-scrollbar {
+  width: 3px;
 }
 
-/* 思考块展开/收起动画 */
-.think-expand-floating-enter-active,
-.think-expand-floating-leave-active {
-  transition: all 0.3s ease;
-  overflow: hidden;
+.think-content-generating-floating::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-.think-expand-floating-enter-from,
-.think-expand-floating-leave-to {
-  max-height: 0;
-  opacity: 0;
-  margin-top: 0;
-  padding-top: 0;
-  border-top-width: 0;
+.think-content-generating-floating::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
 }
 
-.think-expand-floating-enter-to,
-.think-expand-floating-leave-from {
-  max-height: 120px;
-  opacity: 1;
+.think-content-generating-floating::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* 加载动画 */
+.loading-dots-floating::after {
+  content: '';
+  animation: dots-floating 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots-floating {
+  0%,
+  20% {
+    content: '.';
+  }
+  40% {
+    content: '..';
+  }
+  60%,
+  100% {
+    content: '...';
+  }
 }
 
 /* 悬浮窗显示/隐藏动画 */
