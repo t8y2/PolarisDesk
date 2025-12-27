@@ -597,6 +597,14 @@ export class IpcHandlers {
       }
     })
 
+    // 最小化悬浮窗
+    ipcMain.on('minimize-floating-window', () => {
+      const floatingWindow = windowManager.getFloatingWindow()
+      if (floatingWindow && !floatingWindow.isDestroyed()) {
+        floatingWindow.minimize()
+      }
+    })
+
     // 显示响应窗口
     ipcMain.handle('show-response-window', (_, response: string) => {
       // 如果已经有响应窗口，先关闭它

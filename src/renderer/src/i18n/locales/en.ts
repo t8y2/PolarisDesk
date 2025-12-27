@@ -240,6 +240,7 @@ export default {
     pin: 'Pin Window',
     unpin: 'Unpin Window',
     switchToMain: 'Switch to Main Window',
+    minimize: 'Minimize',
     close: 'Close Floating Window',
     releaseToUpload: 'Release to upload',
     supportedFormats: 'Supports images/videos/PDF/PPT',

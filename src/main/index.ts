@@ -57,6 +57,30 @@ app.whenReady().then(async () => {
 
   app.on('activate', function () {
     const mainWindow = windowManager.getMainWindow()
+    const floatingWindow = windowManager.getFloatingWindow()
+
+    // 如果悬浮窗存在且未被销毁（包括最小化状态）
+    if (floatingWindow && !floatingWindow.isDestroyed()) {
+      // 如果悬浮窗被最小化，恢复它
+      if (floatingWindow.isMinimized()) {
+        floatingWindow.restore()
+        floatingWindow.focus()
+        // 确保主窗口隐藏
+        if (mainWindow && !mainWindow.isDestroyed() && mainWindow.isVisible()) {
+          mainWindow.hide()
+        }
+        return
+      }
+      // 如果悬浮窗可见，聚焦它并确保主窗口隐藏
+      if (floatingWindow.isVisible()) {
+        floatingWindow.focus()
+        if (mainWindow && !mainWindow.isDestroyed() && mainWindow.isVisible()) {
+          mainWindow.hide()
+        }
+        return
+      }
+      // 如果悬浮窗被隐藏（用户切换到主窗口），继续显示主窗口
+    }
 
     // 检查主窗口是否存在，如果不存在则重新创建
     if (!mainWindow || mainWindow.isDestroyed()) {

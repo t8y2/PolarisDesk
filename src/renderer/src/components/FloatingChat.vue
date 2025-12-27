@@ -46,6 +46,12 @@
           </n-tooltip>
           <n-tooltip trigger="hover" placement="bottom" :show-arrow="false" :delay="300" size="small">
             <template #trigger>
+              <button class="bg-white/10 border-none rounded text-white text-2.75 cursor-pointer px-1.5 py-1 transition-all-200 min-w-5 h-5 flex items-center justify-center hover:bg-yellow/60" @click="minimizeFloating">−</button>
+            </template>
+            <span class="tooltip-text">{{ t('floating.minimize') }}</span>
+          </n-tooltip>
+          <n-tooltip trigger="hover" placement="bottom" :show-arrow="false" :delay="300" size="small">
+            <template #trigger>
               <button class="bg-white/10 border-none rounded text-white text-2.75 cursor-pointer px-1.5 py-1 transition-all-200 min-w-5 h-5 flex items-center justify-center hover:bg-red/60" @click="closeFloating">✕</button>
             </template>
             <span class="tooltip-text">{{ t('floating.close') }}</span>
@@ -456,6 +462,12 @@ const switchToMain = (): void => {
 const closeFloating = (): void => {
   if (window.api?.closeFloatingWindow) {
     window.api.closeFloatingWindow()
+  }
+}
+
+const minimizeFloating = (): void => {
+  if (window.api?.minimizeFloatingWindow) {
+    window.api.minimizeFloatingWindow()
   }
 }
 

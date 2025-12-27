@@ -69,6 +69,7 @@ const api = {
 
   // 悬浮窗控制
   closeFloatingWindow: () => ipcRenderer.send('close-floating-window'),
+  minimizeFloatingWindow: () => ipcRenderer.send('minimize-floating-window'),
 
   // 响应窗口控制
   showResponseWindow: (response: string) => ipcRenderer.invoke('show-response-window', response),

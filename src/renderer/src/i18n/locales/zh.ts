@@ -240,6 +240,7 @@ export default {
     pin: '窗口置顶',
     unpin: '取消置顶',
     switchToMain: '切换到主窗口',
+    minimize: '最小化',
     close: '关闭悬浮窗',
     releaseToUpload: '释放文件上传',
     supportedFormats: '支持图片/视频/PDF/PPT',

@@ -78,6 +78,7 @@ interface Window {
     offQuickScreenshot: (callback: () => void) => void
     moveFloatingWindow: (deltaX: number, deltaY: number) => void
     closeFloatingWindow: () => void
+    minimizeFloatingWindow: () => void
 
     // 响应窗口控制
     showResponseWindow: (response: string) => Promise<void>
