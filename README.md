@@ -110,6 +110,13 @@ PolarisDesk（北极星桌面）寓意如同北极星为航海者指引方向一
 
 - Node.js >= 18
 - pnpm >= 8
+- **macOS 开发者**: Xcode Command Line Tools（用于编译原生模块）
+- **Windows 开发者**: Visual Studio Build Tools（用于编译原生模块）
+
+```bash
+# macOS 安装构建工具
+xcode-select --install
+```
 
 ### 安装
 
@@ -118,9 +125,11 @@ PolarisDesk（北极星桌面）寓意如同北极星为航海者指引方向一
 git clone https://github.com/t8y2/PolarisDesk.git
 cd PolarisDesk
 
-# 安装依赖
+# 安装依赖（会自动编译原生模块）
 pnpm install
 ```
+
+> 📝 **关于原生模块**: 项目包含平台特定的原生 C++ 模块（如 macOS 的 UI Tree 访问），安装时会自动编译。详见 [原生模块文档](docs/NATIVE_MODULES.md)。
 
 ### 开发
 
@@ -186,6 +195,9 @@ PolarisDesk/
 │       ├── views/      # 页面视图
 │       ├── stores/     # Pinia 状态管理
 │       └── utils/      # 工具函数
+├── native/             # 原生 C++ 模块
+│   ├── mac/           # macOS 原生模块
+│   └── win/           # Windows 原生模块
 ├── resources/          # 应用资源
 ├── build/             # 构建配置
 └── dist/              # 构建输出

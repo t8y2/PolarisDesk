@@ -1,14 +1,3 @@
-# 编译输出
 build/
-*.node
-
-# 依赖
 node_modules/
-
-# 日志
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# macOS
-.DS_Store
+*.log

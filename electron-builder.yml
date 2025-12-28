@@ -23,9 +23,13 @@ files:
   - '!node_modules/**/LICENSE*'
   - '!node_modules/**/*.d.ts'
   - '!node_modules/**/*.ts'
+  - 'native/**/*.node'
+  - '!native/**/node_modules/**'
+  - '!native/**/*.{mm,h,cc,cpp}'
 asarUnpack:
   - resources/**
   - node_modules/ffmpeg-static-electron/**
+  - native/**/*.node
 asar: true
 win:
   executableName: polaris-desk

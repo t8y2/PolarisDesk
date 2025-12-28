@@ -110,6 +110,13 @@ Welcome to join the PolarisDesk community to exchange experiences, share tips, a
 
 - Node.js >= 18
 - pnpm >= 8
+- **macOS Developers**: Xcode Command Line Tools (for compiling native modules)
+- **Windows Developers**: Visual Studio Build Tools (for compiling native modules)
+
+```bash
+# Install build tools on macOS
+xcode-select --install
+```
 
 ### Installation
 
@@ -118,9 +125,11 @@ Welcome to join the PolarisDesk community to exchange experiences, share tips, a
 git clone https://github.com/t8y2/PolarisDesk.git
 cd PolarisDesk
 
-# Install dependencies
+# Install dependencies (native modules will be compiled automatically)
 pnpm install
 ```
+
+> 📝 **About Native Modules**: The project includes platform-specific native C++ modules (e.g., macOS UI Tree access) that are automatically compiled during installation. See [Native Modules Documentation](docs/NATIVE_MODULES.md) for details.
 
 ### Development
 
@@ -186,6 +195,9 @@ PolarisDesk/
 │       ├── views/      # Page views
 │       ├── stores/     # Pinia state management
 │       └── utils/      # Utilities
+├── native/             # Native C++ modules
+│   ├── mac/           # macOS native module
+│   └── win/           # Windows native module
 ├── resources/          # App resources
 ├── build/             # Build config
 └── dist/              # Build output

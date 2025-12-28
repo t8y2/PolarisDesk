@@ -8,7 +8,7 @@ export default defineConfig({
 
   head: [
     ['link', { rel: 'icon', href: '/PolarisDesk/icon.png' }],
-    ['meta', { name: 'theme-color', content: '#5865F2' }],
+    ['meta', { name: 'theme-color', content: '#5865F2' }]
   ],
 
   themeConfig: {
@@ -22,7 +22,7 @@ export default defineConfig({
         text: '链接',
         items: [
           { text: 'GitHub', link: 'https://github.com/t8y2/PolarisDesk' },
-          { text: 'Discord', link: 'https://discord.gg/6XR6b73PrE' },
+          { text: 'Discord', link: 'https://discord.gg/6XR6b73PrE' }
         ]
       }
     ],
@@ -33,7 +33,7 @@ export default defineConfig({
           text: '指南',
           items: [
             { text: '快速开始', link: '/guide/getting-started' },
-            { text: '安装说明', link: '/guide/installation' },
+            { text: '安装说明', link: '/guide/installation' }
           ]
         }
       ],
@@ -43,14 +43,14 @@ export default defineConfig({
           items: [
             { text: 'AI 对话', link: '/features/ai-chat' },
             { text: '悬浮窗口', link: '/features/floating-window' },
-            { text: '对话历史', link: '/features/chat-history' },
+            { text: '对话历史', link: '/features/chat-history' }
           ]
         },
         {
           text: '输入功能',
           items: [
             { text: '文件上传', link: '/features/document' },
-            { text: '截图功能', link: '/features/screenshot' },
+            { text: '截图功能', link: '/features/screenshot' }
           ]
         },
         {
@@ -58,7 +58,7 @@ export default defineConfig({
           items: [
             { text: 'Markdown 渲染', link: '/features/markdown' },
             { text: '隐私模式', link: '/features/privacy-mode' },
-            { text: '设置', link: '/features/settings' },
+            { text: '设置', link: '/features/settings' }
           ]
         }
       ]
