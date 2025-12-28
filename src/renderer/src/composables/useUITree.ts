@@ -71,7 +71,7 @@ export function useUITree(): {
   }
 
   /**
-   * 获取所有活动窗口的 UI 树（简化版，用于 AI，返回 JSON 格式）
+   * 获取所有活动窗口的 UI 树（简化版，用于 AI，返回 XML 格式）
    */
   const getAllWindowsForAI = async (maxDepth: number = 3): Promise<string | null> => {
     if (!isSupported.value || !hasPermission.value) {
@@ -86,14 +86,32 @@ export function useUITree(): {
         return null
       }
 
-      const allWindows = windows.map(window => ({
-        application: window.applicationName,
-        bundleId: window.bundleIdentifier,
-        window: window.windowTitle,
-        uiTree: window.uiTree
-      }))
+      // 构建简洁的 XML 格式
+      let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<windows>\n'
 
-      return JSON.stringify(allWindows, null, 2)
+      for (const window of windows) {
+        const escapeXml = (str: string | undefined): string => {
+          if (!str) return ''
+          return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;')
+        }
+
+        xml += `  <w app="${escapeXml(window.applicationName)}" title="${escapeXml(window.windowTitle)}">\n`
+
+        if (window.uiTree) {
+          // uiTree 已经是 XML 字符串，需要缩进
+          const indentedTree = window.uiTree
+            .split('\n')
+            .map(line => (line ? '    ' + line : ''))
+            .join('\n')
+          xml += indentedTree
+        }
+
+        xml += '  </w>\n'
+      }
+
+      xml += '</windows>'
+
+      return xml
     } catch (error) {
       logger.error('获取所有窗口 UI 树失败', error)
       return null

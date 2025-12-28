@@ -32,7 +32,7 @@ export function registerUITreeHandlers(): void {
               applicationName: window.applicationName,
               bundleIdentifier: window.bundleIdentifier,
               windowTitle: window.windowTitle,
-              uiTree: window.uiTree ? uiTreeService.simplifyUITree(window.uiTree) : null
+              uiTree: window.uiTree ? uiTreeService.simplifyUITreeToXML(window.uiTree) : null
             }
           } catch (error) {
             console.error('Error simplifying window UI tree:', error)

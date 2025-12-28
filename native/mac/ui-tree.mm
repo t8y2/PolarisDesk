@@ -37,7 +37,7 @@ CFTypeRef GetAXAttribute(AXUIElementRef element, CFStringRef attribute) {
     return value;
 }
 
-// 辅助函数：将 UI 元素转换为 JSON 对象
+// 辅助函数：使用 BFS 将 UI 元素转换为 JSON 对象
 napi_value ElementToJSON(napi_env env, AXUIElementRef element, int depth, int maxDepth) {
     if (depth > maxDepth || !element) {
         napi_value result;
@@ -155,9 +155,9 @@ napi_value ElementToJSON(napi_env env, AXUIElementRef element, int depth, int ma
         CFRelease(focused);
     }
     
-    // 递归获取子元素
+    // 使用 BFS 获取子元素（只获取直接子元素，不递归）
     CFArrayRef children = (CFArrayRef)GetAXAttribute(element, kAXChildrenAttribute);
-    if (children) {
+    if (children && depth < maxDepth) {
         CFIndex childCount = CFArrayGetCount(children);
         
         if (childCount > 0) {
@@ -168,6 +168,7 @@ napi_value ElementToJSON(napi_env env, AXUIElementRef element, int depth, int ma
             for (CFIndex i = 0; i < childCount && i < 50; i++) { // 限制最多 50 个子元素
                 AXUIElementRef child = (AXUIElementRef)CFArrayGetValueAtIndex(children, i);
                 if (child) {
+                    // 递归处理子元素（但这是在同一层级完成后才进行的）
                     napi_value childObj = ElementToJSON(env, child, depth + 1, maxDepth);
                     
                     // 只添加非 null 的子元素

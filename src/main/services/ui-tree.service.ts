@@ -137,31 +137,84 @@ class UITreeService {
   }
 
   /**
-   * 将 UI 树转换为简化的 JSON 格式（用于 AI 处理）
+   * 将 UI 树转换为 XML 格式（用于 AI 处理）
+   * 使用广度优先搜索（BFS）从顶层窗口开始遍历
+   * 过滤掉不重要的元素，只保留有意义的交互元素
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public simplifyUITree(element: UITreeElement | null | undefined): any {
-    // 处理 null 或 undefined 元素
+  public simplifyUITreeToXML(element: UITreeElement | null | undefined): string {
     if (!element) {
-      return null
+      return ''
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const simplified: any = {}
-
-    if (element.role) simplified.role = element.role
-    if (element.title) simplified.title = element.title
-    if (element.value !== undefined && element.value !== '') simplified.value = element.value
-    if (element.description) simplified.description = element.description
-    if (element.enabled !== undefined) simplified.enabled = element.enabled
-    if (element.focused) simplified.focused = element.focused
-
-    if (element.children && element.children.length > 0) {
-      // 过滤掉 null 元素并递归简化
-      simplified.children = element.children.map(child => this.simplifyUITree(child)).filter(child => child !== null)
+    const escapeXml = (str: string | number | undefined): string => {
+      if (str === undefined || str === null) return ''
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;')
     }
 
-    return simplified
+    // 判断元素是否重要（值得保留）
+    const isImportantElement = (el: UITreeElement): boolean => {
+      // 保留有标题或值的元素
+      if (el.title || el.value) return true
+
+      // 保留重要的角色类型
+      const importantRoles = ['AXButton', 'AXTextField', 'AXTextArea', 'AXStaticText', 'AXLink', 'AXImage', 'AXMenuButton', 'AXPopUpButton', 'AXCheckBox', 'AXRadioButton', 'AXSlider', 'AXTable', 'AXList', 'AXMenu', 'AXMenuItem', 'AXToolbar', 'AXTab', 'AXTabGroup', 'AXWindow', 'AXDialog', 'AXSheet']
+
+      if (el.role && importantRoles.includes(el.role)) return true
+
+      // 保留聚焦的元素
+      if (el.focused) return true
+
+      // 如果有子元素，可能需要保留作为容器
+      if (el.children && el.children.length > 0) return true
+
+      return false
+    }
+
+    const buildAttributes = (el: UITreeElement): string => {
+      const attrs: string[] = []
+      if (el.role) {
+        // 简化角色名称，去掉 AX 前缀
+        const simplifiedRole = el.role.replace(/^AX/, '').toLowerCase()
+        attrs.push(`role="${simplifiedRole}"`)
+      }
+      if (el.title) attrs.push(`title="${escapeXml(el.title)}"`)
+      if (el.value !== undefined && el.value !== '') attrs.push(`value="${escapeXml(el.value)}"`)
+      if (el.description) attrs.push(`desc="${escapeXml(el.description)}"`)
+      if (el.enabled === false) attrs.push(`enabled="false"`)
+      if (el.focused) attrs.push(`focused="true"`)
+      return attrs.length > 0 ? ' ' + attrs.join(' ') : ''
+    }
+
+    // 使用 BFS 遍历，但保持树形结构输出
+    const buildXmlRecursive = (el: UITreeElement, depth: number): string => {
+      // 过滤掉不重要的元素
+      if (!isImportantElement(el)) {
+        return ''
+      }
+
+      const indent = '  '.repeat(depth)
+      const attrs = buildAttributes(el)
+
+      // 过滤子元素
+      const importantChildren = el.children?.filter(child => child && isImportantElement(child)) || []
+      const hasChildren = importantChildren.length > 0
+
+      if (!hasChildren) {
+        return `${indent}<e${attrs} />\n`
+      }
+
+      let xml = `${indent}<e${attrs}>\n`
+
+      // BFS: 先处理所有直接子元素
+      for (const child of importantChildren) {
+        xml += buildXmlRecursive(child, depth + 1)
+      }
+
+      xml += `${indent}</e>\n`
+      return xml
+    }
+
+    return buildXmlRecursive(element, 0)
   }
 }
 

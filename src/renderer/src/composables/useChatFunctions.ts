@@ -170,8 +170,8 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
     // 如果有 UI 树数据，将其添加到消息内容中（使用 JSON 格式）
     let finalMessageContent = messageContent
     if (uiTreeData && !finalImageData) {
-      finalMessageContent = `${messageContent}\n\n<ui_context>\n所有活动窗口的 UI 结构（JSON 格式）：\n\`\`\`json\n${uiTreeData}\n\`\`\`\n</ui_context>`
-      logger.info('已将所有窗口 UI 树信息（JSON 格式）添加到消息中')
+      finalMessageContent = `${messageContent}\n\n<ui_context>\n所有活动窗口的 UI 结构（XML 格式）：\n\`\`\`xml\n${uiTreeData}\n\`\`\`\n</ui_context>`
+      logger.info('已将所有窗口 UI 树信息（XML 格式）添加到消息中')
     }
 
     // 安全地处理当前请求控制器
