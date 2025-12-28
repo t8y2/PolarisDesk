@@ -100,6 +100,8 @@ export default {
     autoExecuteCommands: '静默执行命令',
     autoScreenshot: '自动截图',
     autoScreenshotTip: '开启后，发送消息时如果没有附带任何媒体资源，将自动截取整个屏幕',
+    enableUITree: 'UI 树感知',
+    enableUITreeTip: '开启后，发送消息时如果没有附带任何媒体资源和截图，将自动获取所有活动窗口的 UI 结构（仅 macOS，需要辅助功能权限）',
 
     // API 配置
     connectionSettings: '连接设置',

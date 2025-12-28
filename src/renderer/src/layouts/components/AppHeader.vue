@@ -188,6 +188,14 @@
                     {{ t('settings.autoScreenshotTip') }}
                   </n-tooltip>
                 </n-form-item>
+                <n-form-item :label="t('settings.enableUITree')">
+                  <n-tooltip trigger="hover" placement="top" :show-arrow="false" :delay="300">
+                    <template #trigger>
+                      <n-switch v-model:value="localSettings.enableUITree" :rail-style="switchRailStyle" />
+                    </template>
+                    {{ t('settings.enableUITreeTip') }}
+                  </n-tooltip>
+                </n-form-item>
               </div>
               <div class="grid grid-cols-2 gap-x-4 gap-y-2 ml-8">
                 <n-form-item :label="t('settings.userMessageWidth')">

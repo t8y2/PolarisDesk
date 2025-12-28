@@ -143,6 +143,7 @@ export interface AppSettings {
   saveRecordingLocally: boolean
   autoExecuteCommands: boolean
   autoScreenshot: boolean
+  enableUITree: boolean
   language: 'zh' | 'en'
   theme: 'dark' | 'light'
 
@@ -170,6 +171,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   saveRecordingLocally: false,
   autoExecuteCommands: false,
   autoScreenshot: false,
+  enableUITree: false,
   language: 'zh',
   theme: 'dark',
 

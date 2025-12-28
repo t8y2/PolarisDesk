@@ -159,6 +159,21 @@ declare global {
         offStreamData: (wrappedCallback: (event: Electron.IpcRendererEvent, ...args: unknown[]) => void) => void
         offStreamComplete: (wrappedCallback: (event: Electron.IpcRendererEvent, ...args: unknown[]) => void) => void
       }
+
+      // UI 树相关功能
+      uiTree: {
+        isSupported: () => Promise<boolean>
+        checkPermission: () => Promise<boolean>
+        requestPermission: () => Promise<boolean>
+        getAllSimplified: (maxDepth?: number) => Promise<
+          Array<{
+            applicationName?: string
+            bundleIdentifier?: string
+            windowTitle?: string
+            uiTree?: unknown
+          }>
+        >
+      }
     }
   }
 }

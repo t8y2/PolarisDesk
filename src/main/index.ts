@@ -3,6 +3,7 @@ import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { windowManager } from './modules/windowManager'
 import { shortcutManager } from './modules/shortcutManager'
 import { ipcHandlers } from './modules/ipcHandlers'
+import { registerUITreeHandlers } from './modules/uiTreeHandler'
 import { databaseService } from './services/database'
 import { checkFFmpegAvailability } from './utils/videoCompress'
 import { logger } from './utils/logger'
@@ -34,6 +35,9 @@ app.whenReady().then(async () => {
   // 注册所有IPC处理器
   logger.info('注册 IPC 处理器...')
   ipcHandlers.registerHandlers()
+
+  // 注册 UI 树处理器
+  registerUITreeHandlers()
 
   // 创建主窗口
   logger.info('创建主窗口...')

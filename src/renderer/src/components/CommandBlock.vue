@@ -111,20 +111,20 @@ const commands = computed<Command[]>(() => {
 })
 
 // 监听 props.commands 变化，输出调试信息
-watch(
-  () => props.commands,
-  newCommands => {
-    console.log(
-      '🔄 CommandBlock: 命令列表更新',
-      newCommands.map(cmd => ({
-        command: cmd.command,
-        executed: cmd.executed,
-        dismissed: cmd.dismissed
-      }))
-    )
-  },
-  { immediate: true, deep: true }
-)
+// watch(
+//   () => props.commands,
+//   newCommands => {
+//     console.log(
+//       '🔄 CommandBlock: 命令列表更新',
+//       newCommands.map(cmd => ({
+//         command: cmd.command,
+//         executed: cmd.executed,
+//         dismissed: cmd.dismissed
+//       }))
+//     )
+//   },
+//   { immediate: true, deep: true }
+// )
 
 // 更新消息中的命令状态
 const updateMessageCommandState = (commandText: string, state: Partial<Omit<CommandState, 'command'>>): void => {

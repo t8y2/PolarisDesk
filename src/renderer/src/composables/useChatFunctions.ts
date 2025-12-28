@@ -6,6 +6,7 @@ import { useSettingsStore, buildSystemPrompt } from '../stores/settingsStore'
 import { useTextProcessing } from './useTextProcessing'
 import { useFileProcessing } from './useFileProcessing'
 import { useScreenshot } from './useScreenshot'
+import { getUITreeInstance } from './uiTreeInstance'
 import { getUserFriendlyErrorMessage } from '../utils/errorHandler'
 import { generateMessageDescription, type MediaData } from '../utils/mediaUtils'
 import { logger } from '../utils/logger'
@@ -66,6 +67,7 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
   const textProcessing = useTextProcessing()
   const fileProcessing = useFileProcessing()
   const screenshot = useScreenshot()
+  const uiTree = getUITreeInstance() // 使用全局单例
 
   // 请求控制器
   let currentRequestController: AbortController | null = null
@@ -128,8 +130,49 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
       }
     }
 
+    // UI 树功能：如果没有任何媒体资源（包括自动截图），且设置中开启了 UI 树功能，则尝试获取所有活动窗口的 UI 树
+    let uiTreeData: string | null = null
+    if (!hasMedia && !autoScreenshotData && settingsStore.settings.enableUITree && uiTree.isSupported.value && uiTree.hasPermission.value) {
+      try {
+        logger.info('正在获取所有活动窗口的 UI 树...')
+        console.log('🔍 UI 树功能检查:', {
+          hasMedia,
+          autoScreenshotData: !!autoScreenshotData,
+          enableUITree: settingsStore.settings.enableUITree,
+          isSupported: uiTree.isSupported.value,
+          hasPermission: uiTree.hasPermission.value
+        })
+        uiTreeData = await uiTree.getAllWindowsForAI(3) // 深度限制为 3，避免数据过大
+        if (uiTreeData) {
+          logger.success('所有窗口 UI 树获取完成')
+          console.log('✅ 所有窗口 UI 树获取成功，数据长度:', uiTreeData.length)
+        } else {
+          console.log('⚠️ 所有窗口 UI 树获取返回 null')
+        }
+      } catch (error) {
+        logger.warn('获取所有窗口 UI 树失败，继续发送消息', error)
+        console.error('❌ 所有窗口 UI 树获取失败:', error)
+        // UI 树获取失败不影响消息发送
+      }
+    } else {
+      console.log('⏭️ 跳过 UI 树获取:', {
+        hasMedia,
+        autoScreenshotData: !!autoScreenshotData,
+        enableUITree: settingsStore.settings.enableUITree,
+        isSupported: uiTree.isSupported.value,
+        hasPermission: uiTree.hasPermission.value
+      })
+    }
+
     // 优先使用用户提供的图片，只有在没有用户图片时才使用自动截图
     const finalImageData = imageData || autoScreenshotData
+
+    // 如果有 UI 树数据，将其添加到消息内容中（使用 JSON 格式）
+    let finalMessageContent = messageContent
+    if (uiTreeData && !finalImageData) {
+      finalMessageContent = `${messageContent}\n\n<ui_context>\n所有活动窗口的 UI 结构（JSON 格式）：\n\`\`\`json\n${uiTreeData}\n\`\`\`\n</ui_context>`
+      logger.info('已将所有窗口 UI 树信息（JSON 格式）添加到消息中')
+    }
 
     // 安全地处理当前请求控制器
     if (currentRequestController) {
@@ -153,9 +196,10 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
       wordTotalPages: wordTotalPages || undefined
     }
 
-    // 生成消息描述
+    // 生成消息描述（使用原始消息内容，不包含 UI 树）
     const messageDescription = generateMessageDescription(messageContent, mediaData)
 
+    // 添加用户消息（显示原始消息，不包含 UI 树）
     chatStore.addUserMessage(messageDescription, mediaData.image, mediaData.video, mediaData.videoBase64, mediaData.pdfImages, mediaData.pdfName, mediaData.pptImages, mediaData.pptName, mediaData.pptTotalPages, mediaData.wordImages, mediaData.wordName, mediaData.wordTotalPages)
 
     clearInputs()
@@ -181,10 +225,27 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
         provider: settingsStore.settings.provider,
         model: settingsStore.settings.model,
         hasMedia: !!(videoBase64 || pdfImages || pptImages || wordImages || finalImageData),
-        autoScreenshot: !!autoScreenshotData
+        autoScreenshot: !!autoScreenshotData,
+        hasUITree: !!uiTreeData
       })
 
-      await handleStreamResponse(scrollToBottom)
+      // 打印发送给 AI 的完整消息
+      console.group('📤 发送给 AI 的消息')
+      console.log('用户消息:', messageContent)
+      if (uiTreeData) {
+        console.log('包含 UI 树:', true)
+        console.log('UI 树数据:', uiTreeData)
+      }
+      if (autoScreenshotData) {
+        console.log('包含自动截图:', true)
+      }
+      if (finalImageData && finalImageData !== autoScreenshotData) {
+        console.log('包含用户图片:', true)
+      }
+      console.log('完整消息内容:', finalMessageContent)
+      console.groupEnd()
+
+      await handleStreamResponse(scrollToBottom, finalMessageContent)
 
       // 再次检查请求是否被取消
       if (!currentRequestController || currentRequestController.signal.aborted) {
@@ -214,7 +275,7 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
   }
 
   // 处理流式响应
-  const handleStreamResponse = async (scrollToBottom: () => void): Promise<string> => {
+  const handleStreamResponse = async (scrollToBottom: () => void, messageContentWithUITree: string): Promise<string> => {
     const historyTurns = settingsStore.settings.historyTurns
     const historyMessages = chatStore.getHistoryForAPI(historyTurns)
 
@@ -224,8 +285,8 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
     // 设置生成状态
     chatStore.setGenerating(true)
 
-    // 构建请求内容
-    const request = buildStreamRequest(historyMessages)
+    // 构建请求内容（使用包含 UI 树的消息内容）
+    const request = buildStreamRequest(historyMessages, messageContentWithUITree)
 
     let fullResponse = ''
     let thinkingContent = ''
@@ -325,8 +386,8 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
 
             // updateMessage() 会重新构建 fullResponse
             updateMessage()
-          } catch (error) {
-            console.warn('处理流式数据块失败:', error, 'chunk:', chunk)
+          } catch {
+            // 静默处理错误，不输出到控制台
             // 继续处理，不中断流式输出
           }
         },
@@ -348,13 +409,15 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
       })
 
       // 输出最终完整内容到控制台
-      console.group('✅ AI 流式输出完成')
-      console.log('消息 ID:', assistantMessageId)
+      console.group('✅ AI 流式响应完成')
       console.log('总长度:', fullResponse.length)
-      console.log('思考内容长度:', thinkingContent.length)
-      console.log('回复内容长度:', responseContent.length)
-      console.log('完整内容:', fullResponse)
-      console.log('包含 <command> 标签:', fullResponse.includes('<command>'))
+      if (thinkingContent.length > 0) {
+        console.log('思考内容长度:', thinkingContent.length)
+      }
+      console.log('完整响应:', fullResponse)
+      if (fullResponse.includes('<command>')) {
+        console.log('⚠️ 包含命令标签')
+      }
       console.groupEnd()
 
       chatStore.saveToStorage()
@@ -408,7 +471,8 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
 
   // 构建流式请求
   const buildStreamRequest = (
-    historyMessages: Array<{ role: string; content: string; image?: string; video?: string; pdfImages?: string[]; pptImages?: string[]; wordImages?: string[] }>
+    historyMessages: Array<{ role: string; content: string; image?: string; video?: string; pdfImages?: string[]; pptImages?: string[]; wordImages?: string[] }>,
+    finalMessageContent: string
   ): {
     messages: Array<{
       role: 'user' | 'assistant' | 'system'
@@ -440,12 +504,18 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
     }
 
     if (historyMessages.length > 0) {
-      // 添加历史消息
+      // 添加历史消息，最后一条消息使用包含 UI 树的完整内容
       messages.push(
-        ...historyMessages.map(msg => ({
-          role: msg.role as 'user' | 'assistant' | 'system',
-          content: buildMessageContent(msg.content, msg.image, msg.video, msg.pdfImages, msg.pptImages, msg.wordImages)
-        }))
+        ...historyMessages.map((msg, index) => {
+          // 对于最后一条用户消息，使用包含 UI 树的完整内容
+          const isLastUserMessage = index === historyMessages.length - 1 && msg.role === 'user'
+          const content = isLastUserMessage ? finalMessageContent : msg.content
+
+          return {
+            role: msg.role as 'user' | 'assistant' | 'system',
+            content: buildMessageContent(content, msg.image, msg.video, msg.pdfImages, msg.pptImages, msg.wordImages)
+          }
+        })
       )
     }
     return { messages }

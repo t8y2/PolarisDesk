@@ -149,6 +149,14 @@ const api = {
     },
     offStreamData: (wrappedCallback: (event: Electron.IpcRendererEvent, ...args: unknown[]) => void) => ipcRenderer.removeListener('command-stream-data', wrappedCallback),
     offStreamComplete: (wrappedCallback: (event: Electron.IpcRendererEvent, ...args: unknown[]) => void) => ipcRenderer.removeListener('command-stream-complete', wrappedCallback)
+  },
+
+  // UI 树相关功能
+  uiTree: {
+    isSupported: () => ipcRenderer.invoke('ui-tree:is-supported'),
+    checkPermission: () => ipcRenderer.invoke('ui-tree:check-permission'),
+    requestPermission: () => ipcRenderer.invoke('ui-tree:request-permission'),
+    getAllSimplified: (maxDepth?: number) => ipcRenderer.invoke('ui-tree:get-all-simplified', maxDepth)
   }
 }
 

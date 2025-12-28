@@ -100,6 +100,8 @@ export default {
     autoExecuteCommands: 'Auto Execute Commands',
     autoScreenshot: 'Auto Screenshot',
     autoScreenshotTip: 'When enabled, automatically capture the entire screen when sending a message without any media attachments',
+    enableUITree: 'UI Tree Awareness',
+    enableUITreeTip: 'When enabled, automatically capture UI structure of all active windows when sending a message without any media or screenshots (macOS only, requires Accessibility permission)',
 
     // API configuration
     connectionSettings: 'Connection Settings',

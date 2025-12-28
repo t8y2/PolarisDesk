@@ -1,0 +1,16 @@
+{
+  "name": "ui-tree-mac",
+  "version": "1.0.0",
+  "description": "macOS UI Tree native module for PolarisDesk",
+  "main": "index.js",
+  "scripts": {
+    "install": "node-gyp rebuild"
+  },
+  "gypfile": true,
+  "dependencies": {
+    "node-addon-api": "^8.0.0"
+  },
+  "devDependencies": {
+    "node-gyp": "^10.0.0"
+  }
+}

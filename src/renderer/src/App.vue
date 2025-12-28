@@ -15,6 +15,7 @@ import { useI18n } from 'vue-i18n'
 import ThemeProvider from './components/ThemeProvider.vue'
 import { useSettingsInit } from './composables/useSettingsInit'
 import { useLanguage } from './composables/useLanguage'
+import { initializeUITree } from './composables/uiTreeInstance'
 
 // 代码分割：懒加载大型组件
 const AppLayout = defineAsyncComponent(() => import('./layouts/AppLayout.vue'))
@@ -30,6 +31,9 @@ useSettingsInit()
 // 初始化语言
 const { initLanguage } = useLanguage()
 initLanguage()
+
+// 初始化 UI 树功能（全局单例）
+initializeUITree()
 
 // 更新加载文本为当前语言
 const updateLoadingText = (): void => {
