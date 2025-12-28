@@ -253,27 +253,92 @@
 
         <!-- 系统提示词标签页 -->
         <n-tab-pane name="system" :tab="t('settings.systemPromptTab')">
-          <n-form :model="localSettings" label-placement="top" size="small">
-            <n-form-item>
-              <template #label>
-                <div class="flex items-center mt-2">
-                  <span class="settings-section-title text-sm font-semibold text-white">{{ t('settings.systemPromptLabel') }}</span>
+          <n-scrollbar style="max-height: 500px">
+            <n-form :model="localSettings" label-placement="top" size="small">
+              <!-- 人设预设管理 -->
+              <div class="persona-section">
+                <div class="flex items-center justify-between mb-4">
+                  <div>
+                    <h4 class="settings-section-title text-base font-semibold text-white">{{ t('settings.personaPresets') }}</h4>
+                    <div class="text-xs text-gray-400 mt-1">{{ t('settings.personaPresetsDesc') }}</div>
+                  </div>
+                  <n-button size="small" type="primary" @click="showAddPersonaModal = true">
+                    <template #icon>
+                      <n-icon>
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                        </svg>
+                      </n-icon>
+                    </template>
+                    {{ t('settings.addPersona') }}
+                  </n-button>
                 </div>
-              </template>
-              <n-input v-model:value="localSettings.systemPrompt" type="textarea" :rows="8" :placeholder="t('settings.systemPromptPlaceholder')" class="w-full" clearable />
-            </n-form-item>
 
-            <div class="bg-blue-500/20 border border-blue-500/50 rounded-lg p-3">
-              <div class="text-sm text-blue-300 mb-2">
-                <strong>{{ t('settings.systemPromptTip') }}</strong>
+                <!-- 当前激活的人设 -->
+                <div v-if="localSettings.activePersonaId" class="mb-4 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <div class="text-xs text-blue-300 mb-1">{{ t('settings.activePersona') }}</div>
+                      <div class="text-base text-white font-medium">{{ getActivePersonaName() }}</div>
+                    </div>
+                    <n-button size="small" @click="handleActivatePersona(localSettings.activePersonaId!)">
+                      {{ t('settings.deactivatePersona') }}
+                    </n-button>
+                  </div>
+                </div>
+
+                <!-- 内置人设列表 -->
+                <div class="mb-4">
+                  <div class="text-sm text-gray-300 font-medium mb-2">{{ t('settings.builtInPersonas') }}</div>
+                  <div class="grid grid-cols-3 gap-3">
+                    <div v-for="persona in builtInPersonas" :key="persona.id" class="persona-card" :class="{ active: localSettings.activePersonaId === persona.id }" @click="handleActivatePersona(persona.id)">
+                      <div class="persona-name">{{ persona.name }}</div>
+                      <div class="persona-desc">{{ persona.description }}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 自定义人设列表 -->
+                <div v-if="customPersonas.length > 0" class="mb-4">
+                  <div class="text-sm text-gray-300 font-medium mb-2">{{ t('settings.customPersonas') }}</div>
+                  <div class="grid grid-cols-1 gap-3">
+                    <div v-for="persona in customPersonas" :key="persona.id" class="persona-card custom" :class="{ active: localSettings.activePersonaId === persona.id }">
+                      <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                          <div class="persona-name">{{ persona.name }}</div>
+                          <div class="persona-desc">{{ persona.description }}</div>
+                        </div>
+                        <div class="persona-actions">
+                          <n-button size="tiny" @click.stop="handleActivatePersona(persona.id)">
+                            {{ localSettings.activePersonaId === persona.id ? t('settings.deactivatePersona') : t('settings.activatePersona') }}
+                          </n-button>
+                          <n-button size="tiny" @click.stop="handleEditPersona(persona)">{{ t('settings.editPersona') }}</n-button>
+                          <n-button size="tiny" type="error" @click.stop="handleDeletePersona(persona)">{{ t('settings.deletePersona') }}</n-button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <ul class="text-sm text-blue-300 space-y-1">
-                <li>{{ t('settings.systemPromptTip1') }}</li>
-                <li>{{ t('settings.systemPromptTip2') }}</li>
-                <li>{{ t('settings.systemPromptTip3') }}</li>
-              </ul>
-            </div>
-          </n-form>
+
+              <!-- 分隔线 -->
+              <n-divider class="my-6" />
+
+              <!-- 自定义系统提示词 -->
+              <div class="system-prompt-section">
+                <div class="flex items-center justify-between mb-3">
+                  <h4 class="settings-section-title text-base font-semibold text-white">{{ t('settings.systemPromptLabel') }}</h4>
+                  <span v-if="localSettings.activePersonaId" class="text-xs text-yellow-400 px-2 py-1 bg-yellow-400/10 rounded">{{ t('settings.personaActiveHint') }}</span>
+                </div>
+                <n-input v-model:value="localSettings.systemPrompt" type="textarea" :rows="8" :placeholder="t('settings.systemPromptPlaceholder')" class="w-full" clearable :disabled="!!localSettings.activePersonaId" />
+                <div class="text-xs text-gray-400 mt-2 space-y-1">
+                  <div>💡 {{ t('settings.systemPromptTip1') }}</div>
+                  <div>💡 {{ t('settings.systemPromptTip2') }}</div>
+                  <div>💡 {{ t('settings.systemPromptTip3') }}</div>
+                </div>
+              </div>
+            </n-form>
+          </n-scrollbar>
         </n-tab-pane>
 
         <!-- 关于标签页 -->
@@ -337,21 +402,43 @@
         </div>
       </template>
     </n-modal>
+
+    <!-- 添加/编辑人设模态框 -->
+    <n-modal v-model:show="showAddPersonaModal" preset="card" :title="editingPersona ? t('settings.editPersona') : t('settings.addPersona')" class="w-160 select-none">
+      <n-form ref="personaFormRef" :model="personaForm" :rules="personaFormRules" label-placement="top" size="small">
+        <n-form-item :label="t('settings.personaName')" path="name">
+          <n-input v-model:value="personaForm.name" :placeholder="t('settings.personaNamePlaceholder')" />
+        </n-form-item>
+        <n-form-item :label="t('settings.personaDescription')" path="description">
+          <n-input v-model:value="personaForm.description" :placeholder="t('settings.personaDescPlaceholder')" />
+        </n-form-item>
+        <n-form-item :label="t('settings.personaPrompt')" path="prompt">
+          <n-input v-model:value="personaForm.prompt" type="textarea" :rows="8" :placeholder="t('settings.personaPromptPlaceholder')" />
+        </n-form-item>
+      </n-form>
+      <template #footer>
+        <div class="flex justify-end space-x-2">
+          <n-button @click="showAddPersonaModal = false">{{ t('common.cancel') }}</n-button>
+          <n-button type="primary" @click="handleSavePersona">{{ t('common.save') }}</n-button>
+        </div>
+      </template>
+    </n-modal>
   </header>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
-import { NButton, NIcon, NTooltip, NModal, NForm, NFormItem, NInput, NInputNumber, NSwitch, NSlider, NTabs, NTabPane, NTag, NSelect, NAlert, NText, NProgress, NDivider, useMessage } from 'naive-ui'
+import { NButton, NIcon, NTooltip, NModal, NForm, NFormItem, NInput, NInputNumber, NSwitch, NSlider, NTabs, NTabPane, NTag, NSelect, NAlert, NText, NProgress, NDivider, useMessage, useDialog, type FormInst, type FormRules } from 'naive-ui'
 import { Settings, Launch, Pin, ViewOff } from '@vicons/carbon'
 import { useI18n } from 'vue-i18n'
 import { useChatStore } from '../../stores/chatStore'
-import { useSettingsStore, type AppSettings } from '../../stores/settingsStore'
+import { useSettingsStore, type AppSettings, type PersonaPreset } from '../../stores/settingsStore'
 import { PROVIDERS, type ProviderType } from '../../utils/providerConfig'
 import { logger } from '../../utils/logger'
 
 const { t } = useI18n()
 const message = useMessage()
+const dialog = useDialog()
 const chatStore = useChatStore()
 const settingsStore = useSettingsStore()
 
@@ -415,6 +502,134 @@ const currentProviderConfig = computed(() => {
   return PROVIDERS[localSettings.value.provider || 'zhipu']
 })
 
+// 人设预设相关
+const showAddPersonaModal = ref(false)
+const editingPersona = ref<PersonaPreset | null>(null)
+const personaFormRef = ref<FormInst | null>(null)
+const personaForm = ref({
+  name: '',
+  description: '',
+  prompt: ''
+})
+
+const personaFormRules: FormRules = {
+  name: [{ required: true, message: () => t('settings.personaNameRequired'), trigger: 'blur' }],
+  prompt: [{ required: true, message: () => t('settings.personaPromptRequired'), trigger: 'blur' }]
+}
+
+const builtInPersonas = computed(() => {
+  return localSettings.value.personaPresets?.filter(p => p.isBuiltIn) || []
+})
+
+const customPersonas = computed(() => {
+  return localSettings.value.personaPresets?.filter(p => !p.isBuiltIn) || []
+})
+
+function getActivePersonaName(): string {
+  if (!localSettings.value.activePersonaId) {
+    return t('settings.noActivePersona')
+  }
+  const persona = localSettings.value.personaPresets?.find(p => p.id === localSettings.value.activePersonaId)
+  return persona ? persona.name : t('settings.noActivePersona')
+}
+
+function handleActivatePersona(id: string): void {
+  if (localSettings.value.activePersonaId === id) {
+    // 取消激活
+    localSettings.value.activePersonaId = null
+    localSettings.value.systemPrompt = ''
+    message.success(t('settings.personaDeactivated'))
+  } else {
+    // 激活人设
+    const persona = localSettings.value.personaPresets?.find(p => p.id === id)
+    if (persona) {
+      localSettings.value.activePersonaId = id
+      localSettings.value.systemPrompt = persona.prompt
+      message.success(t('settings.personaActivated', { name: persona.name }))
+    }
+  }
+}
+
+function handleEditPersona(persona: PersonaPreset): void {
+  editingPersona.value = persona
+  personaForm.value = {
+    name: persona.name,
+    description: persona.description,
+    prompt: persona.prompt
+  }
+  showAddPersonaModal.value = true
+}
+
+function handleDeletePersona(persona: PersonaPreset): void {
+  dialog.warning({
+    title: t('settings.confirmDeletePersona'),
+    content: t('settings.confirmDeletePersonaContent', { name: persona.name }),
+    positiveText: t('common.confirm'),
+    negativeText: t('common.cancel'),
+    onPositiveClick: () => {
+      const index = localSettings.value.personaPresets.findIndex(p => p.id === persona.id)
+      if (index !== -1) {
+        localSettings.value.personaPresets.splice(index, 1)
+        if (localSettings.value.activePersonaId === persona.id) {
+          localSettings.value.activePersonaId = null
+          localSettings.value.systemPrompt = ''
+        }
+        message.success(t('settings.personaDeleted'))
+      }
+    }
+  })
+}
+
+async function handleSavePersona(): Promise<void> {
+  try {
+    await personaFormRef.value?.validate()
+
+    if (editingPersona.value) {
+      // 更新现有人设
+      const index = localSettings.value.personaPresets.findIndex(p => p.id === editingPersona.value!.id)
+      if (index !== -1) {
+        localSettings.value.personaPresets[index] = {
+          ...localSettings.value.personaPresets[index],
+          name: personaForm.value.name,
+          description: personaForm.value.description,
+          prompt: personaForm.value.prompt
+        }
+        // 如果当前激活的是这个人设，也更新 systemPrompt
+        if (localSettings.value.activePersonaId === editingPersona.value.id) {
+          localSettings.value.systemPrompt = personaForm.value.prompt
+        }
+        message.success(t('settings.personaUpdated'))
+      }
+    } else {
+      // 添加新人设
+      const newPersona: PersonaPreset = {
+        id: `custom_${Date.now()}`,
+        name: personaForm.value.name,
+        description: personaForm.value.description,
+        prompt: personaForm.value.prompt,
+        isBuiltIn: false
+      }
+      if (!localSettings.value.personaPresets) {
+        localSettings.value.personaPresets = []
+      }
+      localSettings.value.personaPresets.push(newPersona)
+      message.success(t('settings.personaAdded'))
+    }
+
+    showAddPersonaModal.value = false
+    editingPersona.value = null
+    personaForm.value = { name: '', description: '', prompt: '' }
+  } catch {
+    // 验证失败，不关闭对话框
+  }
+}
+
+// 当打开添加人设对话框时重置表单（暂未使用，保留供将来扩展）
+// function resetPersonaForm(): void {
+//   editingPersona.value = null
+//   personaForm.value = { name: '', description: '', prompt: '' }
+// }
+
 // 处理服务商切换
 function handleProviderChange(provider: ProviderType): void {
   const config = PROVIDERS[provider]
@@ -439,7 +654,7 @@ function handleOpacityChange(value: number): void {
 }
 
 // 打开设置时保存当前设置并创建本地副本
-function openSettings(): void {
+function openSettings(tab?: string): void {
   // 获取当前设置的副本
   const currentSettings = settingsStore.getSettingsCopy()
 
@@ -449,8 +664,13 @@ function openSettings(): void {
   // 创建本地副本用于表单绑定
   localSettings.value = JSON.parse(JSON.stringify(currentSettings))
 
+  // 如果指定了标签页，则切换到该标签页
+  if (tab) {
+    activeTab.value = tab
+  }
+
   showSettings.value = true
-  logger.debug('打开设置面板')
+  logger.debug('打开设置面板', { tab })
 }
 
 // 取消设置时恢复原始设置
@@ -742,6 +962,10 @@ onMounted(() => {
   if (window.api?.updater?.onUpdateStatus) {
     window.api.updater.onUpdateStatus(handleUpdateStatus)
   }
+
+  // 暴露打开设置面板的方法到全局
+  const windowWithMethod = window as Window & { __openSettingsPanel?: (tab?: string) => void }
+  windowWithMethod.__openSettingsPanel = openSettings
 })
 
 onUnmounted(() => {
@@ -752,6 +976,10 @@ onUnmounted(() => {
   if (window.api?.updater?.offUpdateStatus) {
     window.api.updater.offUpdateStatus(handleUpdateStatus)
   }
+
+  // 清理全局方法
+  const windowWithMethod = window as Window & { __openSettingsPanel?: (tab?: string) => void }
+  delete windowWithMethod.__openSettingsPanel
 })
 </script>
 
@@ -908,5 +1136,83 @@ body[data-theme='light'] :deep(.n-slider .n-slider-dot) {
 
 body[data-theme='light'] :deep(.n-slider .n-slider-dot--active) {
   background-color: #1a1a1a !important;
+}
+
+/* 人设卡片样式 */
+.persona-card {
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.persona-card:hover {
+  border-color: rgba(59, 130, 246, 0.5);
+  background: rgba(59, 130, 246, 0.1);
+  transform: translateY(-2px);
+}
+
+.persona-card.active {
+  border-color: rgba(59, 130, 246, 0.8);
+  background: rgba(59, 130, 246, 0.2);
+}
+
+.persona-card.custom {
+  padding: 16px;
+}
+
+.persona-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 4px;
+}
+
+.persona-desc {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.4;
+  margin-bottom: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.persona-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* 人设和系统提示词区域 */
+.persona-section,
+.system-prompt-section {
+  padding: 0 4px;
+}
+
+/* 浅色主题 - 人设卡片 */
+body[data-theme='light'] .persona-card {
+  border-color: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+body[data-theme='light'] .persona-card:hover {
+  border-color: rgba(37, 99, 235, 0.5);
+  background: rgba(37, 99, 235, 0.1);
+}
+
+body[data-theme='light'] .persona-card.active {
+  border-color: rgba(37, 99, 235, 0.8);
+  background: rgba(37, 99, 235, 0.15);
+}
+
+body[data-theme='light'] .persona-name {
+  color: #1a1a1a;
+}
+
+body[data-theme='light'] .persona-desc {
+  color: rgba(0, 0, 0, 0.6);
 }
 </style>

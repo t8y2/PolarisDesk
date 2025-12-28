@@ -152,6 +152,15 @@ ${customInstructionsLabel}
 ${trimmedUserPrompt}`
 }
 
+// 人设预设接口
+export interface PersonaPreset {
+  id: string
+  name: string
+  description: string
+  prompt: string
+  isBuiltIn?: boolean
+}
+
 export interface AppSettings {
   // 基础设置
   starryBackground: boolean
@@ -174,11 +183,61 @@ export interface AppSettings {
   historyTurns: number
   systemPrompt: string
 
+  // 人设预设
+  personaPresets: PersonaPreset[]
+  activePersonaId: string | null
+
   // UI配置
   userMessageWidth: number
   aiMessageWidth: number
   windowOpacity: number
 }
+
+// 内置人设预设
+const BUILT_IN_PERSONAS: PersonaPreset[] = [
+  {
+    id: 'default',
+    name: '默认助手',
+    description: '专业、友好的通用AI助手',
+    prompt: '',
+    isBuiltIn: true
+  },
+  {
+    id: 'programmer',
+    name: '编程专家',
+    description: '精通多种编程语言，擅长代码优化和问题解决',
+    prompt: '你是一位资深的编程专家，精通多种编程语言和开发框架。你的回答应该：\n1. 提供清晰、可运行的代码示例\n2. 解释代码的工作原理和最佳实践\n3. 考虑性能、安全性和可维护性\n4. 使用简洁的技术语言，避免冗长的解释',
+    isBuiltIn: true
+  },
+  {
+    id: 'writer',
+    name: '文案创作者',
+    description: '擅长各类文案创作，文笔优美流畅',
+    prompt: '你是一位专业的文案创作者，擅长各类文体写作。你的回答应该：\n1. 语言优美流畅，富有感染力\n2. 根据不同场景调整文风（正式/轻松/专业等）\n3. 注重文案的吸引力和传播性\n4. 提供多个创意方案供选择',
+    isBuiltIn: true
+  },
+  {
+    id: 'teacher',
+    name: '耐心导师',
+    description: '善于用简单易懂的方式解释复杂概念',
+    prompt: '你是一位耐心的导师，擅长教学和知识传授。你的回答应该：\n1. 用简单易懂的语言解释复杂概念\n2. 使用类比和实例帮助理解\n3. 循序渐进，从基础到进阶\n4. 鼓励提问，营造轻松的学习氛围',
+    isBuiltIn: true
+  },
+  {
+    id: 'analyst',
+    name: '数据分析师',
+    description: '擅长数据分析和洞察挖掘',
+    prompt: '你是一位专业的数据分析师，擅长从数据中发现洞察。你的回答应该：\n1. 用数据和事实支撑观点\n2. 提供清晰的分析框架和逻辑\n3. 使用图表和可视化思维\n4. 给出可执行的建议和结论',
+    isBuiltIn: true
+  },
+  {
+    id: 'creative',
+    name: '创意大师',
+    description: '思维活跃，善于头脑风暴和创意思考',
+    prompt: '你是一位充满创意的思考者，善于跳出常规思维。你的回答应该：\n1. 提供多角度、创新性的想法\n2. 鼓励发散思维和头脑风暴\n3. 不拘泥于传统方案\n4. 用生动有趣的方式表达创意',
+    isBuiltIn: true
+  }
+]
 
 const DEFAULT_SETTINGS: AppSettings = {
   // 基础设置
@@ -201,6 +260,10 @@ const DEFAULT_SETTINGS: AppSettings = {
   topP: 0.6,
   historyTurns: 4,
   systemPrompt: '',
+
+  // 人设预设
+  personaPresets: [...BUILT_IN_PERSONAS],
+  activePersonaId: null,
 
   // UI配置
   userMessageWidth: 80,
@@ -438,6 +501,62 @@ export const useSettingsStore = defineStore('settings', () => {
     await saveSettings()
   }
 
+  // 人设预设管理
+  const addPersonaPreset = async (persona: Omit<PersonaPreset, 'id'>): Promise<string> => {
+    const id = `custom_${Date.now()}`
+    const newPersona: PersonaPreset = {
+      ...persona,
+      id,
+      isBuiltIn: false
+    }
+    settings.value.personaPresets.push(newPersona)
+    await saveSettings()
+    logger.success('添加人设预设', { name: persona.name })
+    return id
+  }
+
+  const updatePersonaPreset = async (id: string, updates: Partial<Omit<PersonaPreset, 'id' | 'isBuiltIn'>>): Promise<void> => {
+    const index = settings.value.personaPresets.findIndex(p => p.id === id)
+    if (index !== -1 && !settings.value.personaPresets[index].isBuiltIn) {
+      Object.assign(settings.value.personaPresets[index], updates)
+      await saveSettings()
+      logger.success('更新人设预设', { id, name: updates.name })
+    }
+  }
+
+  const deletePersonaPreset = async (id: string): Promise<void> => {
+    const index = settings.value.personaPresets.findIndex(p => p.id === id)
+    if (index !== -1 && !settings.value.personaPresets[index].isBuiltIn) {
+      settings.value.personaPresets.splice(index, 1)
+      if (settings.value.activePersonaId === id) {
+        settings.value.activePersonaId = null
+        settings.value.systemPrompt = ''
+      }
+      await saveSettings()
+      logger.success('删除人设预设', { id })
+    }
+  }
+
+  const activatePersona = async (id: string | null): Promise<void> => {
+    if (id === null) {
+      settings.value.activePersonaId = null
+      settings.value.systemPrompt = ''
+    } else {
+      const persona = settings.value.personaPresets.find(p => p.id === id)
+      if (persona) {
+        settings.value.activePersonaId = id
+        settings.value.systemPrompt = persona.prompt
+        logger.success('激活人设预设', { id, name: persona.name })
+      }
+    }
+    await saveSettings()
+  }
+
+  const getActivePersona = (): PersonaPreset | null => {
+    if (!settings.value.activePersonaId) return null
+    return settings.value.personaPresets.find(p => p.id === settings.value.activePersonaId) || null
+  }
+
   // 监听跨窗口设置变化
   const setupCrossWindowSync = (): (() => void) => {
     const handleStorageChange = (e: StorageEvent): void => {
@@ -481,7 +600,14 @@ export const useSettingsStore = defineStore('settings', () => {
     resetToDefaults,
     setupCrossWindowSync,
     getSettingsCopy,
-    restoreFromCopy
+    restoreFromCopy,
+
+    // 人设预设管理
+    addPersonaPreset,
+    updatePersonaPreset,
+    deletePersonaPreset,
+    activatePersona,
+    getActivePersona
   }
 })
 

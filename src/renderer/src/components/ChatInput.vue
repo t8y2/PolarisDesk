@@ -4,8 +4,8 @@
     <MediaPreviewCard :pending-media="pendingMedia" @clear="handleClearMedia" />
 
     <!-- 输入框和按钮 -->
-    <div class="flex items-end space-x-3">
-      <div class="flex space-x-2">
+    <div class="flex items-center space-x-3">
+      <div class="flex items-center space-x-2">
         <n-tooltip trigger="hover" placement="top" :show-arrow="false" :delay="500">
           <template #trigger>
             <n-button circle :loading="isQuickCapturing" :disabled="isAnyOperationInProgress && !isQuickCapturing" class="action-button" @click="handleQuickCapture">
@@ -44,6 +44,13 @@
           </template>
           {{ t('chatInput.uploadFile') }}
         </n-tooltip>
+
+        <!-- 人设选择框 -->
+        <n-select v-model:value="selectedPersonaId" :options="personaSelectOptions" :placeholder="t('chatInput.selectPersona')" class="persona-select" size="small" :consistent-menu-width="false" @update:value="handlePersonaChange">
+          <template #empty>
+            <div class="text-xs text-gray-400 p-2">{{ t('chatInput.noPersonas') }}</div>
+          </template>
+        </n-select>
       </div>
 
       <n-input ref="inputRef" v-model:value="inputText" type="textarea" :autosize="{ minRows: 1, maxRows: 4 }" :placeholder="t('chatInput.placeholder')" class="flex-1 custom-input" @keydown="handleKeydown" @paste="handlePaste" />
@@ -83,13 +90,16 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { NInput, NButton, NTooltip, NIcon } from 'naive-ui'
+import { NInput, NButton, NTooltip, NIcon, NSelect, useMessage } from 'naive-ui'
 import { Camera, Attachment } from '@vicons/carbon'
 import { Cut } from '@vicons/tabler'
 import { useI18n } from 'vue-i18n'
+import { useSettingsStore } from '../stores/settingsStore'
 import MediaPreviewCard from './MediaPreviewCard.vue'
 
 const { t } = useI18n()
+const message = useMessage()
+const settingsStore = useSettingsStore()
 
 interface PendingMedia {
   image?: string
@@ -146,6 +156,77 @@ const canSend = computed(() => {
 const isAnyOperationInProgress = computed(() => {
   return props.isQuickCapturing || props.isAreaCapturing
 })
+
+// 人设相关
+const selectedPersonaId = computed({
+  get: () => settingsStore.settings.activePersonaId || null,
+  set: async (value: string | null) => {
+    if (value === null || value === 'none') {
+      await settingsStore.activatePersona(null)
+      message.success(t('chatInput.personaCleared'))
+    } else {
+      const persona = settingsStore.settings.personaPresets?.find(p => p.id === value)
+      if (persona) {
+        await settingsStore.activatePersona(value)
+        message.success(t('chatInput.personaActivated', { name: persona.name }))
+      }
+    }
+  }
+})
+
+const personaSelectOptions = computed(() => {
+  const options: Array<{ label: string; value: string | null; disabled?: boolean }> = []
+
+  // 添加"无人设"选项
+  options.push({
+    label: t('chatInput.noPersona'),
+    value: null
+  })
+
+  // 内置人设
+  const builtInPersonas = settingsStore.settings.personaPresets?.filter(p => p.isBuiltIn) || []
+  if (builtInPersonas.length > 0) {
+    builtInPersonas.forEach(persona => {
+      options.push({
+        label: persona.name,
+        value: persona.id
+      })
+    })
+  }
+
+  // 自定义人设
+  const customPersonas = settingsStore.settings.personaPresets?.filter(p => !p.isBuiltIn) || []
+  if (customPersonas.length > 0) {
+    customPersonas.forEach(persona => {
+      options.push({
+        label: `${persona.name} ⭐`,
+        value: persona.id
+      })
+    })
+  }
+
+  // 添加"管理人设"选项
+  options.push({
+    label: t('chatInput.managePersonas'),
+    value: '__manage__'
+  })
+
+  return options
+})
+
+async function handlePersonaChange(value: string | null): Promise<void> {
+  // 如果选择的是"管理人设"选项
+  if (value === '__manage__') {
+    // 触发打开设置面板并跳转到系统提示词标签页
+    const windowWithMethod = window as Window & { __openSettingsPanel?: (tab: string) => void }
+    if (windowWithMethod.__openSettingsPanel) {
+      windowWithMethod.__openSettingsPanel('system')
+    }
+    // 不改变当前选中的人设，恢复到之前的值
+    return
+  }
+  // 值的变化已经通过 computed setter 处理了
+}
 
 function handleSend(): void {
   emit('send')
@@ -206,6 +287,50 @@ defineExpose({
   box-shadow:
     0 -4px 30px rgba(0, 0, 0, 0.5),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* 人设选择框样式 */
+.persona-select {
+  width: 140px;
+  flex-shrink: 0;
+}
+
+:deep(.persona-select .n-base-selection) {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+  height: 34px !important;
+  min-height: 34px !important;
+}
+
+:deep(.persona-select .n-base-selection .n-base-selection-label) {
+  height: 32px !important;
+  line-height: 32px !important;
+  padding: 0 12px !important;
+}
+
+:deep(.persona-select .n-base-selection .n-base-suffix) {
+  padding-right: 8px !important;
+}
+
+:deep(.persona-select .n-base-selection:hover) {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+:deep(.persona-select .n-base-selection.n-base-selection--focus) {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(96, 165, 250, 0.5) !important;
+  box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.1) !important;
+}
+
+:deep(.persona-select .n-base-selection-label) {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+:deep(.persona-select .n-base-selection-placeholder) {
+  color: rgba(255, 255, 255, 0.4) !important;
 }
 
 /* 操作按钮样式 */
@@ -360,6 +485,38 @@ body[data-theme='light'] :deep(.send-button:disabled) {
   border-color: transparent !important;
   color: #999999 !important;
   box-shadow: none !important;
+}
+
+/* 浅色主题 - 人设选择框 */
+body[data-theme='light'] :deep(.persona-select .n-base-selection) {
+  background-color: #ffffff !important;
+  border-color: #d6d6d6 !important;
+  height: 34px !important;
+  min-height: 34px !important;
+}
+
+body[data-theme='light'] :deep(.persona-select .n-base-selection .n-base-selection-label) {
+  height: 32px !important;
+  line-height: 32px !important;
+}
+
+body[data-theme='light'] :deep(.persona-select .n-base-selection:hover) {
+  background-color: #ffffff !important;
+  border-color: #b8b8b8 !important;
+}
+
+body[data-theme='light'] :deep(.persona-select .n-base-selection.n-base-selection--focus) {
+  background-color: #ffffff !important;
+  border-color: #95ec69 !important;
+  box-shadow: 0 0 0 2px rgba(149, 236, 105, 0.2) !important;
+}
+
+body[data-theme='light'] :deep(.persona-select .n-base-selection-label) {
+  color: #1a1a1a !important;
+}
+
+body[data-theme='light'] :deep(.persona-select .n-base-selection-placeholder) {
+  color: #999999 !important;
 }
 
 /* 浅色主题 - 操作按钮 */
