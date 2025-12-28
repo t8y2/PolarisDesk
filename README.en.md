@@ -60,20 +60,16 @@ Supports custom endpoints compatible with OpenAI API format
   </tr>
 </table>
 
-## ✨ Features
+## ✨ Key Features
 
-- 🤖 **AI Chat** - Intelligent conversations with multiple AI models
+- 🤖 **Multi-Model AI Chat** - Support for OpenAI, Anthropic, Google, DeepSeek, and more
 - 🎭 **Persona Presets** - Quickly switch between different AI roles and personas
-- 💻 **AI Command Line** - AI understands intent and executes system commands
-- 🎨 **Modern UI** - Beautiful interface based on Naive UI
-- 💬 **Float Window** - Convenient floating chat window
-- 📝 **Markdown Rendering** - Code highlighting, math formulas (KaTeX)
-- 📄 **Document Processing** - PDF, PPT, Word parsing support
+- 💻 **AI-Powered CLI** - AI understands intent and executes system commands
+- 📄 **Smart Document Processing** - PDF, PPT, Word parsing support
 - 📸 **Smart Screenshot** - Quick screenshot, region screenshot, and auto screenshot
-- 🖥️ **UI Tree Awareness** - Auto-capture window UI structure on macOS (requires Accessibility permission)
-- 🎬 **Video Compression** - Built-in FFmpeg video processing
-- 💾 **Local Storage** - SQLite local database
-- ⚡ **Performance Optimized** - Code splitting, lazy loading, virtual scrolling
+- 🖥️ **UI Tree Awareness** - Auto-capture window UI structure on macOS
+- 💬 **Float Window** - Convenient floating chat window
+- 🎨 **Modern UI** - Beautiful interface based on Naive UI
 - 🌐 **Internationalization** - Supports Chinese and English
 
 ## 👥 Join the Community
@@ -108,179 +104,35 @@ Welcome to join the PolarisDesk community to exchange experiences, share tips, a
 
 ## 🚀 Quick Start
 
-> 💡 **Downloading the installer?** Check out the [Installation Guide](docs/INSTALLATION.md) for detailed installation steps and troubleshooting.
+### 📦 Download & Install
 
-### Requirements
+Visit the [Releases](https://github.com/t8y2/PolarisDesk/releases) page to download the installer for your system.
 
-- Node.js >= 18
-- pnpm >= 8
-- **macOS Developers**: Xcode Command Line Tools (for compiling native modules)
-- **Windows Developers**: Visual Studio Build Tools (for compiling native modules)
+> 💡 **Having installation issues?** Check out the [Installation Guide](docs/INSTALLATION.md) and [FAQ](docs/FAQ.md)
 
-```bash
-# Install build tools on macOS
-xcode-select --install
-```
-
-### Installation
+### 👨‍💻 Development Build
 
 ```bash
 # Clone the repository
 git clone https://github.com/t8y2/PolarisDesk.git
 cd PolarisDesk
 
-# Install dependencies (native modules will be compiled automatically)
+# Install dependencies
 pnpm install
-```
 
-> 📝 **About Native Modules**: The project includes platform-specific native C++ modules (e.g., macOS UI Tree access) that are automatically compiled during installation. See [Native Modules Documentation](docs/NATIVE_MODULES.md) for details.
-
-### Development
-
-```bash
 # Start development server
 pnpm dev
 ```
 
-### Build
+For more development information, see the [Contributing Guide](docs/CONTRIBUTING.md)
 
-```bash
-# Build application
-pnpm build
+## 📚 Documentation
 
-# Build for Windows
-pnpm build:win
-
-# Build for macOS
-pnpm build:mac
-
-# Build for Linux
-pnpm build:linux
-```
-
-## 🛠️ Tech Stack
-
-### Core
-
-- **Electron** - Cross-platform desktop framework
-- **Vue 3** - Progressive JavaScript framework
-- **TypeScript** - Type-safe JavaScript superset
-- **Vite** - Next-generation frontend build tool
-
-### UI Components
-
-- **Naive UI** - Vue 3 component library
-- **UnoCSS** - Instant on-demand atomic CSS engine
-- **Vue Virtual Scroller** - Virtual scrolling optimization
-
-### Features
-
-- **Markdown-it** - Markdown parser
-- **Highlight.js** - Code syntax highlighting
-- **KaTeX** - Math formula rendering
-- **PDF.js** - PDF document rendering
-- **Mammoth.js** - Word document processing
-- **pptxtojson** - PPT document parsing
-- **Better-SQLite3** - High-performance SQLite database
-- **FFmpeg** - Video processing
-
-## 📁 Project Structure
-
-```
-PolarisDesk/
-├── src/
-│   ├── main/           # Electron main process
-│   │   ├── modules/    # Feature modules
-│   │   ├── services/   # Service layer
-│   │   └── utils/      # Utilities
-│   ├── preload/        # Preload scripts
-│   └── renderer/       # Renderer process (Vue app)
-│       ├── components/ # Vue components
-│       ├── views/      # Page views
-│       ├── stores/     # Pinia state management
-│       └── utils/      # Utilities
-├── native/             # Native C++ modules
-│   ├── mac/           # macOS native module
-│   └── win/           # Windows native module
-├── resources/          # App resources
-├── build/             # Build config
-└── dist/              # Build output
-```
-
-## ⚙️ Configuration
-
-Application config files are located in user data directory:
-
-- **Windows**: `%APPDATA%/polaris-desk`
-- **macOS**: `~/Library/Application Support/polaris-desk`
-- **Linux**: `~/.config/polaris-desk`
-
-## 🍎 macOS Installation Guide
-
-### Fixing "App is Damaged" Error
-
-Since the app is not notarized by Apple, you may see a "damaged and can't be opened" message on first launch. This is a normal security prompt. Here's how to fix it:
-
-#### Method 1: Terminal Command (Recommended)
-
-```bash
-# After downloading the .dmg file, open Terminal and run:
-xattr -cr /Applications/PolarisDesk.app
-```
-
-#### Method 2: System Settings
-
-1. Open **System Settings** > **Privacy & Security**
-2. Find the blocked app notification at the bottom
-3. Click **Open Anyway**
-
-#### Method 3: Right-Click Open
-
-1. Find PolarisDesk.app in Finder
-2. Hold **Control** key and click the app icon
-3. Select **Open**
-4. Click **Open** in the dialog
-
-### Why Does This Happen?
-
-- The app is not code-signed or notarized by Apple
-- This is macOS Gatekeeper's security mechanism
-- The app itself is safe - the source code is fully open source
-
-### Future Plans
-
-We plan to add code signing and notarization in future releases to eliminate this issue.
-
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome!
-
-1. Fork this repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📝 Development Guidelines
-
-- Use ESLint for code linting
-- Use Prettier for code formatting
-- Follow TypeScript type specifications
-- Run `pnpm lint` and `pnpm typecheck` before committing
-
-## 🚀 Roadmap
-
-| Feature              | Description                                        | Status       |
-| -------------------- | -------------------------------------------------- | ------------ |
-| 🤖 AI-Powered CLI    | AI understands intent and executes system commands | ✅ Completed |
-| 🎭 Persona System    | Quickly switch AI roles                            | ✅ Completed |
-| 🌐 Multi-language    | Internationalization                               | ✅ Completed |
-| 🔌 Plugin System     | Third-party plugin support                         | Planned      |
-| 🎙️ Voice Interaction | Voice input/output                                 | Planned      |
-| 🎨 Theme Support     | More theme extensions                              | Planned      |
-| 💡 More              | And more                                           | Planned      |
-
-Developers are welcome to contribute via PR!
+- [Installation Guide](docs/INSTALLATION.md) - Detailed installation steps and system requirements
+- [FAQ](docs/FAQ.md) - Frequently asked questions
+- [Contributing Guide](docs/CONTRIBUTING.md) - How to contribute to the project
+- [Roadmap](docs/ROADMAP.md) - Feature planning and development progress
+- [Native Modules](docs/NATIVE_MODULES.md) - Native module compilation guide
 
 ## 📄 License
 
