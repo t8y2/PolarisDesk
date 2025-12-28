@@ -48,30 +48,31 @@ class UITreeService {
   }
 
   private initialize(): void {
-    // 只在 macOS 上加载原生模块
-    if (process.platform !== 'darwin') {
-      console.log('UI Tree service is only supported on macOS')
+    // 检查平台支持
+    if (process.platform !== 'darwin' && process.platform !== 'win32') {
+      console.log('UI Tree service is only supported on macOS and Windows')
       return
     }
 
     try {
       let modulePath: string
+      const platformDir = process.platform === 'darwin' ? 'mac' : 'win'
 
       if (app.isPackaged) {
         // 生产环境：从 resources 目录加载
-        modulePath = path.join(process.resourcesPath, 'native', 'mac')
+        modulePath = path.join(process.resourcesPath, 'native', platformDir)
       } else {
         // 开发环境：从项目根目录加载
         // __dirname 在开发模式下是 src/main/services
         // 需要回到项目根目录
-        modulePath = path.join(app.getAppPath(), 'native', 'mac')
+        modulePath = path.join(app.getAppPath(), 'native', platformDir)
       }
 
       console.log('Attempting to load UI Tree module from:', modulePath)
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       this.nativeModule = require(modulePath)
       this.isSupported = true
-      console.log('✅ UI Tree native module loaded successfully')
+      console.log(`✅ UI Tree native module loaded successfully (${process.platform})`)
     } catch (error) {
       console.error('❌ Failed to load UI Tree native module:', error)
       console.log('UI Tree functionality will not be available')

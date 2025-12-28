@@ -23,6 +23,7 @@
     "rebuild": "electron-rebuild -f -w better-sqlite3 && pnpm run rebuild:native",
     "rebuild:native": "node scripts/build-native.js",
     "rebuild:native:mac": "cd native/mac && npm install",
+    "rebuild:native:win": "cd native/win && npm install",
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",
     "build:mac": "npm run build && electron-builder --mac",

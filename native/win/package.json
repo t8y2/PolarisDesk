@@ -1,0 +1,16 @@
+{
+  "name": "ui-tree-win",
+  "version": "1.0.0",
+  "description": "Windows UI Automation native module for PolarisDesk",
+  "main": "build/Release/ui_tree_win.node",
+  "scripts": {
+    "install": "node-gyp rebuild",
+    "test": "node test.js",
+    "clean": "node-gyp clean"
+  },
+  "gypfile": true,
+  "dependencies": {
+    "node-addon-api": "^8.0.0",
+    "node-gyp": "^10.0.0"
+  }
+}
