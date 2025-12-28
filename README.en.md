@@ -63,10 +63,14 @@ Supports custom endpoints compatible with OpenAI API format
 ## ✨ Features
 
 - 🤖 **AI Chat** - Intelligent conversations with multiple AI models
+- 🎭 **Persona Presets** - Quickly switch between different AI roles and personas
+- 💻 **AI Command Line** - AI understands intent and executes system commands
 - 🎨 **Modern UI** - Beautiful interface based on Naive UI
 - 💬 **Float Window** - Convenient floating chat window
 - 📝 **Markdown Rendering** - Code highlighting, math formulas (KaTeX)
 - 📄 **Document Processing** - PDF, PPT, Word parsing support
+- 📸 **Smart Screenshot** - Quick screenshot, region screenshot, and auto screenshot
+- 🖥️ **UI Tree Awareness** - Auto-capture window UI structure on macOS (requires Accessibility permission)
 - 🎬 **Video Compression** - Built-in FFmpeg video processing
 - 💾 **Local Storage** - SQLite local database
 - ⚡ **Performance Optimized** - Code splitting, lazy loading, virtual scrolling
@@ -268,9 +272,10 @@ Contributions, issues, and feature requests are welcome!
 
 | Feature              | Description                                        | Status       |
 | -------------------- | -------------------------------------------------- | ------------ |
-| 🤖 AI-Powered CLI    | AI understands intent and executes system commands | Planned      |
-| 🔌 Plugin System     | Third-party plugin support                         | Planned      |
+| 🤖 AI-Powered CLI    | AI understands intent and executes system commands | ✅ Completed |
+| 🎭 Persona System    | Quickly switch AI roles                            | ✅ Completed |
 | 🌐 Multi-language    | Internationalization                               | ✅ Completed |
+| 🔌 Plugin System     | Third-party plugin support                         | Planned      |
 | 🎙️ Voice Interaction | Voice input/output                                 | Planned      |
 | 🎨 Theme Support     | More theme extensions                              | Planned      |
 | 💡 More              | And more                                           | Planned      |

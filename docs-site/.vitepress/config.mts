@@ -33,7 +33,8 @@ export default defineConfig({
           text: '指南',
           items: [
             { text: '快速开始', link: '/guide/getting-started' },
-            { text: '安装说明', link: '/guide/installation' }
+            { text: '安装说明', link: '/guide/installation' },
+            { text: '更新日志', link: '/guide/changelog' }
           ]
         }
       ],
@@ -42,6 +43,8 @@ export default defineConfig({
           text: '核心功能',
           items: [
             { text: 'AI 对话', link: '/features/ai-chat' },
+            { text: '人设预设', link: '/features/persona-presets' },
+            { text: 'AI 命令行', link: '/features/ai-command' },
             { text: '悬浮窗口', link: '/features/floating-window' },
             { text: '对话历史', link: '/features/chat-history' }
           ]
