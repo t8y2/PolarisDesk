@@ -169,7 +169,7 @@ export default {
       openrouter: 'OpenRouter',
       siliconcloud: 'SiliconCloud',
       ollama: 'Ollama',
-      zhipu: '智谱 AI (GLM)',
+      zhipu: 'Z AI (GLM)',
       custom: '自定义端点'
     },
 

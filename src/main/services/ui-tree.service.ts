@@ -137,10 +137,50 @@ class UITreeService {
   }
 
   /**
+   * 遍历策略枚举
+   */
+  private traversalStrategies = {
+    structure: 'structure', // 结构优先：看整体布局
+    interaction: 'interaction', // 交互优先：找按钮、输入框
+    content: 'content', // 内容优先：提取文本
+    focused: 'focused', // 焦点优先：当前操作区域
+    deep: 'deep' // 深度优先：完整遍历
+  } as const
+
+  /**
+   * 根据用户意图检测遍历策略
+   */
+  public detectTraversalStrategy(userMessage: string): string {
+    const msg = userMessage.toLowerCase()
+
+    // 结构查询
+    if (/布局|结构|界面|窗口|有哪些|组成/.test(msg)) {
+      return this.traversalStrategies.structure
+    }
+
+    // 交互查询
+    if (/点击|按钮|输入|操作|怎么|如何|执行/.test(msg)) {
+      return this.traversalStrategies.interaction
+    }
+
+    // 内容查询
+    if (/内容|文字|文本|显示|写着|说|读/.test(msg)) {
+      return this.traversalStrategies.content
+    }
+
+    // 焦点查询
+    if (/当前|正在|现在|这个|这里/.test(msg)) {
+      return this.traversalStrategies.focused
+    }
+
+    // 默认深度遍历
+    return this.traversalStrategies.deep
+  }
+
+  /**
    * 将 UI 树转换为 XML 格式（用于 AI 处理）
-   * 使用广度优先搜索（BFS）从顶层窗口开始遍历
-   * 过滤掉不重要的元素，只保留有意义的交互元素
-   * 极致优化：合并单行元素、智能合并相似元素、去除冗余层级
+   * 支持智能自适应遍历策略
+   * @param element UI 树根元素
    */
   public simplifyUITreeToXML(element: UITreeElement | null | undefined): string {
     if (!element) {

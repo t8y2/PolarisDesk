@@ -115,6 +115,39 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
       return
     }
 
+    // 优先使用用户提供的图片
+    const finalImageData = imageData
+
+    // 准备媒体数据
+    const mediaData: MediaData = {
+      image: finalImageData || undefined,
+      video: videoData || undefined,
+      videoBase64: videoBase64 || undefined,
+      pdfImages: pdfImages || undefined,
+      pdfName: pdfName || undefined,
+      pptImages: pptImages || undefined,
+      pptName: pptName || undefined,
+      pptTotalPages: pptTotalPages || undefined,
+      wordImages: wordImages || undefined,
+      wordName: wordName || undefined,
+      wordTotalPages: wordTotalPages || undefined
+    }
+
+    // 生成消息描述（使用原始消息内容，不包含 UI 树）
+    const messageDescription = generateMessageDescription(messageContent, mediaData)
+
+    // 立即添加用户消息并显示
+    chatStore.addUserMessage(messageDescription, mediaData.image, mediaData.video, mediaData.videoBase64, mediaData.pdfImages, mediaData.pdfName, mediaData.pptImages, mediaData.pptName, mediaData.pptTotalPages, mediaData.wordImages, mediaData.wordName, mediaData.wordTotalPages)
+
+    clearInputs()
+    await nextTick()
+    scrollToBottom()
+
+    // 设置加载状态
+    chatStore.setLoading(true)
+    await nextTick()
+    scrollToBottom()
+
     // 自动截图功能：如果开启了自动截图且没有任何媒体资源，则自动截取整屏
     let autoScreenshotData: string | null = null
     if (settingsStore.settings.autoScreenshot && !hasMedia) {
@@ -123,6 +156,8 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
         if (window.api && 'quickScreenshot' in window.api) {
           autoScreenshotData = await (window.api as { quickScreenshot: () => Promise<string> }).quickScreenshot()
           logger.success('自动截图完成')
+          // 更新 mediaData
+          mediaData.image = autoScreenshotData || undefined
         }
       } catch (error) {
         logger.warn('自动截图失败，继续发送消息', error)
@@ -142,17 +177,71 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
           isSupported: uiTree.isSupported.value,
           hasPermission: uiTree.hasPermission.value
         })
-        uiTreeData = await uiTree.getAllWindowsForAI(3) // 深度限制为 3，避免数据过大
+
+        // 🎯 精准策略：使用 AI 识别用户意图和目标应用
+        let depth = 6
+        let targetApp: string | undefined
+
+        // 动态导入意图识别模块
+        const { detectIntentByAI, detectIntentByRegex } = await import('../utils/intentDetection')
+
+        // 先快速获取窗口列表（用于 AI 识别）
+        const quickWindows = await window.api.uiTree.getAllSimplified(1) // 深度1，只获取窗口信息
+        const activeWindows =
+          quickWindows?.map(w => ({
+            app: w.applicationName || '',
+            title: w.windowTitle || ''
+          })) || []
+
+        // 尝试使用 AI 精准识别
+        try {
+          const apiSettings = getAPISettings()
+          const result = await detectIntentByAI(
+            messageContent,
+            {
+              provider: apiSettings.provider,
+              apiUrl: apiSettings.apiUrl,
+              apiKey: apiSettings.apiKey,
+              model: apiSettings.model
+            },
+            activeWindows
+          )
+
+          depth = result.depth
+          targetApp = result.targetApp
+
+          logger.info(`✨ AI 精准识别成功:`, {
+            depth,
+            targetApp,
+            strategy: result.strategy,
+            confidence: result.confidence
+          })
+
+          if (targetApp) {
+            logger.success(`🎯 识别到目标应用: ${targetApp}，将只获取该应用的 UI 树`)
+          }
+        } catch (error) {
+          // AI 识别失败，降级到正则匹配
+          logger.warn('AI 精准识别失败，降级到正则匹配', error)
+          const result = detectIntentByRegex(messageContent, activeWindows)
+          depth = result.depth
+          targetApp = result.targetApp
+          logger.info(`📝 正则匹配结果:`, { depth, targetApp, strategy: result.strategy })
+        }
+
+        // 使用识别结果获取 UI 树
+        uiTreeData = await uiTree.getAllWindowsForAI(depth, targetApp)
+
         if (uiTreeData) {
-          logger.success('所有窗口 UI 树获取完成')
-          console.log('✅ 所有窗口 UI 树获取成功，数据长度:', uiTreeData.length)
+          const info = targetApp ? `目标应用=${targetApp}, 深度=${depth}` : `所有窗口, 深度=${depth}`
+          logger.success(`UI 树获取完成 (${info})`)
+          console.log('✅ UI 树获取成功，数据长度:', uiTreeData.length)
         } else {
-          console.log('⚠️ 所有窗口 UI 树获取返回 null')
+          console.log('⚠️ UI 树获取返回 null')
         }
       } catch (error) {
-        logger.warn('获取所有窗口 UI 树失败，继续发送消息', error)
-        console.error('❌ 所有窗口 UI 树获取失败:', error)
-        // UI 树获取失败不影响消息发送
+        logger.warn('获取 UI 树失败，继续发送消息', error)
+        console.error('❌ UI 树获取失败:', error)
       }
     } else {
       console.log('⏭️ 跳过 UI 树获取:', {
@@ -164,12 +253,9 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
       })
     }
 
-    // 优先使用用户提供的图片，只有在没有用户图片时才使用自动截图
-    const finalImageData = imageData || autoScreenshotData
-
-    // 如果有 UI 树数据，将其添加到消息内容中（使用 JSON 格式）
+    // 如果有 UI 树数据，将其添加到消息内容中
     let finalMessageContent = messageContent
-    if (uiTreeData && !finalImageData) {
+    if (uiTreeData && !finalImageData && !autoScreenshotData) {
       finalMessageContent = `${messageContent}\n\n<ui_context>\n所有活动窗口的 UI 结构（XML 格式）：\n\`\`\`xml\n${uiTreeData}\n\`\`\`\n</ui_context>`
       logger.info('已将所有窗口 UI 树信息（XML 格式）添加到消息中')
     }
@@ -181,34 +267,6 @@ export function useChatFunctions(): ReturnType<typeof useTextProcessing> &
 
     // 创建新的请求控制器
     currentRequestController = new AbortController()
-
-    const mediaData: MediaData = {
-      image: finalImageData || undefined,
-      video: videoData || undefined,
-      videoBase64: videoBase64 || undefined,
-      pdfImages: pdfImages || undefined,
-      pdfName: pdfName || undefined,
-      pptImages: pptImages || undefined,
-      pptName: pptName || undefined,
-      pptTotalPages: pptTotalPages || undefined,
-      wordImages: wordImages || undefined,
-      wordName: wordName || undefined,
-      wordTotalPages: wordTotalPages || undefined
-    }
-
-    // 生成消息描述（使用原始消息内容，不包含 UI 树）
-    const messageDescription = generateMessageDescription(messageContent, mediaData)
-
-    // 添加用户消息（显示原始消息，不包含 UI 树）
-    chatStore.addUserMessage(messageDescription, mediaData.image, mediaData.video, mediaData.videoBase64, mediaData.pdfImages, mediaData.pdfName, mediaData.pptImages, mediaData.pptName, mediaData.pptTotalPages, mediaData.wordImages, mediaData.wordName, mediaData.wordTotalPages)
-
-    clearInputs()
-    await nextTick()
-    scrollToBottom()
-
-    chatStore.setLoading(true)
-    await nextTick()
-    scrollToBottom()
 
     try {
       // 安全检查：确保控制器存在且未被取消

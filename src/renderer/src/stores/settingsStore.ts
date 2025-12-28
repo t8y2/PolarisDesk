@@ -544,7 +544,7 @@ export const PROVIDER_PRESETS = {
     supportsStreaming: true
   },
   zhipu: {
-    name: '智谱 AI (GLM)',
+    name: 'Z AI (GLM)',
     apiUrl: 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
     defaultModel: 'glm-4v-plus',
     maxTokens: 128000,

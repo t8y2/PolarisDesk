@@ -11,7 +11,7 @@
 - Moonshot (Kimi)
 - OpenRouter
 - Ollama
-- 智谱 AI
+- Z AI
 - SiliconCloud
 
 ## 功能

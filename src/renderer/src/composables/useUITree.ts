@@ -72,8 +72,10 @@ export function useUITree(): {
 
   /**
    * 获取所有活动窗口的 UI 树（简化版，用于 AI，返回 XML 格式）
+   * @param maxDepth 最大深度
+   * @param targetApp 目标应用名称（可选，如果指定则只返回该应用的窗口）
    */
-  const getAllWindowsForAI = async (maxDepth: number = 6): Promise<string | null> => {
+  const getAllWindowsForAI = async (maxDepth: number = 6, targetApp?: string): Promise<string | null> => {
     if (!isSupported.value || !hasPermission.value) {
       return null
     }
@@ -86,10 +88,22 @@ export function useUITree(): {
         return null
       }
 
+      // 如果指定了目标应用，只保留该应用的窗口
+      let filteredWindows = windows
+      if (targetApp) {
+        filteredWindows = windows.filter(w => w.applicationName?.toLowerCase().includes(targetApp.toLowerCase()))
+        if (filteredWindows.length === 0) {
+          logger.warn(`未找到目标应用: ${targetApp}，返回所有窗口`)
+          filteredWindows = windows
+        } else {
+          logger.info(`已过滤到目标应用: ${targetApp}，窗口数: ${filteredWindows.length}`)
+        }
+      }
+
       // 构建简洁的 XML 格式
       let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<windows>\n'
 
-      for (const window of windows) {
+      for (const window of filteredWindows) {
         const escapeXml = (str: string | undefined): string => {
           if (!str) return ''
           return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;')
