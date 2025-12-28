@@ -36,7 +36,7 @@
 
         <n-tooltip trigger="hover" placement="bottom" :show-arrow="false" :delay="500">
           <template #trigger>
-            <n-button circle class="no-drag" @click="openSettings">
+            <n-button circle class="no-drag" @click="() => openSettings()">
               <template #icon>
                 <n-icon size="16">
                   <Settings />
@@ -86,8 +86,8 @@
     </div>
 
     <!-- 设置弹窗 -->
-    <n-modal v-model:show="showSettings" preset="card" :title="t('settings.title')" class="w-200 select-none">
-      <n-tabs type="segment" size="small" animated :default-value="activeTab" @update:value="activeTab = $event">
+    <n-modal v-model:show="showSettings" preset="card" :title="t('settings.title')" class="w-200 select-none" @after-enter="handleModalAfterEnter">
+      <n-tabs v-model:value="activeTab" type="segment" size="small" animated>
         <!-- 模型设置标签页 -->
         <n-tab-pane name="model" :tab="t('settings.modelSettings')">
           <n-form :model="localSettings" label-placement="left" label-width="200px" size="small">
@@ -427,8 +427,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue'
-import { NButton, NIcon, NTooltip, NModal, NForm, NFormItem, NInput, NInputNumber, NSwitch, NSlider, NTabs, NTabPane, NTag, NSelect, NAlert, NText, NProgress, NDivider, useMessage, useDialog, type FormInst, type FormRules } from 'naive-ui'
+import { ref, onMounted, onUnmounted, computed, nextTick } from 'vue'
+import { NButton, NIcon, NTooltip, NModal, NForm, NFormItem, NInput, NInputNumber, NSwitch, NSlider, NTabs, NTabPane, NTag, NSelect, NAlert, NText, NProgress, NDivider, NScrollbar, useMessage, useDialog, type FormInst, type FormRules } from 'naive-ui'
 import { Settings, Launch, Pin, ViewOff } from '@vicons/carbon'
 import { useI18n } from 'vue-i18n'
 import { useChatStore } from '../../stores/chatStore'
@@ -655,6 +655,14 @@ function handleOpacityChange(value: number): void {
 
 // 打开设置时保存当前设置并创建本地副本
 function openSettings(tab?: string): void {
+  // 如果指定了标签页，则切换到该标签页
+  if (tab) {
+    activeTab.value = tab
+  } else {
+    // 确保默认显示模型设置标签页
+    activeTab.value = 'model'
+  }
+
   // 获取当前设置的副本
   const currentSettings = settingsStore.getSettingsCopy()
 
@@ -664,13 +672,25 @@ function openSettings(tab?: string): void {
   // 创建本地副本用于表单绑定
   localSettings.value = JSON.parse(JSON.stringify(currentSettings))
 
-  // 如果指定了标签页，则切换到该标签页
-  if (tab) {
-    activeTab.value = tab
-  }
-
   showSettings.value = true
   logger.debug('打开设置面板', { tab })
+}
+
+// 模态框进入动画完成后的回调 - 自动聚焦到第一个输入框
+function handleModalAfterEnter(): void {
+  nextTick(() => {
+    setTimeout(() => {
+      const modalElement = document.querySelector('.n-modal') as HTMLElement
+      if (modalElement) {
+        // 尝试聚焦到第一个可见的输入框或选择框
+        const firstInput = modalElement.querySelector('.n-tab-pane:not([style*="display: none"]) .n-select, .n-tab-pane:not([style*="display: none"]) input:not([type="hidden"]):not([disabled])') as HTMLElement
+        if (firstInput) {
+          firstInput.focus()
+          logger.debug('已自动聚焦到第一个输入元素')
+        }
+      }
+    }, 100)
+  })
 }
 
 // 取消设置时恢复原始设置
