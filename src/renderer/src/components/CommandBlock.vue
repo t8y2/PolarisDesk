@@ -1,40 +1,47 @@
 <template>
-  <div v-if="commands.length > 0" class="command-blocks mb-3">
-    <div v-for="(cmd, index) in commands" :key="index" class="command-block mb-2">
+  <div v-if="commands.length > 0" class="command-blocks">
+    <div v-for="(cmd, index) in commands" :key="index" class="command-block">
       <div class="command-header">
         <div class="header-left">
-          <span class="command-icon">⚡</span>
-          <span class="command-label">检测到命令</span>
+          <span class="command-icon">$</span>
+          <span class="command-text">{{ cmd.command }}</span>
         </div>
         <div class="command-actions">
-          <!-- 未执行且未取消：显示执行和取消按钮 -->
+          <!-- 未执行且未取消：显示复制、执行和取消按钮 -->
           <template v-if="!cmd.executed && !cmd.executing && !cmd.dismissed">
-            <n-button size="tiny" type="primary" @click="executeCommand(index)">执行</n-button>
-            <n-button size="tiny" @click="dismissCommand(index)">取消</n-button>
+            <button class="action-btn copy-btn" :title="t('command.copy')" @click="copyCommand(cmd.command)">
+              <span v-if="copiedCommand === cmd.command" class="i-carbon-checkmark text-16px"></span>
+              <span v-else class="i-carbon-copy text-16px"></span>
+            </button>
+            <button class="action-btn execute-btn" @click="executeCommand(index)">
+              <span class="i-carbon-play text-14px"></span>
+              <span class="btn-text">{{ t('command.run') }}</span>
+            </button>
+            <button class="action-btn dismiss-btn" @click="dismissCommand(index)">
+              <span class="i-carbon-close text-16px"></span>
+            </button>
           </template>
           <!-- 执行中状态：显示中止按钮 -->
-          <n-button v-if="cmd.executing" size="tiny" type="warning" @click="cancelExecution(index)">中止</n-button>
+          <button v-if="cmd.executing" class="action-btn cancel-btn" @click="cancelExecution(index)">
+            <span class="i-carbon-renew animate-spin text-14px"></span>
+            <span class="btn-text">{{ t('command.running') }}</span>
+          </button>
           <!-- 已取消状态：显示取消标签 -->
-          <n-tag v-if="cmd.dismissed" type="default" size="small">已取消</n-tag>
+          <span v-if="cmd.dismissed" class="status-badge dismissed">{{ t('command.dismissed') }}</span>
           <!-- 已完成状态：显示状态标签 -->
-          <n-tag v-if="cmd.executed && !cmd.dismissed" :type="cmd.exitCode === 0 ? 'success' : 'error'" size="small">
-            {{ cmd.exitCode === 0 ? '✓ 成功' : '✗ 失败' }}
-          </n-tag>
+          <span v-if="cmd.executed && !cmd.dismissed" :class="['status-badge', cmd.exitCode === 0 ? 'success' : 'error']">
+            {{ cmd.exitCode === 0 ? `✓ ${t('command.successBadge')}` : `✗ ${t('command.failedBadge')}` }}
+          </span>
         </div>
-      </div>
-      <div class="command-content">
-        <n-code :code="cmd.command" language="bash" class="command-code" />
       </div>
 
       <!-- 执行结果 -->
-      <div v-if="cmd.output || cmd.error" class="command-result">
-        <div v-if="cmd.output" class="result-output">
-          <div class="result-label">输出：</div>
-          <n-code :code="cmd.output" language="text" />
+      <div v-if="cmd.output || cmd.error" class="command-output">
+        <div v-if="cmd.output" class="output-section">
+          <pre class="output-text">{{ cmd.output }}</pre>
         </div>
-        <div v-if="cmd.error" class="result-error">
-          <div class="result-label">错误：</div>
-          <n-code :code="cmd.error" language="text" />
+        <div v-if="cmd.error" class="error-section">
+          <pre class="error-text">{{ cmd.error }}</pre>
         </div>
       </div>
     </div>
@@ -43,10 +50,17 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
-import { NButton, NCode, NTag, useDialog } from 'naive-ui'
+import { useDialog, useMessage } from 'naive-ui'
+import { useI18n } from 'vue-i18n'
 import { useChatStore } from '../stores/chatStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import { updateCommandState, type CommandState } from '../utils/commandExtractor'
+
+const { t } = useI18n()
+const message = useMessage()
+
+// 复制状态
+const copiedCommand = ref<string | null>(null)
 
 interface Command extends CommandState {
   executing: boolean
@@ -169,15 +183,42 @@ const executeCommand = (index: number): void => {
 
   const isDangerous = dangerousPatterns.some(pattern => pattern.test(cmd.command))
 
+  // 如果是危险命令，始终需要确认
+  // 如果不是危险命令且没有开启静默执行，直接执行
+  if (!isDangerous && !settingsStore.settings.autoExecuteCommands) {
+    doExecute(index)
+    return
+  }
+
+  // 危险命令或开启了静默执行时，显示确认对话框
   dialog.warning({
-    title: '确认执行',
-    content: `即将执行以下命令：\n\n${cmd.command}\n\n${isDangerous ? '⚠️ 警告：此命令可能会修改系统文件或设置，请谨慎确认' : ''}`,
-    positiveText: '执行',
-    negativeText: '取消',
+    title: t('command.confirmExecution'),
+    content: `${t('command.confirmMessage')}\n\n${cmd.command}\n\n${isDangerous ? t('command.dangerWarning') : ''}`,
+    positiveText: t('command.execute'),
+    negativeText: t('common.cancel'),
     onPositiveClick: async () => {
       await doExecute(index)
     }
   })
+}
+
+// 复制命令到剪贴板
+const copyCommand = async (command: string): Promise<void> => {
+  try {
+    await navigator.clipboard.writeText(command)
+    copiedCommand.value = command
+    message.success(t('command.copied'))
+
+    // 2秒后重置复制状态
+    setTimeout(() => {
+      if (copiedCommand.value === command) {
+        copiedCommand.value = null
+      }
+    }, 2000)
+  } catch (error) {
+    console.error('复制失败:', error)
+    message.error('复制失败')
+  }
 }
 
 const doExecute = async (index: number): Promise<void> => {
@@ -382,178 +423,327 @@ onMounted(() => {
 
 <style scoped>
 .command-blocks {
-  width: 70%;
-  margin-left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0;
+  width: 100%;
 }
 
 .command-block {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1));
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  border-radius: 12px;
-  padding: 12px;
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  overflow: hidden;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Consolas', monospace;
+  transition: all 0.2s ease;
+}
+
+.command-block:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .command-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #60a5fa;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  min-height: 36px;
 }
 
 .header-left {
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.command-icon {
-  font-size: 16px;
-}
-
-.command-content {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  overflow-x: auto;
-}
-
-.command-code {
-  font-size: 13px;
+  flex: 1;
   min-width: 0;
 }
 
-/* 命令代码块的滚动条样式 */
-.command-content :deep(.n-code) {
-  overflow-x: auto;
-  max-width: 100%;
+.command-icon {
+  color: #10b981;
+  font-size: 14px;
+  font-weight: 600;
+  flex-shrink: 0;
 }
 
-.command-content :deep(.n-code pre) {
-  white-space: pre;
-  word-wrap: normal;
-  overflow-x: auto;
-}
-
-/* 自定义滚动条样式 */
-.command-content::-webkit-scrollbar,
-.command-content :deep(.n-code)::-webkit-scrollbar,
-.command-content :deep(.n-code pre)::-webkit-scrollbar {
-  height: 6px;
-}
-
-.command-content::-webkit-scrollbar-track,
-.command-content :deep(.n-code)::-webkit-scrollbar-track,
-.command-content :deep(.n-code pre)::-webkit-scrollbar-track {
-  background: rgba(59, 130, 246, 0.1);
-  border-radius: 3px;
-}
-
-.command-content::-webkit-scrollbar-thumb,
-.command-content :deep(.n-code)::-webkit-scrollbar-thumb,
-.command-content :deep(.n-code pre)::-webkit-scrollbar-thumb {
-  background: rgba(59, 130, 246, 0.4);
-  border-radius: 3px;
-}
-
-.command-content::-webkit-scrollbar-thumb:hover,
-.command-content :deep(.n-code)::-webkit-scrollbar-thumb:hover,
-.command-content :deep(.n-code pre)::-webkit-scrollbar-thumb:hover {
-  background: rgba(59, 130, 246, 0.6);
+.command-text {
+  color: #e5e7eb;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Consolas', monospace;
 }
 
 .command-actions {
   display: flex;
   gap: 6px;
   align-items: center;
+  flex-shrink: 0;
 }
 
-.command-result {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(59, 130, 246, 0.2);
-  overflow-x: auto;
-}
-
-.result-output,
-.result-error {
-  margin-bottom: 8px;
-  overflow-x: auto;
-}
-
-/* 结果输出的滚动条样式 */
-.result-output :deep(.n-code),
-.result-error :deep(.n-code) {
-  overflow-x: auto;
-  max-width: 100%;
-}
-
-.result-output :deep(.n-code pre),
-.result-error :deep(.n-code pre) {
-  white-space: pre;
-  word-wrap: normal;
-  overflow-x: auto;
-}
-
-.result-output::-webkit-scrollbar,
-.result-error::-webkit-scrollbar,
-.result-output :deep(.n-code)::-webkit-scrollbar,
-.result-error :deep(.n-code)::-webkit-scrollbar {
-  height: 6px;
-}
-
-.result-output::-webkit-scrollbar-track,
-.result-error::-webkit-scrollbar-track,
-.result-output :deep(.n-code)::-webkit-scrollbar-track,
-.result-error :deep(.n-code)::-webkit-scrollbar-track {
-  background: rgba(59, 130, 246, 0.1);
-  border-radius: 3px;
-}
-
-.result-output::-webkit-scrollbar-thumb,
-.result-error::-webkit-scrollbar-thumb,
-.result-output :deep(.n-code)::-webkit-scrollbar-thumb,
-.result-error :deep(.n-code)::-webkit-scrollbar-thumb {
-  background: rgba(59, 130, 246, 0.4);
-  border-radius: 3px;
-}
-
-.result-output::-webkit-scrollbar-thumb:hover,
-.result-error::-webkit-scrollbar-thumb:hover,
-.result-output :deep(.n-code)::-webkit-scrollbar-thumb:hover,
-.result-error :deep(.n-code)::-webkit-scrollbar-thumb:hover {
-  background: rgba(59, 130, 246, 0.6);
-}
-
-.result-label {
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border: none;
+  border-radius: 4px;
   font-size: 12px;
-  font-weight: 600;
-  color: #9ca3af;
-  margin-bottom: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-.result-error .result-label {
-  color: #f87171;
+.copy-btn {
+  background: rgba(107, 114, 128, 0.15);
+  color: #9ca3af;
+  border: 1px solid rgba(107, 114, 128, 0.3);
+  padding: 4px 8px;
+}
+
+.copy-btn:hover {
+  background: rgba(107, 114, 128, 0.25);
+  color: #d1d5db;
+}
+
+.execute-btn {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.execute-btn:hover {
+  background: rgba(59, 130, 246, 0.25);
+  border-color: rgba(59, 130, 246, 0.5);
+}
+
+.dismiss-btn {
+  background: rgba(255, 255, 255, 0.05);
+  color: #9ca3af;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 4px 8px;
+}
+
+.dismiss-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e5e7eb;
+}
+
+.cancel-btn {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.cancel-btn:hover {
+  background: rgba(251, 191, 36, 0.25);
+}
+
+.btn-text {
+  font-size: 12px;
+  line-height: 1;
+}
+
+.spinning {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.status-badge.success {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-badge.error {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.status-badge.dismissed {
+  background: rgba(107, 114, 128, 0.15);
+  color: #9ca3af;
+  border: 1px solid rgba(107, 114, 128, 0.3);
+}
+
+.command-output {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.output-section,
+.error-section {
+  padding: 12px;
+}
+
+.output-section {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.error-section {
+  background: rgba(239, 68, 68, 0.05);
+  border-top: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.output-text,
+.error-text {
+  margin: 0;
+  padding: 0;
+  font-size: 12px;
+  line-height: 1.6;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Consolas', monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #d1d5db;
+}
+
+.error-text {
+  color: #fca5a5;
+}
+
+/* 滚动条样式 */
+.command-output::-webkit-scrollbar {
+  width: 8px;
+}
+
+.command-output::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.command-output::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.command-output::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 /* 浅色主题 */
 body[data-theme='light'] .command-block {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(147, 51, 234, 0.08));
-  border-color: rgba(59, 130, 246, 0.4);
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+body[data-theme='light'] .command-block:hover {
+  border-color: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.04);
 }
 
 body[data-theme='light'] .command-header {
-  color: #2563eb;
+  background: rgba(0, 0, 0, 0.04);
+  border-bottom-color: rgba(0, 0, 0, 0.08);
 }
 
-body[data-theme='light'] .result-label {
+body[data-theme='light'] .command-icon {
+  color: #059669;
+}
+
+body[data-theme='light'] .command-text {
+  color: #1f2937;
+}
+
+body[data-theme='light'] .copy-btn {
+  background: rgba(107, 114, 128, 0.1);
+  color: #6b7280;
+  border-color: rgba(107, 114, 128, 0.3);
+}
+
+body[data-theme='light'] .copy-btn:hover {
+  background: rgba(107, 114, 128, 0.2);
+  color: #374151;
+}
+
+body[data-theme='light'] .execute-btn {
+  background: rgba(59, 130, 246, 0.1);
+  color: #2563eb;
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+body[data-theme='light'] .execute-btn:hover {
+  background: rgba(59, 130, 246, 0.2);
+}
+
+body[data-theme='light'] .dismiss-btn {
+  background: rgba(0, 0, 0, 0.05);
+  color: #6b7280;
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+body[data-theme='light'] .dismiss-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: #374151;
+}
+
+body[data-theme='light'] .cancel-btn {
+  background: rgba(251, 191, 36, 0.1);
+  color: #d97706;
+}
+
+body[data-theme='light'] .status-badge.success {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+}
+
+body[data-theme='light'] .status-badge.error {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+body[data-theme='light'] .status-badge.dismissed {
+  background: rgba(107, 114, 128, 0.1);
   color: #6b7280;
 }
 
-body[data-theme='light'] .result-error .result-label {
+body[data-theme='light'] .output-section {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+body[data-theme='light'] .error-section {
+  background: rgba(239, 68, 68, 0.05);
+}
+
+body[data-theme='light'] .output-text {
+  color: #374151;
+}
+
+body[data-theme='light'] .error-text {
   color: #dc2626;
+}
+
+body[data-theme='light'] .command-output::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+body[data-theme='light'] .command-output::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+body[data-theme='light'] .command-output::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
 }
 </style>

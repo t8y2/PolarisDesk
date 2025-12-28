@@ -318,6 +318,13 @@ export default {
     confirmMessage: 'About to execute the following command, please confirm:',
     dangerWarning: '⚠️ Warning: This command may modify system files or settings, please confirm carefully',
     execute: 'Execute',
-    exitCode: 'Exit code'
+    exitCode: 'Exit code',
+    run: 'Run',
+    running: 'Running...',
+    dismissed: 'Dismissed',
+    successBadge: 'Success',
+    failedBadge: 'Failed',
+    copy: 'Copy',
+    copied: 'Copied'
   }
 }

@@ -318,6 +318,13 @@ export default {
     confirmMessage: '即将执行以下命令，请确认：',
     dangerWarning: '⚠️ 警告：此命令可能会修改系统文件或设置，请谨慎确认',
     execute: '执行',
-    exitCode: '退出码'
+    exitCode: '退出码',
+    run: '执行',
+    running: '执行中...',
+    dismissed: '已取消',
+    successBadge: '成功',
+    failedBadge: '失败',
+    copy: '复制',
+    copied: '已复制'
   }
 }

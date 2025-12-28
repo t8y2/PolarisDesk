@@ -16,19 +16,36 @@ export interface CommandState {
  * 或带状态: <command executed="true" exitCode="0">命令内容<output>输出</output><error>错误</error></command>
  */
 export function extractCommands(content: string): CommandState[] {
+  // 先移除 <think> 标签内的内容，避免误匹配
+  const contentWithoutThink = content.replace(/<think>[\s\S]*?<\/think>/g, '')
+
   const commands: CommandState[] = []
   const regex = /<command([^>]*)>([\s\S]*?)<\/command>/g
   let match: RegExpExecArray | null
 
-  while ((match = regex.exec(content)) !== null) {
+  while ((match = regex.exec(contentWithoutThink)) !== null) {
     const attributes = match[1]
     const innerContent = match[2]
 
     // 提取命令文本（去除 output 和 error 标签）
-    const commandMatch = innerContent.match(/^([^<]+)/)
-    if (!commandMatch) continue
+    const commandText = innerContent
+      .replace(/<output>[\s\S]*?<\/output>/g, '')
+      .replace(/<error>[\s\S]*?<\/error>/g, '')
+      .trim()
 
-    const command = commandMatch[1].trim()
+    // 清理命令文本：
+    // 1. 移除可能的注释（# 开头的行）
+    // 2. 移除多余的换行和空格
+    // 3. 只保留第一行作为命令（如果有多行）
+    const lines = commandText
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line && !line.startsWith('#'))
+
+    if (lines.length === 0) continue
+
+    // 只取第一行作为命令
+    const command = lines[0].trim()
     if (!command) continue
 
     const state: CommandState = { command }
@@ -44,7 +61,7 @@ export function extractCommands(content: string): CommandState[] {
       if (exitCodeMatch) state.exitCode = parseInt(exitCodeMatch[1])
     }
 
-    // 提取 output 和 error
+    // 提取 output 和 error（从原始内容中提取，不是从 contentWithoutThink）
     const outputMatch = innerContent.match(/<output>([\s\S]*?)<\/output>/)
     const errorMatch = innerContent.match(/<error>([\s\S]*?)<\/error>/)
 
@@ -54,7 +71,8 @@ export function extractCommands(content: string): CommandState[] {
     commands.push(state)
   }
 
-  return commands
+  // 只返回最后一个命令（通常是最完整或最推荐的版本）
+  return commands.length > 0 ? [commands[commands.length - 1]] : []
 }
 
 /**
