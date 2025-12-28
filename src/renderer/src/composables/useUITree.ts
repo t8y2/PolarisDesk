@@ -73,7 +73,7 @@ export function useUITree(): {
   /**
    * 获取所有活动窗口的 UI 树（简化版，用于 AI，返回 XML 格式）
    */
-  const getAllWindowsForAI = async (maxDepth: number = 3): Promise<string | null> => {
+  const getAllWindowsForAI = async (maxDepth: number = 6): Promise<string | null> => {
     if (!isSupported.value || !hasPermission.value) {
       return null
     }

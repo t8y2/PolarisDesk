@@ -246,14 +246,14 @@ napi_value GetAllActiveWindows(napi_env env, napi_callback_info info) {
     napi_value args[1];
     napi_get_cb_info(env, info, &argc, args, NULL, NULL);
     
-    int maxDepth = 3; // 默认最大深度
+    int maxDepth = 6; // 默认最大深度
     if (argc > 0) {
         napi_valuetype valuetype;
         napi_typeof(env, args[0], &valuetype);
         if (valuetype == napi_number) {
             int32_t depth;
             napi_get_value_int32(env, args[0], &depth);
-            if (depth > 0 && depth <= 10) {
+            if (depth > 0 && depth <= 15) {
                 maxDepth = depth;
             }
         }
