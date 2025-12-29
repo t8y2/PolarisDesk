@@ -134,9 +134,9 @@ pnpm dev
 - [开发路线图](docs/ROADMAP.md) - 功能规划和开发进度
 - [原生模块](docs/NATIVE_MODULES.md) - 原生模块编译说明
 
-## 📄 许可证
+## ⭐ Star History
 
-本项目采用 [MIT](LICENSE) 许可证。
+[![Star History Chart](https://api.star-history.com/svg?repos=t8y2/PolarisDesk&type=Date)](https://star-history.com/#t8y2/PolarisDesk&Date)
 
 ## 📮 联系方式
 

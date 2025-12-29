@@ -134,9 +134,9 @@ For more development information, see the [Contributing Guide](docs/CONTRIBUTING
 - [Roadmap](docs/ROADMAP.md) - Feature planning and development progress
 - [Native Modules](docs/NATIVE_MODULES.md) - Native module compilation guide
 
-## 📄 License
+## ⭐ Star History
 
-This project is licensed under the [MIT](LICENSE) License.
+[![Star History Chart](https://api.star-history.com/svg?repos=t8y2/PolarisDesk&type=Date)](https://star-history.com/#t8y2/PolarisDesk&Date)
 
 ## 📮 Contact
 
