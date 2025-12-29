@@ -204,7 +204,12 @@
                     <n-collapse-item name="think" class="think-collapse-item-floating">
                       <template #header>
                         <div class="think-header-floating">
-                          <span class="think-icon-floating">{{ index === chatStore.messages.length - 1 && chatStore.isGenerating ? '✨' : '✓' }}</span>
+                          <!-- 思考中动画加载器 -->
+                          <div v-if="index === chatStore.messages.length - 1 && chatStore.isGenerating" class="think-icon-wrapper-floating">
+                            <ThinkingLoader :size="0.14" :speed="2" theme="white" />
+                          </div>
+                          <!-- 完成图标 -->
+                          <span v-else class="think-icon-floating">✓</span>
                           <span class="think-label-floating" :class="{ 'thinking-blink-floating': index === chatStore.messages.length - 1 && chatStore.isGenerating }">
                             {{ index === chatStore.messages.length - 1 && chatStore.isGenerating ? t('think.thinking') : t('think.thinkingComplete') }}
                           </span>
@@ -413,6 +418,7 @@ import { useI18n } from 'vue-i18n'
 import { useChatFunctions } from '../composables/useChatFunctions'
 import { useSettingsStore } from '../stores/settingsStore'
 import VideoPlayer from './VideoPlayer.vue'
+import ThinkingLoader from './ThinkingLoader.vue'
 
 // 使用组合式函数
 const { chatStore, extractThinkContent, removeThinkContent, formatAnswerBoxes, processFile, handlePaste, sendMessage: sendMessageCore, handleKeyDown: handleKeyDownCore, handleMessageClick, handleAreaScreenshot: handleAreaScreenshotCore, handleQuickScreenshot: handleQuickScreenshotCore, cleanup, cancelCurrentRequest } = useChatFunctions()
@@ -1286,6 +1292,15 @@ const handleDrop = async (event: DragEvent): Promise<void> => {
   gap: 4px;
   width: 100%;
   user-select: none;
+}
+
+.think-icon-wrapper-floating {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .think-icon-floating {

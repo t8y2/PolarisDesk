@@ -4,7 +4,12 @@
       <n-collapse-item name="think" class="think-collapse-item">
         <template #header>
           <div class="think-header">
-            <span class="think-icon">{{ isGenerating ? '✨' : '✓' }}</span>
+            <!-- 思考中动画加载器 -->
+            <div v-if="isGenerating" class="think-icon-wrapper">
+              <ThinkingLoader :size="0.2" :speed="2" />
+            </div>
+            <!-- 完成图标 -->
+            <span v-else class="think-icon">✓</span>
             <span class="think-label" :class="{ 'thinking-blink': isGenerating }">
               {{ isGenerating ? t('think.thinking') : t('think.thinkingComplete') }}
             </span>
@@ -24,6 +29,7 @@
 <script setup lang="ts">
 import { NCollapse, NCollapseItem } from 'naive-ui'
 import { useI18n } from 'vue-i18n'
+import ThinkingLoader from './ThinkingLoader.vue'
 
 const { t } = useI18n()
 
@@ -91,6 +97,15 @@ withDefaults(defineProps<Props>(), {
   gap: 8px;
   width: 100%;
   user-select: none;
+}
+
+.think-icon-wrapper {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .think-icon {
@@ -208,5 +223,14 @@ body[data-theme='light'] .think-content-generating::-webkit-scrollbar-thumb {
 
 body[data-theme='light'] .think-content-generating::-webkit-scrollbar-thumb:hover {
   background: rgba(149, 236, 105, 0.6);
+}
+
+/* 浅色主题加载器颜色 */
+body[data-theme='light'] .think-icon-wrapper :deep(.thinking-loader) {
+  --color-one: #15803d;
+  --color-two: #95ec69;
+  --color-three: #15803d80;
+  --color-four: #95ec6980;
+  --color-five: #15803d40;
 }
 </style>
