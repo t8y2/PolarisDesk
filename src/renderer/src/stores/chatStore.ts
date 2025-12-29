@@ -231,11 +231,8 @@ export const useChatStore = defineStore(STORE_ID, () => {
   const updateAssistantMessageContent = (messageId: string, content: string): void => {
     const messageIndex = messages.value.findIndex(msg => msg.id === messageId)
     if (messageIndex !== -1) {
-      // 使用 Vue 3 的响应式方式更新对象属性
-      messages.value[messageIndex] = {
-        ...messages.value[messageIndex],
-        content: content
-      }
+      // 直接修改content属性，避免创建新对象
+      messages.value[messageIndex].content = content
 
       // 输出更新日志（仅在内容较长时输出，避免流式输出时刷屏）
       if (content.length > 100 && content.length % 500 < 50) {
@@ -292,48 +289,58 @@ export const useChatStore = defineStore(STORE_ID, () => {
 
   // ========== 存储管理 ==========
 
+  // 防抖保存，避免频繁写入localStorage
+  let saveTimer: ReturnType<typeof setTimeout> | null = null
   const saveToStorage = (): void => {
     // 隐私模式下不保存消息
     if (isPrivateMode.value) {
-      console.log('隐私模式：跳过保存消息到本地存储')
       return
     }
 
-    try {
-      const messagesData = JSON.stringify(messages.value)
-
-      // 数据过大时保存简化版本
-      if (messagesData.length > 4000000) {
-        console.warn('消息数据过大，正在保存简化版本...')
-        const simplifiedMessages = messages.value.map(msg => ({
-          ...msg,
-          image: msg.image && msg.image.length > 100000 ? undefined : msg.image,
-          video: undefined,
-          videoBase64: undefined,
-          pdfImages: msg.pdfImages && msg.pdfImages.some(img => img.length > 50000) ? undefined : msg.pdfImages,
-          pptImages: msg.pptImages && msg.pptImages.some(img => img.length > 50000) ? undefined : msg.pptImages
-        }))
-        localStorage.setItem(KEYS.MESSAGES, JSON.stringify(simplifiedMessages))
-      } else {
-        localStorage.setItem(KEYS.MESSAGES, messagesData)
-      }
-
-      localStorage.setItem(KEYS.WELCOME, JSON.stringify(welcomeAdded.value))
-    } catch (error) {
-      console.error('保存聊天数据失败:', error)
-      // 降级保存纯文本版本
-      try {
-        const textOnlyMessages = messages.value.map(msg => ({
-          id: msg.id,
-          role: msg.role,
-          content: msg.content,
-          timestamp: msg.timestamp
-        }))
-        localStorage.setItem(KEYS.MESSAGES, JSON.stringify(textOnlyMessages))
-      } catch (secondError) {
-        console.error('无法保存任何聊天数据:', secondError)
-      }
+    // 清除之前的定时器
+    if (saveTimer) {
+      clearTimeout(saveTimer)
     }
+
+    // 延迟保存，合并多次调用
+    saveTimer = setTimeout(() => {
+      try {
+        const messagesData = JSON.stringify(messages.value)
+
+        // 数据过大时保存简化版本
+        if (messagesData.length > 4000000) {
+          console.warn('消息数据过大，正在保存简化版本...')
+          const simplifiedMessages = messages.value.map(msg => ({
+            ...msg,
+            image: msg.image && msg.image.length > 100000 ? undefined : msg.image,
+            video: undefined,
+            videoBase64: undefined,
+            pdfImages: msg.pdfImages && msg.pdfImages.some(img => img.length > 50000) ? undefined : msg.pdfImages,
+            pptImages: msg.pptImages && msg.pptImages.some(img => img.length > 50000) ? undefined : msg.pptImages
+          }))
+          localStorage.setItem(KEYS.MESSAGES, JSON.stringify(simplifiedMessages))
+        } else {
+          localStorage.setItem(KEYS.MESSAGES, messagesData)
+        }
+
+        localStorage.setItem(KEYS.WELCOME, JSON.stringify(welcomeAdded.value))
+      } catch (error) {
+        console.error('保存聊天数据失败:', error)
+        // 降级保存纯文本版本
+        try {
+          const textOnlyMessages = messages.value.map(msg => ({
+            id: msg.id,
+            role: msg.role,
+            content: msg.content,
+            timestamp: msg.timestamp
+          }))
+          localStorage.setItem(KEYS.MESSAGES, JSON.stringify(textOnlyMessages))
+        } catch (secondError) {
+          console.error('无法保存任何聊天数据:', secondError)
+        }
+      }
+      saveTimer = null
+    }, 300) // 300ms防抖
   }
 
   // ========== 同步机制 ==========

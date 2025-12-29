@@ -12,34 +12,45 @@ import { autoUpdaterService } from './modules/autoUpdater'
 app.whenReady().then(async () => {
   electronApp.setAppUserModelId('com.electron')
 
-  // 初始化 FFmpeg（确保视频压缩功能在应用启动时就检查）
-  try {
-    const ffmpegReady = await checkFFmpegAvailability()
-    if (ffmpegReady) {
-      logger.success('FFmpeg 初始化成功，视频压缩功能已就绪')
-    } else {
-      logger.warn('FFmpeg 不可用，视频压缩功能将被跳过')
-    }
-  } catch (error) {
-    logger.error('FFmpeg 初始化失败', error)
-  }
-
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // 注册全局快捷键
-  logger.info('注册全局快捷键...')
-  shortcutManager.registerGlobalShortcuts()
+  // 并行初始化非阻塞任务
+  const initTasks = [
+    // 注册全局快捷键
+    (async () => {
+      logger.info('注册全局快捷键...')
+      shortcutManager.registerGlobalShortcuts()
+    })(),
+    // 注册IPC处理器
+    (async () => {
+      logger.info('注册 IPC 处理器...')
+      ipcHandlers.registerHandlers()
+    })(),
+    // 注册UI树处理器
+    (async () => {
+      registerUITreeHandlers()
+    })(),
+    // 异步初始化FFmpeg（不阻塞窗口创建）
+    (async () => {
+      try {
+        const ffmpegReady = await checkFFmpegAvailability()
+        if (ffmpegReady) {
+          logger.success('FFmpeg 初始化成功，视频压缩功能已就绪')
+        } else {
+          logger.warn('FFmpeg 不可用，视频压缩功能将被跳过')
+        }
+      } catch (error) {
+        logger.error('FFmpeg 初始化失败', error)
+      }
+    })()
+  ]
 
-  // 注册所有IPC处理器
-  logger.info('注册 IPC 处理器...')
-  ipcHandlers.registerHandlers()
+  // 等待关键初始化完成（不包括FFmpeg）
+  await Promise.all(initTasks.slice(0, 3))
 
-  // 注册 UI 树处理器
-  registerUITreeHandlers()
-
-  // 创建主窗口
+  // 创建主窗口（不等待FFmpeg）
   logger.info('创建主窗口...')
   windowManager.createMainWindow()
 
@@ -57,7 +68,7 @@ app.whenReady().then(async () => {
     if (!windowManager.getFloatingWindow() && mainWindow && !mainWindow.isDestroyed()) {
       windowManager.createFloatingWindow(false) // 预创建时不显示
     }
-  }, 1500) // 增加延迟至1.5秒，避免与主窗口初始化冲突
+  }, 1500)
 
   app.on('activate', function () {
     const mainWindow = windowManager.getMainWindow()

@@ -377,49 +377,54 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   // 保存设置到本地存储和数据库
+  // 防抖保存设置
+  let settingsSaveTimer: ReturnType<typeof setTimeout> | null = null
   const saveSettings = async (): Promise<void> => {
-    try {
-      const settingsToSave = JSON.stringify(settings.value)
-
-      // 保存到 localStorage
-      localStorage.setItem(STORAGE_KEY, settingsToSave)
-
-      // 验证 localStorage 保存
-      const saved = localStorage.getItem(STORAGE_KEY)
-      if (saved !== settingsToSave) {
-        logger.error('设置保存验证失败')
-      }
-
-      // 同时保存到数据库
-      if (window.api?.database) {
-        try {
-          for (const [key, value] of Object.entries(settings.value)) {
-            await window.api.database.saveSetting(key, JSON.stringify(value))
-          }
-          logger.debug('设置已保存到数据库')
-        } catch (error) {
-          logger.warn('保存设置到数据库失败', error)
-        }
-      }
-
-      // 保存后立即同步到 modelAPI
-      updateCSSVariables()
-
-      // 触发跨窗口同步事件
-      window.dispatchEvent(
-        new CustomEvent('polaris-settings-changed', {
-          detail: settings.value
-        })
-      )
-
-      logger.success('设置已保存', {
-        provider: settings.value.provider,
-        model: settings.value.model,
-        hasApiKey: !!settings.value.apiKey
-      })
-    } catch (error) {
-      logger.error('保存设置失败', error)
+    // 清除之前的定时器
+    if (settingsSaveTimer) {
+      clearTimeout(settingsSaveTimer)
     }
+
+    // 延迟保存，合并多次调用
+    settingsSaveTimer = setTimeout(async () => {
+      try {
+        const settingsToSave = JSON.stringify(settings.value)
+
+        // 保存到 localStorage
+        localStorage.setItem(STORAGE_KEY, settingsToSave)
+
+        // 同时保存到数据库
+        if (window.api?.database) {
+          try {
+            for (const [key, value] of Object.entries(settings.value)) {
+              await window.api.database.saveSetting(key, JSON.stringify(value))
+            }
+            logger.debug('设置已保存到数据库')
+          } catch (error) {
+            logger.warn('保存设置到数据库失败', error)
+          }
+        }
+
+        // 保存后立即同步到 modelAPI
+        updateCSSVariables()
+
+        // 触发跨窗口同步事件
+        window.dispatchEvent(
+          new CustomEvent('polaris-settings-changed', {
+            detail: settings.value
+          })
+        )
+
+        logger.success('设置已保存', {
+          provider: settings.value.provider,
+          model: settings.value.model,
+          hasApiKey: !!settings.value.apiKey
+        })
+      } catch (error) {
+        logger.error('保存设置失败', error)
+      }
+      settingsSaveTimer = null
+    }, 500) // 500ms防抖
   }
 
   // 更新CSS变量

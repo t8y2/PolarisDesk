@@ -1,5 +1,5 @@
 <template>
-  <DynamicScroller ref="scroller" :items="messages" :min-item-size="80" class="flex-1 p-4 pb-0 bg-gradient-to-br from-neutral-950/30 to-black/20 relative z-10 virtual-scroller" :class="{ 'drag-over': isDragOver }" key-field="id">
+  <DynamicScroller ref="scroller" :items="messages" :min-item-size="80" :buffer="200" :page-mode="false" class="flex-1 p-4 pb-0 bg-gradient-to-br from-neutral-950/30 to-black/20 relative z-10 virtual-scroller" :class="{ 'drag-over': isDragOver }" key-field="id">
     <template #default="{ item: msg, index, active }">
       <DynamicScrollerItem :item="msg" :active="active" :size-dependencies="[msg.content, msg.image, msg.video, msg.pdfImages, msg.pptImages]" :data-index="index">
         <div :id="`message-${msg.id}`" class="mb-2 relative z-10 group" :class="msg.role">
@@ -78,11 +78,18 @@ const scrollToMessage = (messageId: string): void => {
   }
 }
 
-// 监听消息变化，自动滚动
+// 监听消息变化，自动滚动（防抖优化）
+let scrollTimer: ReturnType<typeof setTimeout> | null = null
 watch(
   () => props.messages.length,
   () => {
-    scrollToBottom()
+    if (scrollTimer) {
+      clearTimeout(scrollTimer)
+    }
+    scrollTimer = setTimeout(() => {
+      scrollToBottom()
+      scrollTimer = null
+    }, 100)
   }
 )
 

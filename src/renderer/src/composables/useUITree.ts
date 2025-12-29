@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { ref, type Ref } from 'vue'
 import { logger } from '../utils/logger'
 
 export function useUITree(): {
@@ -103,19 +103,20 @@ export function useUITree(): {
       // 构建简洁的 XML 格式
       let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<windows>\n'
 
-      for (const window of filteredWindows) {
-        const escapeXml = (str: string | undefined): string => {
-          if (!str) return ''
-          return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;')
-        }
+      // 预编译转义函数，避免重复创建
+      const escapeXml = (str: string | undefined): string => {
+        if (!str) return ''
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;')
+      }
 
+      for (const window of filteredWindows) {
         xml += `  <w app="${escapeXml(window.applicationName)}" title="${escapeXml(window.windowTitle)}">\n`
 
         if (window.uiTree) {
           // uiTree 已经是 XML 字符串，需要缩进
           const indentedTree = window.uiTree
             .split('\n')
-            .map(line => (line ? '    ' + line : ''))
+            .map((line: string) => (line ? '    ' + line : ''))
             .join('\n')
           xml += indentedTree
         }

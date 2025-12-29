@@ -2,7 +2,13 @@ appId: com.polaris-desk.app
 productName: PolarisDesk
 directories:
   buildResources: build
+  output: dist
 files:
+  - out/**/*
+  - package.json
+  - node_modules/**/*
+  - resources/**/*
+  - native/**/*.node
   - '!**/.vscode/*'
   - '!src/*'
   - '!electron.vite.config.{js,ts,mjs,cjs}'
@@ -15,17 +21,21 @@ files:
   - '!**/*.test.*'
   - '!**/*.spec.*'
   - '!**/docs/**'
+  - '!**/docs-site/**'
   - '!**/examples/**'
-  - '!**/{.github,.vscode,test,tests,docs,examples,coverage}/**'
+  - '!**/{.github,.vscode,test,tests,docs,docs-site,examples,coverage}/**'
   - '!node_modules/@types/**'
   - '!node_modules/**/README.md'
   - '!node_modules/**/CHANGELOG.md'
   - '!node_modules/**/LICENSE*'
   - '!node_modules/**/*.d.ts'
   - '!node_modules/**/*.ts'
-  - 'native/**/*.node'
   - '!native/**/node_modules/**'
   - '!native/**/*.{mm,h,cc,cpp}'
+  - '!*.md'
+  - '!.performance-checklist.md'
+  - '!PERFORMANCE_IMPROVEMENTS.md'
+  - '!性能优化说明.md'
 asarUnpack:
   - resources/**
   - node_modules/ffmpeg-static-electron/**
